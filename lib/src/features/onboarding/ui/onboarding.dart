@@ -1,9 +1,6 @@
-
 import 'package:btcdirect/src/presentation/config_packages.dart';
-import 'package:btcdirect/src/presentation/footerContainer_widget.dart';
 
 import 'mail_verification.dart';
-
 
 class OnBoarding extends StatefulWidget {
   const OnBoarding({super.key});
@@ -57,7 +54,12 @@ class _OnBoardingState extends State<OnBoarding> {
                         child: Center(
                           child: Text(
                             'Personal',
-                            style: TextStyle(color: isPersonalButton ? AppColors.blueColor : AppColors.greyColor, fontSize: 18, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+                            style: TextStyle(
+                              color: isPersonalButton ? AppColors.blueColor : AppColors.greyColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'TextaAlt',
+                            ),
                           ),
                         ),
                       ),
@@ -72,13 +74,18 @@ class _OnBoardingState extends State<OnBoarding> {
                         height: h * 0.06,
                         width: w * 0.38,
                         decoration: BoxDecoration(
-                          color: isBusinessButton ?AppColors.backgroundColor  : AppColors.transparent,
+                          color: isBusinessButton ? AppColors.backgroundColor : AppColors.transparent,
                           borderRadius: const BorderRadius.only(topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
                         ),
                         child: Center(
                           child: Text(
                             'Business',
-                            style: TextStyle(color: isBusinessButton ? AppColors.blueColor : AppColors.greyColor , fontSize: 18, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+                            style: TextStyle(
+                              color: isBusinessButton ? AppColors.blueColor : AppColors.greyColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'TextaAlt',
+                            ),
                           ),
                         ),
                       ),
@@ -111,86 +118,139 @@ class _OnBoardingState extends State<OnBoarding> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children:  <Widget>[
+                children: <Widget>[
                   SizedBox(width: w, height: h * 0.04),
-                 const Center(
-                   child: Text(
-                     "BTC Direct for business",
-                     style: TextStyle(color: AppColors.black, fontSize: 22, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
-                   ),
-                 ),
-                 Padding(
-                   padding:  EdgeInsets.only(right: w * 0.08, left: w * 0.08, top: 20),
-                   child: const Center(
-                     child: Text(
-                       "Invest in cryptocurrency with your\ncompany. Before we continue please be\naware of the following requirements.",
-                       textAlign: TextAlign.center,
-                       style: TextStyle(color: AppColors.greyColor, fontSize: 16, fontWeight: FontWeight.w400,height: 1.2,fontFamily: 'TextaAlt',),
-                     ),
-                   ),
-                 ),
-                 Padding(
-                   padding: EdgeInsets.only(right: w * 0.05, left: w * 0.05, top: 20),
-                   child: const Row(
-                     crossAxisAlignment: CrossAxisAlignment.start,
-                     children: [
-                       Icon(Icons.location_on_outlined, color: AppColors.greyColor, size: 25,),
-                       SizedBox(width: 10,),
-                       Expanded(
-                         child: Text(
-                           "We only accept Dutch and Belgium companies.",
-                           style: TextStyle(color: AppColors.greyColor, fontSize: 18, fontWeight: FontWeight.w400,fontFamily: 'TextaAlt',),
-                         ),
-                       ),
-                     ],
-                   ),
-                 ),
-                 Padding(
+                  const Center(
+                    child: Text(
+                      "BTC Direct for business",
+                      style: TextStyle(
+                        color: AppColors.black,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'TextaAlt',
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(right: w * 0.08, left: w * 0.08, top: 20),
+                    child: const Center(
+                      child: Text(
+                        "Invest in cryptocurrency with your\ncompany. Before we continue please be\naware of the following requirements.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.greyColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          height: 1.2,
+                          fontFamily: 'TextaAlt',
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
                     padding: EdgeInsets.only(right: w * 0.05, left: w * 0.05, top: 20),
                     child: const Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.contact_mail, color: AppColors.greyColor, size: 25,),
-                        SizedBox(width: 10,),
+                        Icon(
+                          Icons.location_on_outlined,
+                          color: AppColors.greyColor,
+                          size: 25,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: Text(
+                            "We only accept Dutch and Belgium companies.",
+                            style: TextStyle(
+                              color: AppColors.greyColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'TextaAlt',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(right: w * 0.05, left: w * 0.05, top: 20),
+                    child: const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.contact_mail,
+                          color: AppColors.greyColor,
+                          size: 25,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
                         Expanded(
                           child: Text(
                             "You must be the majority shareholder of your company.",
-                            style: TextStyle(color: AppColors.greyColor, fontSize: 18, fontWeight: FontWeight.w400,fontFamily: 'TextaAlt',),
+                            style: TextStyle(
+                              color: AppColors.greyColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'TextaAlt',
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                 Padding(
+                  Padding(
                     padding: EdgeInsets.only(right: w * 0.05, left: w * 0.05, top: 20),
                     child: const Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.email_outlined, color: AppColors.greyColor, size: 25,),
-                        SizedBox(width: 10,),
+                        Icon(
+                          Icons.email_outlined,
+                          color: AppColors.greyColor,
+                          size: 25,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
                         Expanded(
                           child: Text(
                             "After signing up we need to verify your information. Once we're done we send you an email with information on how to complete your business account.",
-                            style: TextStyle(color: AppColors.greyColor, fontSize: 16, fontWeight: FontWeight.w400,fontFamily: 'TextaAlt',),
+                            style: TextStyle(
+                              color: AppColors.greyColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'TextaAlt',
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                 SizedBox(height: h * 0.03,),
-                 Padding(
-                   padding: EdgeInsets.only(right: h * 0.03 , left: h * 0.03),
-                   child: ButtonItem.filled(
+                  SizedBox(
+                    height: h * 0.03,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(right: h * 0.03, left: h * 0.03),
+                    child: ButtonItem.filled(
                       text: "Close",
                       fontSize: 20,
-                      textStyle: const TextStyle(fontSize: 24,color: AppColors.white,fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+                      textStyle: const TextStyle(
+                        fontSize: 24,
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'TextaAlt',
+                      ),
                       bgColor: AppColors.blueColor,
                       onPressed: () {
                         Navigator.pop(context);
                       },
                     ),
-                 ),
-                 SizedBox(height: h * 0.04,),
+                  ),
+                  SizedBox(
+                    height: h * 0.04,
+                  ),
                 ],
               ),
             ),
@@ -202,7 +262,11 @@ class _OnBoardingState extends State<OnBoarding> {
                   onTap: () {
                     Navigator.pop(context);
                   },
-                  child: const Icon(Icons.close, color: AppColors.black, size: 26,),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.black,
+                    size: 26,
+                  ),
                 ),
               ),
             ),
@@ -218,25 +282,33 @@ class _OnBoardingState extends State<OnBoarding> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if(isBusinessButton)
-        SizedBox(height: h * 0.03,),
-        if(isBusinessButton)
-        ButtonItem.outline(
-          text: "BTC Direct for business",
-          icon: const Icon(Icons.info_outline, color: AppColors.blueColor, size: 20,),
-          textStyle: const TextStyle(
+        if (isBusinessButton)
+          SizedBox(
+            height: h * 0.03,
+          ),
+        if (isBusinessButton)
+          ButtonItem.outline(
+            text: "BTC Direct for business",
+            icon: const Icon(
+              Icons.info_outline,
+              color: AppColors.blueColor,
+              size: 20,
+            ),
+            textStyle: const TextStyle(
               fontSize: 20,
               color: AppColors.blueColor,
               fontWeight: FontWeight.w600,
               fontFamily: 'TextaAlt',
+            ),
+            width: w * 0.9,
+            bgColor: AppColors.blueColor,
+            onPressed: () {
+              businessBottomSheet(context);
+            },
           ),
-          width: w * 0.9,
-          bgColor: AppColors.blueColor,
-          onPressed: () {
-            businessBottomSheet(context);
-          },
+        SizedBox(
+          height: h * 0.03,
         ),
-        SizedBox(height: h * 0.03,),
         Row(
           children: [
             Expanded(
@@ -245,7 +317,12 @@ class _OnBoardingState extends State<OnBoarding> {
                 children: [
                   const Text(
                     "First name",
-                    style: TextStyle(color: AppColors.black, fontSize: 16, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'TextaAlt',
+                    ),
                   ),
                   SizedBox(
                     height: h * 0.012,
@@ -271,7 +348,12 @@ class _OnBoardingState extends State<OnBoarding> {
                 children: [
                   const Text(
                     "Last name",
-                    style: TextStyle(color: AppColors.black, fontSize: 16, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'TextaAlt',
+                    ),
                   ),
                   SizedBox(
                     height: h * 0.012,
@@ -295,7 +377,12 @@ class _OnBoardingState extends State<OnBoarding> {
         ),
         const Text(
           "Email",
-          style: TextStyle(color: AppColors.black, fontSize: 16, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+          style: TextStyle(
+            color: AppColors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'TextaAlt',
+          ),
         ),
         SizedBox(
           height: h * 0.012,
@@ -316,7 +403,12 @@ class _OnBoardingState extends State<OnBoarding> {
         ),
         const Text(
           "Nationality",
-          style: TextStyle(color: AppColors.black, fontSize: 16, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+          style: TextStyle(
+            color: AppColors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'TextaAlt',
+          ),
         ),
         SizedBox(
           height: h * 0.012,
@@ -333,7 +425,12 @@ class _OnBoardingState extends State<OnBoarding> {
                 padding: EdgeInsets.only(left: 12.0),
                 child: Text(
                   "Netherlands",
-                  style: TextStyle(color: AppColors.black, fontSize: 16, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+                  style: TextStyle(
+                    color: AppColors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'TextaAlt',
+                  ),
                 ),
               ),
               const Spacer(),
@@ -357,12 +454,22 @@ class _OnBoardingState extends State<OnBoarding> {
           children: [
             Text(
               "Password",
-              style: TextStyle(color: AppColors.black, fontSize: 16, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+              style: TextStyle(
+                color: AppColors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'TextaAlt',
+              ),
             ),
             Spacer(),
             Text(
               "Minimum of 8 characters",
-              style: TextStyle(color: AppColors.greyColor, fontSize: 12, fontWeight: FontWeight.w400,fontFamily: 'TextaAlt',),
+              style: TextStyle(
+                color: AppColors.greyColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                fontFamily: 'TextaAlt',
+              ),
             ),
           ],
         ),
@@ -412,27 +519,44 @@ class _OnBoardingState extends State<OnBoarding> {
             ),
             Expanded(
               child: RichText(
-                text: TextSpan(children: [
-                  const TextSpan(text: "I agree to the "),
-                  TextSpan(
-                    text: "terms and conditions",
-                    style: const TextStyle(color: AppColors.blueColor, fontSize: 15, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        //launchUrlString('https://blockx. gitbook.io/blocx./get-started/masternode#vps-console-putty-or-terminal');
-                      },
-                  ),
-                  const TextSpan(text: " and "),
-                  TextSpan(
-                    text: "privacy policy",
-                    style: const TextStyle(color: AppColors.blueColor, fontSize: 15, fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        //launchUrlString('https://blockx. gitbook.io/blocx./get-started/masternode#vps-console-putty-or-terminal');
-                      },
-                  ),
-                  const TextSpan(text: "."),
-                ], style: const TextStyle(color: AppColors.black, fontSize: 15, fontWeight: FontWeight.w500,fontFamily: 'TextaAlt',)),
+                text: TextSpan(
+                    children: [
+                      const TextSpan(text: "I agree to the "),
+                      TextSpan(
+                        text: "terms and conditions",
+                        style: const TextStyle(
+                          color: AppColors.blueColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'TextaAlt',
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            //launchUrlString('https://blockx. gitbook.io/blocx./get-started/masternode#vps-console-putty-or-terminal');
+                          },
+                      ),
+                      const TextSpan(text: " and "),
+                      TextSpan(
+                        text: "privacy policy",
+                        style: const TextStyle(
+                          color: AppColors.blueColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'TextaAlt',
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            //launchUrlString('https://blockx. gitbook.io/blocx./get-started/masternode#vps-console-putty-or-terminal');
+                          },
+                      ),
+                      const TextSpan(text: "."),
+                    ],
+                    style: const TextStyle(
+                      color: AppColors.black,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'TextaAlt',
+                    )),
               ),
             ),
           ],
@@ -440,11 +564,16 @@ class _OnBoardingState extends State<OnBoarding> {
         Visibility(
           visible: isCheckBoxValue1,
           child: Padding(
-            padding:  EdgeInsets.only(left: w * 0.06),
+            padding: EdgeInsets.only(left: w * 0.06),
             child: const Text(
               textAlign: TextAlign.center,
-                "Please check the checkbox to continue.",
-                style: TextStyle(color: AppColors.redColor, fontSize: 13, fontWeight: FontWeight.w500,fontFamily: 'TextaAlt',),
+              "Please check the checkbox to continue.",
+              style: TextStyle(
+                color: AppColors.redColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'TextaAlt',
+              ),
             ),
           ),
         ),
@@ -473,16 +602,28 @@ class _OnBoardingState extends State<OnBoarding> {
               width: w * 0.76,
               child: const Text(
                 "Yes, I would like to regularly receive the newsletter by email and be informed about offers and promotions.",
-                style: TextStyle(color: AppColors.black, fontSize: 15, fontWeight: FontWeight.w500,fontFamily: 'TextaAlt',),
+                style: TextStyle(
+                  color: AppColors.black,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'TextaAlt',
+                ),
               ),
             ),
           ],
         ),
-        SizedBox(height: h * 0.03,),
+        SizedBox(
+          height: h * 0.03,
+        ),
         ButtonItem.filled(
           text: "Continue",
           fontSize: 20,
-          textStyle: const TextStyle(fontSize: 24,color: AppColors.white,fontWeight: FontWeight.w600,fontFamily: 'TextaAlt',),
+          textStyle: const TextStyle(
+            fontSize: 24,
+            color: AppColors.white,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'TextaAlt',
+          ),
           bgColor: AppColors.blueColor,
           onPressed: () {
             // if(formKey.currentState!.validate()){
@@ -490,12 +631,17 @@ class _OnBoardingState extends State<OnBoarding> {
             //     Navigator.push(context, MaterialPageRoute(builder: (context) => EmailVerification(email: emailController.text),));
             //   }
             // }
-            Navigator.push(context, MaterialPageRoute(builder: (context) => EmailVerification(email: "dhruvin182@yopmail.com" /*emailController.text*/),));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EmailVerification(email: "dhruvin182@yopmail.com" /*emailController.text*/),
+                ));
           },
         ),
-        SizedBox(height: h * 0.12,),
+        SizedBox(
+          height: h * 0.12,
+        ),
       ],
     );
   }
-
 }

@@ -1,8 +1,4 @@
-
-
 import 'package:btcdirect/src/presentation/config_packages.dart';
-
-import 'app_colors.dart';
 
 enum ButtonEnum { outline, filled, text }
 
@@ -13,7 +9,7 @@ class ButtonItem extends StatelessWidget {
   final double? height;
   final double? borderRadius;
   double? fontSize;
-  final VoidCallback? onPressed;
+  final Function()? onPressed;
   FontStyle? fontStyle;
   late final ButtonEnum buttonType;
   final TextStyle? textStyle;
@@ -102,7 +98,7 @@ class ButtonItem extends StatelessWidget {
                     text,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: textStyle ,//?? Get.theme.textTheme.titleLarge!.copyWith(color: Get.theme.colorScheme.onPrimary),
+                    style: textStyle, //?? Get.theme.textTheme.titleLarge!.copyWith(color: Get.theme.colorScheme.onPrimary),
                   ),
                 ),
               ],
@@ -128,40 +124,39 @@ class ButtonItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(borderRadius ?? 15),
               color: bgColor ?? Theme.of(context).primaryColor,
             ),
-            child:  Row(
-                mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: Text(
-                      text,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textStyle ?? const TextStyle(),//?? Get.textTheme.titleLarge!.copyWith(color: AppColors.darkTextColor),
-                    ),
+            child: Row(
+              mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Flexible(
+                  flex: 1,
+                  child: Text(
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textStyle ?? const TextStyle(), //?? Get.textTheme.titleLarge!.copyWith(color: AppColors.darkTextColor),
                   ),
-                  icon == null ? const SizedBox.shrink() : const SizedBox(width: 8),
-                  icon == null ? const SizedBox.shrink() : icon!
-                ],
-              ),
+                ),
+                icon == null ? const SizedBox.shrink() : const SizedBox(width: 8),
+                icon == null ? const SizedBox.shrink() : icon!
+              ],
             ),
+          ),
         );
 
       case ButtonEnum.text:
         return TextButton(
           key: key,
           onPressed: onPressed,
-          child: Text(
-            text,
-            overflow: TextOverflow.ellipsis,
-            style: textStyle ?? TextStyle(
-              fontSize: fontSize ?? 18,
-              color: Theme.of(context).primaryColor,
-              fontStyle: fontStyle ?? FontStyle.normal,
-              decoration: TextDecoration.underline,
-            )
-          ),
+          child: Text(text,
+              overflow: TextOverflow.ellipsis,
+              style: textStyle ??
+                  TextStyle(
+                    fontSize: fontSize ?? 18,
+                    color: Theme.of(context).primaryColor,
+                    fontStyle: fontStyle ?? FontStyle.normal,
+                    decoration: TextDecoration.underline,
+                  )),
         );
     }
   }

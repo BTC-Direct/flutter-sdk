@@ -1,10 +1,10 @@
 import 'dart:async';
+
 import 'package:btcdirect/src/features/buy/ui/buy.dart';
-import 'package:btcdirect/src/features/onboarding/ui/onboarding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main()  async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -37,4 +37,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

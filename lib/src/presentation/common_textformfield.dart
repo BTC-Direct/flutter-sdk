@@ -1,6 +1,3 @@
-
-
-import 'package:btcdirect/src/presentation/app_colors.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 
 class CommonTextFormField extends StatelessWidget {
@@ -25,8 +22,7 @@ class CommonTextFormField extends StatelessWidget {
       this.keyBoardType,
       this.inputFormatters,
       this.onChanged,
-      this.onEditingComplete
-      });
+      this.onEditingComplete});
 
   final String? icon;
   final String? hintText;
@@ -69,39 +65,35 @@ class CommonTextFormField extends StatelessWidget {
             decoration: InputDecoration(
                 //fillColor: Get.theme.scaffoldBackgroundColor,
                 //filled: true,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.blueColor)),
-                disabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.greyColor)),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.greyColor)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.blueColor)),
-                focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.redColor)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.blueColor)),
+                disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.greyColor)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.greyColor)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.blueColor)),
+                focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.redColor)),
                 //focusColor: AppColors.darkTextColor,
                 hintText: hintText,
                 prefixIcon: prefix,
                 errorText: errorText,
-                errorStyle: const TextStyle(fontSize: 14,height: 0.5,color: AppColors.redColor, fontFamily: 'TextaAlt', fontWeight: FontWeight.w500),
+                errorStyle: const TextStyle(fontSize: 14, height: 0.5, color: AppColors.redColor, fontFamily: 'TextaAlt', fontWeight: FontWeight.w500),
                 suffixIcon: suffix,
                 errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.redColor)),
-                hintStyle: hintTextStyle ,//?? Get.textTheme.bodyLarge!.copyWith(color: Get.theme.hintColor),
-                contentPadding: const EdgeInsets.only(left:12))),
+                hintStyle: hintTextStyle,
+                //?? Get.textTheme.bodyLarge!.copyWith(color: Get.theme.hintColor),
+                contentPadding: const EdgeInsets.only(left: 12))),
       ],
     );
   }
 }
 
 class CustomBoxShadow extends BoxShadow {
-  @override
-  final BlurStyle blurStyle;
+/*  @override
+  final BlurStyle blurStyle;*/
 
   const CustomBoxShadow({
     Color color = const Color(0xFF000000),
     Offset offset = Offset.zero,
     double blurRadius = 0.0,
-    this.blurStyle = BlurStyle.normal,
+    // this.blurStyle = BlurStyle.normal,
   }) : super(color: color, offset: offset, blurRadius: blurRadius);
 
   @override
