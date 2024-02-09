@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:btcdirect/src/presentation/config_packages.dart';
+import 'package:http/http.dart' as http;
 
 import 'mail_verification.dart';
 
@@ -10,6 +13,7 @@ class OnBoarding extends StatefulWidget {
 }
 
 class _OnBoardingState extends State<OnBoarding> {
+  bool isLoading = false;
   bool isPersonalButton = true;
   bool isBusinessButton = false;
   bool isPasswordShow = true;
@@ -18,8 +22,18 @@ class _OnBoardingState extends State<OnBoarding> {
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController nationalityController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  List<Nationality> countryList = [];
+  List<Nationality> combinedItemsList = [];
+  int countrySelectIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    getCountries();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,74 +41,77 @@ class _OnBoardingState extends State<OnBoarding> {
     double h = MediaQuery.of(context).size.height;
     return FooterContainer(
       appBarTitle: "Create account",
+      isAppBarLeadShow: true,
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
           child: Form(
             key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        isBusinessButton = false;
-                        isPersonalButton = !isPersonalButton;
-                        setState(() {});
-                      },
-                      child: Container(
-                        height: h * 0.06,
-                        width: w * 0.38,
-                        decoration: BoxDecoration(
-                          color: isPersonalButton ? AppColors.backgroundColor : AppColors.transparent,
-                          borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), bottomLeft: Radius.circular(10)),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Personal',
-                            style: TextStyle(
-                              color: isPersonalButton ? AppColors.blueColor : AppColors.greyColor,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'TextaAlt',
+            child: isLoading
+                ? SizedBox(height: h, child: const Center(child: CircularProgressIndicator()))
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              isBusinessButton = false;
+                              isPersonalButton = !isPersonalButton;
+                              setState(() {});
+                            },
+                            child: Container(
+                              height: h * 0.06,
+                              width: w * 0.38,
+                              decoration: BoxDecoration(
+                                color: isPersonalButton ? AppColors.backgroundColor : AppColors.transparent,
+                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), bottomLeft: Radius.circular(10)),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Personal',
+                                  style: TextStyle(
+                                    color: isPersonalButton ? AppColors.blueColor : AppColors.greyColor,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'TextaAlt',
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        isPersonalButton = false;
-                        isBusinessButton = !isPersonalButton;
-                        setState(() {});
-                      },
-                      child: Container(
-                        height: h * 0.06,
-                        width: w * 0.38,
-                        decoration: BoxDecoration(
-                          color: isBusinessButton ? AppColors.backgroundColor : AppColors.transparent,
-                          borderRadius: const BorderRadius.only(topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Business',
-                            style: TextStyle(
-                              color: isBusinessButton ? AppColors.blueColor : AppColors.greyColor,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'TextaAlt',
+                          InkWell(
+                            onTap: () {
+                              isPersonalButton = false;
+                              isBusinessButton = !isPersonalButton;
+                              setState(() {});
+                            },
+                            child: Container(
+                              height: h * 0.06,
+                              width: w * 0.38,
+                              decoration: BoxDecoration(
+                                color: isBusinessButton ? AppColors.backgroundColor : AppColors.transparent,
+                                borderRadius: const BorderRadius.only(topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Business',
+                                  style: TextStyle(
+                                    color: isBusinessButton ? AppColors.blueColor : AppColors.greyColor,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'TextaAlt',
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                personalInfoContainer(),
-              ],
-            ),
+                      personalInfoContainer(),
+                    ],
+                  ),
           ),
         ),
       ),
@@ -413,39 +430,19 @@ class _OnBoardingState extends State<OnBoarding> {
         SizedBox(
           height: h * 0.012,
         ),
-        Container(
-          width: w,
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.greyColor),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 12.0),
-                child: Text(
-                  "Netherlands",
-                  style: TextStyle(
-                    color: AppColors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'TextaAlt',
-                  ),
-                ),
-              ),
-              const Spacer(),
-              InkWell(
-                onTap: () {},
-                child: const Padding(
-                  padding: EdgeInsets.all(15),
-                  child: Icon(
-                    Icons.keyboard_arrow_down_outlined,
-                    size: 25,
-                  ),
-                ),
-              ),
-            ],
-          ),
+        CommonTextFormField(
+          textEditingController: nationalityController,
+          readOnly: true,
+          suffix: const Icon(Icons.keyboard_arrow_down_outlined, color: AppColors.greyColor),
+          onTap: () {
+            nationalitySelectBottomSheet(context);
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Chooes your nationality.';
+            }
+            return null;
+          },
         ),
         SizedBox(
           height: h * 0.03,
@@ -562,7 +559,7 @@ class _OnBoardingState extends State<OnBoarding> {
           ],
         ),
         Visibility(
-          visible: isCheckBoxValue1,
+          visible: !isCheckBoxValue1,
           child: Padding(
             padding: EdgeInsets.only(left: w * 0.06),
             child: const Text(
@@ -616,7 +613,7 @@ class _OnBoardingState extends State<OnBoarding> {
           height: h * 0.03,
         ),
         ButtonItem.filled(
-          text: "Continue",
+          text: "Create account",
           fontSize: 20,
           textStyle: const TextStyle(
             fontSize: 24,
@@ -626,16 +623,19 @@ class _OnBoardingState extends State<OnBoarding> {
           ),
           bgColor: AppColors.blueColor,
           onPressed: () {
-            // if(formKey.currentState!.validate()){
-            //   if(isCheckBoxValue1){
-            //     Navigator.push(context, MaterialPageRoute(builder: (context) => EmailVerification(email: emailController.text),));
-            //   }
-            // }
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const EmailVerification(email: "dhruvin182@yopmail.com" /*emailController.text*/),
-                ));
+            if (formKey.currentState!.validate()) {
+              if (isCheckBoxValue1) {
+                createAccountApiCall(
+                    context: context,
+                    firstName: firstNameController.text,
+                    lastName: lastNameController.text,
+                    nationalityCode: '${combinedItemsList[countrySelectIndex].code}',
+                    email: emailController.text,
+                    password: passwordController.text,
+                    isBusiness: isBusinessButton,
+                    newsletterSubscription: isCheckBoxValue2);
+              }
+            }
           },
         ),
         SizedBox(
@@ -643,5 +643,334 @@ class _OnBoardingState extends State<OnBoarding> {
         ),
       ],
     );
+  }
+
+  getCountries() async {
+    try {
+      isLoading = true;
+      http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/system/info"), headers: {"X-Api-Key": xApiKey});
+
+      if (response.statusCode == 200) {
+        var a = jsonDecode(response.body) as Map<String, dynamic>;
+        log("Response ${a["nationalities"]}");
+
+        countryList = List<Nationality>.from(a["nationalities"].map((x) => Nationality.fromJson(x)));
+        combinedItemsList = List.from(countryList)..addAll(List.generate(1, (index) => Nationality(name: "Other nationality", code: "", idSelfieRequired: true)));
+        isLoading = false;
+        setState(() {});
+      }
+    } catch (e) {
+      isLoading = false;
+      print("getCountriesError :::: $e");
+      setState(() {});
+    }
+  }
+
+  nationalitySelectBottomSheet(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(25.0),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: h * 0.9,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: h * 0.01),
+              Row(
+                children: [
+                  SizedBox(width: w / 2.8),
+                  const Text(
+                    "Nationality",
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'TextaAlt',
+                    ),
+                  ),
+                  const Spacer(),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Icon(
+                          Icons.close,
+                          color: AppColors.black,
+                          size: 26,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: h * 0.01),
+              Padding(
+                padding: EdgeInsets.only(left: w * 0.08),
+                child: const Text(
+                  "All",
+                  style: TextStyle(color: AppColors.black, fontSize: 18, fontWeight: FontWeight.w700, fontFamily: 'TextaAlt'),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: combinedItemsList.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      width: w,
+                      height: h * 0.08,
+                      margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.008),
+                      decoration: BoxDecoration(
+                        color: countrySelectIndex == index ? AppColors.backgroundColor.withOpacity(0.4) : AppColors.transparent,
+                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            countrySelectIndex = index;
+                            nationalityController.text = '${combinedItemsList[index].name}';
+                            Navigator.pop(context);
+                          });
+                        },
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            SizedBox(
+                              width: w * 0.05,
+                            ),
+                            combinedItemsList[index].code == ""
+                                ? Container(
+                                    height: 30,
+                                    width: 35,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.backgroundColor,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  )
+                                : SvgPicture.network(
+                                    'https://widgets-sandbox.btcdirect.eu/img/flags/${(combinedItemsList[index].code)?.toLowerCase()}.svg',
+                                    width: 25,
+                                    height: 25,
+                                  ),
+                            SizedBox(
+                              width: w * 0.04,
+                            ),
+                            Center(
+                              child: Text(
+                                '${combinedItemsList[index].name}',
+                                style: const TextStyle(
+                                  color: AppColors.black,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'TextaAlt',
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            Icon(
+                              countrySelectIndex == index ? Icons.check : null,
+                              color: AppColors.black,
+                              size: 15,
+                            ),
+                            if (combinedItemsList[index].code == "")
+                              Icon(
+                                countrySelectIndex == index ? null : Icons.info_sharp,
+                                color: AppColors.greyColor,
+                                size: 22,
+                              ),
+                            SizedBox(
+                              width: w * 0.02,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: h * 0.01),
+            ],
+          ),
+        );
+      },
+    ).then((value) {
+      if (combinedItemsList[countrySelectIndex].code == "") {
+        otherNationalityBottomSheet(context);
+      }
+    });
+  }
+
+  otherNationalityBottomSheet(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+    showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(25.0),
+          ),
+        ),
+        builder: (BuildContext context) {
+          return SizedBox(
+            height: h * 0.70,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.008),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: h * 0.01),
+                  Row(
+                    children: [
+                      SizedBox(width: w / 4.5),
+                      const Text(
+                        "Other nationality",
+                        style: TextStyle(
+                          color: AppColors.black,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'TextaAlt',
+                        ),
+                      ),
+                      const Spacer(),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Icon(
+                            Icons.close,
+                            color: AppColors.black,
+                            size: 26,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Center(
+                    child: Text(
+                      "We don't serve your region.",
+                      style: TextStyle(
+                        color: AppColors.black,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'TextaAlt',
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: h * 0.02),
+                  Center(child: SvgPicture.asset("assets/images/other_nationality.svg", color: AppColors.greenColor, height: 50)),
+                  const Text(
+                    "Unfortunately we do not offer our service in your region.",
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'TextaAlt',
+                    ),
+                  ),
+                  SizedBox(height: h * 0.02),
+                  const Text(
+                    "We check your nationality during the ID verification. Choosing a different nationality will result the revoke of the application.",
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'TextaAlt',
+                    ),
+                  ),
+                  SizedBox(height: h * 0.02),
+                  const Text(
+                    "Regions where BTC Direct operates:\nAndorra, Austria, Belgium, Bulgaria, Croatia, Cyprus, Czechia, Denmark, Estonia, Finland, France, Germany, Gibraltar, Greece, Guernsey, Hungary, Iceland, Ireland, Isle of Man, Italy, Jersey, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Monaco, Netherlands, Norway, Poland, Portugal, Romania, San Marino, Slovakia, Slovenia, Spain, Sweden, Switzerland, United Kingdom, Vatican City",
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'TextaAlt',
+                    ),
+                  ),
+                  SizedBox(height: h * 0.02),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  createAccountApiCall({
+    required BuildContext context,
+    String firstName = '',
+    String lastName = '',
+    String email = '',
+    String password = '',
+    String nationalityCode = '',
+    bool isBusiness = false,
+    bool newsletterSubscription = false,
+  }) async {
+    try {
+      String identifier = AppCommonFunction().generateRandomString(36);
+      print("identifier: $identifier");
+      isLoading = true;
+      http.Response response = await http.post(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/user"), body: {
+        "isBusiness": isBusiness.toString(),
+        "identifier": identifier,
+        "firstName": firstName,
+        "lastName": lastName,
+        "email": email,
+        "country": nationalityCode,
+        "password": password,
+        "termsAndConditions": "true",
+        "privacyAgreement": "true",
+        "newsletterSubscription": newsletterSubscription.toString(),
+        "websiteLanguage": "en",
+        "websiteCountry": "gb"
+      }, headers: {
+        "X-Api-Key": xApiKey,
+      });
+      if (response.statusCode == 201) {
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        log("Response ${tempData.toString()}");
+        var user = UserModel.fromJson(tempData);
+        log("Response ${user.toString()}");
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EmailVerification(email: user.email.toString(), identifier: identifier),
+            ));
+      } else if (response.statusCode == 400) {
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            }
+          }
+        }
+      }
+      isLoading = false;
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+      isLoading = false;
+      setState(() {});
+    }
   }
 }

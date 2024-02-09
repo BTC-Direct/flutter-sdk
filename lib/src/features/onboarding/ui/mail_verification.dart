@@ -1,10 +1,13 @@
+import 'dart:developer';
 import 'package:btcdirect/src/features/onboarding/ui/verify_identity.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
+import 'package:http/http.dart' as http;
 
 class EmailVerification extends StatefulWidget {
   final String email;
+  final String identifier;
 
-  const EmailVerification({super.key, required this.email});
+  const EmailVerification({super.key, required this.email, required this.identifier});
 
   @override
   State<EmailVerification> createState() => _EmailVerificationState();
@@ -12,6 +15,7 @@ class EmailVerification extends StatefulWidget {
 
 class _EmailVerificationState extends State<EmailVerification> {
   final smartAuth = SmartAuth();
+  bool isLoading = false;
   final pinputController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -63,7 +67,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                   height: h * 0.02,
                 ),
                 Text(
-                  'Enter the 6-digit code you received on your email ${widget.email}.',
+                  'Enter the 6-digit code you received on your email ${widget.email}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 18,
@@ -88,9 +92,11 @@ class _EmailVerificationState extends State<EmailVerification> {
                   },
                   onSubmitted: (value) {
                     debugPrint('onSubmitted: $value');
+                    FocusScope.of(context);
                   },
                   onCompleted: (value) {
                     debugPrint('onCompleted: $value');
+                    FocusScope.of(context);
                   },
                 ),
                 SizedBox(
@@ -136,14 +142,9 @@ class _EmailVerificationState extends State<EmailVerification> {
                   ),
                   bgColor: AppColors.blueColor,
                   onPressed: () {
-                    // if(formKey.currentState!.validate()){
-                    //   Navigator.push(context, MaterialPageRoute(builder: (context) => VerifyIdentity(),));
-                    // }
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const VerifyIdentity(),
-                        ));
+                    if(formKey.currentState!.validate()){
+                      verifyEmailApiCall(context, pinputController.text);
+                    }
                   },
                 ),
                 SizedBox(
@@ -155,5 +156,46 @@ class _EmailVerificationState extends State<EmailVerification> {
         ),
       ),
     );
+  }
+
+
+  verifyEmailApiCall(BuildContext context , String emailCode) async {
+    try{
+      isLoading = true;
+      http.Response response = await http.patch(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/user"),
+          body: {
+            "emailCode": emailCode
+          },
+          headers: {
+            "X-Api-Key": xApiKey,
+            "user-identifier" : widget.identifier
+          });
+      if(response.statusCode == 202) {
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        log("verifyEmail Response ::: ${tempData.toString()}");
+        var user = UserModel.fromJson(tempData);
+        log("verifyEmail Response ${user.toString()}");
+        Navigator.push(context, MaterialPageRoute(builder: (context) => VerifyIdentity(),));
+      } else if(response.statusCode == 400){
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        print("errorCodeList: $errorCodeList");
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            }
+          }
+        }
+      }
+      isLoading = false;
+      setState(() {});
+    }
+    catch(e){
+      log(e.toString());
+      isLoading = false;
+      setState(() {});
+    }
   }
 }

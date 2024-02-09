@@ -1,6 +1,5 @@
 export 'dart:async';
 export 'dart:convert';
-
 export 'package:btcdirect/src/core/global_variables.dart';
 export 'package:btcdirect/src/presentation/app_colors.dart';
 export 'package:btcdirect/src/presentation/app_validation.dart';
@@ -14,3 +13,8 @@ export 'package:flutter/rendering.dart';
 export 'package:flutter/services.dart';
 export 'package:flutter_svg/flutter_svg.dart';
 export 'package:pinput/pinput.dart';
+export 'package:btcdirect/src/presentation/common_functions.dart';
+export 'package:btcdirect/src/core/model/error_response_model.dart';
+export 'package:btcdirect/src/core/model/nationality_model.dart';
+export 'package:btcdirect/src/core/model/user_response_model.dart';
+export 'package:btcdirect/src/features/onboarding/ui/onboarding.dart';

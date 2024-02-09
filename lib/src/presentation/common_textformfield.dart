@@ -30,7 +30,7 @@ class CommonTextFormField extends StatelessWidget {
   final TextEditingController textEditingController;
   final bool? obscure;
   final String? Function(String? p1)? validator;
-  final Function? onTap;
+  final void Function()? onTap;
   final String? helpertext;
   final Widget? prefix;
   final Widget? suffix;
@@ -51,6 +51,7 @@ class CommonTextFormField extends StatelessWidget {
       children: [
         TextFormField(
             onChanged: onChanged,
+            onTap: onTap,
             keyboardType: keyBoardType,
             inputFormatters: inputFormatters,
             readOnly: readOnly ?? false,

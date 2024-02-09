@@ -13,6 +13,7 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return FooterContainer(
+      //appBarTitle: "Verify identity",
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: w * 0.06),
         child: Column(

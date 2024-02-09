@@ -1,0 +1,44 @@
+{
+  "errorCodeList": [
+    {
+      "code": "ER003",
+      "message": "No email address provided.",
+      "solution": "Provide a valid email address."
+    },
+    {
+      "code": "ER002",
+      "message": "Email address already registered.",
+      "solution": "Tell the user to log in to their existing account, or provide a link to the 'forgot password' procedure."
+    },
+    {
+      "code": "ER706",
+      "message": "User identifier is invalid.",
+      "solution": "Provide a valid user identifier, a unique identifier string for the user account that is not already in use."
+    },
+    {
+      "code": "ER122",
+      "message": "Invalid password length",
+      "solution": "Your password should be at least 8 characters in length."
+    },
+    {
+      "code": "ER090",
+      "message": "Invalid email verification code.",
+      "solution": "Provide a valid email verification code."
+    },
+    {
+      "code": "ER005",
+      "message": "Invalid login details provided.",
+      "solution": "Tell the user to provide valid authentication details, or inform them about the \u0027forgot password\u0027 functionality."
+    },
+    {
+      "code": "ER999",
+      "message": "A general error has occurred. Please contact our support team.",
+      "solution": "Contact our support team."
+    },
+    {
+      "code": "ER062",
+      "message": "No country code provided.",
+      "solution": "Provide a valid country code."
+    }
+  ]
+}

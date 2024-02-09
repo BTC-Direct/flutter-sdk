@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:btcdirect/src/features/buy/ui/buy.dart';
+import 'package:btcdirect/src/features/onboarding/ui/onboarding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
         // home: OnBoarding(),
-        home: BuyScreen(),
+        home: Buy(),
       ),
     );
   }
