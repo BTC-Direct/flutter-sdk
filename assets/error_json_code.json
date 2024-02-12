@@ -36,6 +36,41 @@
       "solution": "Contact our support team."
     },
     {
+      "code": "ER006",
+      "message": "The provided quote has expired.",
+      "solution": "Request a new quote."
+    },
+    {
+      "code": "ER014",
+      "message": "Invalid wallet address.",
+      "solution": "Provide a valid wallet address for the selected currency pair."
+    },
+    {
+      "code": "ER043",
+      "message": "Both fiatAmount and cryptoAmount are provided.",
+      "solution": "Provide a fiat amount or a crypto amount, not both."
+    },
+    {
+      "code": "ER700",
+      "message": "User authorization token not found.",
+      "solution": "Provide a user authorization token."
+    },
+    {
+      "code": "ER702",
+      "message": "User authorization token is invalid.",
+      "solution": "Provide a valid user authorization token."
+    },
+    {
+      "code": "ER007",
+      "message": "The provided quote contains invalid data. It is possible it has been tampered with.",
+      "solution": "Provide a valid quote."
+    },
+    {
+      "code": "ER701",
+      "message": "User authorization token has expired.",
+      "solution": "Request a new authorization token, or refresh the token."
+    },
+    {
       "code": "ER062",
       "message": "No country code provided.",
       "solution": "Provide a valid country code."

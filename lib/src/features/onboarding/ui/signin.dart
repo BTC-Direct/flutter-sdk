@@ -1,11 +1,9 @@
-
-
-
-
 import 'dart:developer';
-import 'package:btcdirect/src/features/onboarding/ui/verify_identity.dart';
-import 'package:http/http.dart' as http;
+
+import 'package:btcdirect/src/core/model/userinfomodel.dart';
+import 'package:btcdirect/src/features/buy/ui/buy.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
+import 'package:http/http.dart' as http;
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -15,7 +13,6 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -26,20 +23,30 @@ class _SignInState extends State<SignIn> {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
-    return  FooterContainer(
+    return FooterContainer(
       appBarTitle: "Sign in",
       isAppBarLeadShow: true,
       child: Form(
         key: formKey,
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: w * 0.06, ),
+            padding: EdgeInsets.symmetric(
+              horizontal: w * 0.06,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: h * 0.02,),
-                const Center(child: Text("Welcome",style: TextStyle(color: AppColors.black, fontSize: 24, fontFamily: 'TextaAlt', fontWeight: FontWeight.w700),)),
-                SizedBox(height: h * 0.04,),
+                SizedBox(
+                  height: h * 0.02,
+                ),
+                const Center(
+                    child: Text(
+                  "Welcome",
+                  style: TextStyle(color: AppColors.black, fontSize: 24, fontFamily: 'TextaAlt', fontWeight: FontWeight.w700),
+                )),
+                SizedBox(
+                  height: h * 0.04,
+                ),
                 Center(
                   child: RichText(
                     textAlign: TextAlign.center,
@@ -74,7 +81,9 @@ class _SignInState extends State<SignIn> {
                         )),
                   ),
                 ),
-                SizedBox(height: h * 0.03,),
+                SizedBox(
+                  height: h * 0.03,
+                ),
                 Padding(
                   padding: EdgeInsets.only(top: h * 0.015, bottom: h * 0.01),
                   child: const Text(
@@ -143,7 +152,9 @@ class _SignInState extends State<SignIn> {
                     ),
                   ),
                 ),
-                SizedBox(height: h * 0.22,),
+                SizedBox(
+                  height: h * 0.22,
+                ),
                 ButtonItem.filled(
                   text: "Sign in",
                   fontSize: 20,
@@ -164,7 +175,9 @@ class _SignInState extends State<SignIn> {
                     // );
                   },
                 ),
-                SizedBox(height: h * 0.12,),
+                SizedBox(
+                  height: h * 0.12,
+                ),
               ],
             ),
           ),
@@ -192,11 +205,10 @@ class _SignInState extends State<SignIn> {
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VerifyIdentity(),
-            ));
+        await StorageHelper.setValue(StorageKeys.token, tempData['token']);
+        await StorageHelper.setValue(StorageKeys.userId, tempData['uuid']);
+        await StorageHelper.setValue(StorageKeys.refreshToken, tempData['refreshToken']);
+        getUserInfo(tempData['token']);
       } else if (response.statusCode == 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
@@ -218,4 +230,29 @@ class _SignInState extends State<SignIn> {
     }
   }
 
+  getUserInfo(String token) async {
+    try {
+      var response = await Repository().getUserInfoApiCall(token);
+      print("Response $response");
+      UserInfoModel userInfoModel = UserInfoModel.fromJson(response);
+      print("userInfoModel Response :: ${userInfoModel.toString()}");
+      if (userInfoModel.status?.status == "pending") {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerifyIdentity(),
+            ));
+      } else {
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BuyScreen(),
+            ));
+      }
+      setState(() {});
+    } catch (e) {
+      setState(() {});
+      log(e.toString());
+    }
+  }
 }

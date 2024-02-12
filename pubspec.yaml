@@ -38,6 +38,9 @@ dependencies:
   pinput: ^3.0.1
   flutter_svg: ^2.0.9
   http: any
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.2.4
+  uni_links: ^0.5.1
 
 dev_dependencies:
   flutter_test:

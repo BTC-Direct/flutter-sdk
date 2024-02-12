@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:btcdirect/src/core/storage_helper.dart';
 import 'package:btcdirect/src/features/buy/ui/buy.dart';
-import 'package:btcdirect/src/features/onboarding/ui/onboarding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,6 +11,7 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  await StorageHelper.initialize();
   runApp(const MyApp());
 }
 
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
         // home: OnBoarding(),
-        home: Buy(),
+        home: BuyScreen(),
       ),
     );
   }

@@ -1,13 +1,13 @@
 import 'dart:developer';
-import 'package:btcdirect/src/features/onboarding/ui/verify_identity.dart';
+
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 
 class EmailVerification extends StatefulWidget {
   final String email;
-  final String identifier;
+  final String? identifier;
 
-  const EmailVerification({super.key, required this.email, required this.identifier});
+  const EmailVerification({super.key, required this.email, this.identifier});
 
   @override
   State<EmailVerification> createState() => _EmailVerificationState();
@@ -142,7 +142,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                   ),
                   bgColor: AppColors.blueColor,
                   onPressed: () {
-                    if(formKey.currentState!.validate()){
+                    if (formKey.currentState!.validate()) {
                       verifyEmailApiCall(context, pinputController.text);
                     }
                   },
@@ -158,25 +158,27 @@ class _EmailVerificationState extends State<EmailVerification> {
     );
   }
 
-
-  verifyEmailApiCall(BuildContext context , String emailCode) async {
-    try{
+  verifyEmailApiCall(BuildContext context, String emailCode) async {
+    try {
       isLoading = true;
-      http.Response response = await http.patch(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/user"),
-          body: {
-            "emailCode": emailCode
-          },
-          headers: {
-            "X-Api-Key": xApiKey,
-            "user-identifier" : widget.identifier
-          });
-      if(response.statusCode == 202) {
+      var token = StorageHelper.getValue(StorageKeys.token);
+      http.Response response = await http.patch(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/user"), body: {
+        "emailCode": emailCode
+      }, headers: {
+        "X-Api-Key": xApiKey,
+        "user-identifier": widget.identifier ?? "",
+      });
+      if (response.statusCode == 202) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("verifyEmail Response ::: ${tempData.toString()}");
         var user = UserModel.fromJson(tempData);
         log("verifyEmail Response ${user.toString()}");
-        Navigator.push(context, MaterialPageRoute(builder: (context) => VerifyIdentity(),));
-      } else if(response.statusCode == 400){
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerifyIdentity(),
+            ));
+      } else if (response.statusCode == 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
         var errorCodeList = await AppCommonFunction().getJsonData();
@@ -191,8 +193,7 @@ class _EmailVerificationState extends State<EmailVerification> {
       }
       isLoading = false;
       setState(() {});
-    }
-    catch(e){
+    } catch (e) {
       log(e.toString());
       isLoading = false;
       setState(() {});

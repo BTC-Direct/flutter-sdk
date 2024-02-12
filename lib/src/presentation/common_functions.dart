@@ -7,18 +7,20 @@ class AppCommonFunction {
 
   String generateRandomString(int length) {
     final random = Random();
-    return String.fromCharCodes(Iterable.generate(
-        length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
+    return String.fromCharCodes(Iterable.generate(length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
   }
 
-  successSnackBar({required String message,required BuildContext context}) {
+  successSnackBar({required String message, required BuildContext context}) {
     final snackBar = SnackBar(content: Text(message));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  failureSnackBar({required String message,required BuildContext context}) {
+  failureSnackBar({required String message, required BuildContext context}) {
     final snackBar = SnackBar(
-        content: Text(message,style: const TextStyle(color: AppColors.white,fontFamily: 'TextaAlt',fontSize: 18,fontWeight: FontWeight.w400),),
+      content: Text(
+        message,
+        style: const TextStyle(color: AppColors.white, fontFamily: 'TextaAlt', fontSize: 18, fontWeight: FontWeight.w400),
+      ),
       duration: const Duration(seconds: 4),
       backgroundColor: AppColors.redColor,
     );
@@ -32,5 +34,14 @@ class AppCommonFunction {
     return newResponse.errorCodeList;
   }
 
+  String truncateStringWithEllipsis(String input, int leftLength, int rightLength) {
+    if (input.length <= leftLength + rightLength) {
+      return input;
+    }
 
+    String leftPart = input.substring(0, leftLength);
+    String rightPart = input.substring(input.length - rightLength);
+
+    return '$leftPart...$rightPart';
+  }
 }

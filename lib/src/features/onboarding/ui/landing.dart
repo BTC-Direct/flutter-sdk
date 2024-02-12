@@ -1,8 +1,3 @@
-
-
-
-
-import 'package:btcdirect/src/features/onboarding/ui/onboarding.dart';
 import 'package:btcdirect/src/features/onboarding/ui/signin.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 
@@ -21,7 +16,9 @@ class _LandingState extends State<Landing> {
     return FooterContainer(
       isAppBarLeadShow: true,
       child: Padding(
-        padding:  EdgeInsets.symmetric(horizontal: w * 0.06, ),
+        padding: EdgeInsets.symmetric(
+          horizontal: w * 0.06,
+        ),
         child: Column(
           children: [
             SizedBox(height: h * 0.05),
@@ -51,12 +48,12 @@ class _LandingState extends State<Landing> {
               ),
               bgColor: AppColors.blueColor,
               onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const OnBoarding(),
-                    ),
-                  );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const OnBoarding(),
+                  ),
+                );
               },
             ),
             SizedBox(height: h * 0.03),
@@ -70,12 +67,12 @@ class _LandingState extends State<Landing> {
               ),
               bgColor: AppColors.blueColor,
               onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SignIn(),
-                    ),
-                  );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SignIn(),
+                  ),
+                );
               },
             ),
             SizedBox(height: h * 0.12),

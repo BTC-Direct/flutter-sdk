@@ -1,9 +1,6 @@
 import 'dart:developer';
-
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
-
-import 'mail_verification.dart';
 
 class OnBoarding extends StatefulWidget {
   const OnBoarding({super.key});
@@ -17,7 +14,8 @@ class _OnBoardingState extends State<OnBoarding> {
   bool isPersonalButton = true;
   bool isBusinessButton = false;
   bool isPasswordShow = true;
-  bool isCheckBoxValue1 = false;
+  bool isChecked = false;
+  bool showError = false;
   bool isCheckBoxValue2 = false;
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
@@ -500,9 +498,10 @@ class _OnBoardingState extends State<OnBoarding> {
         Row(
           children: [
             Checkbox(
-              value: isCheckBoxValue1,
+              value: isChecked,
               onChanged: (value) {
-                isCheckBoxValue1 = value!;
+                isChecked = value!;
+                showError = false;
                 setState(() {});
               },
               side: const BorderSide(color: AppColors.greyColor, width: 1.5),
@@ -559,7 +558,7 @@ class _OnBoardingState extends State<OnBoarding> {
           ],
         ),
         Visibility(
-          visible: !isCheckBoxValue1,
+          visible: showError && !isChecked,
           child: Padding(
             padding: EdgeInsets.only(left: w * 0.06),
             child: const Text(
@@ -624,7 +623,7 @@ class _OnBoardingState extends State<OnBoarding> {
           bgColor: AppColors.blueColor,
           onPressed: () {
             if (formKey.currentState!.validate()) {
-              if (isCheckBoxValue1) {
+              if (showError = !isChecked) {
                 createAccountApiCall(
                     context: context,
                     firstName: firstNameController.text,
@@ -649,15 +648,24 @@ class _OnBoardingState extends State<OnBoarding> {
     try {
       isLoading = true;
       http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/system/info"), headers: {"X-Api-Key": xApiKey});
-
       if (response.statusCode == 200) {
         var a = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${a["nationalities"]}");
-
         countryList = List<Nationality>.from(a["nationalities"].map((x) => Nationality.fromJson(x)));
         combinedItemsList = List.from(countryList)..addAll(List.generate(1, (index) => Nationality(name: "Other nationality", code: "", idSelfieRequired: true)));
         isLoading = false;
         setState(() {});
+      } else if (response.statusCode == 400) {
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            }
+          }
+        }
       }
     } catch (e) {
       isLoading = false;
@@ -948,6 +956,7 @@ class _OnBoardingState extends State<OnBoarding> {
         log("Response ${tempData.toString()}");
         var user = UserModel.fromJson(tempData);
         log("Response ${user.toString()}");
+        await StorageHelper.setValue(StorageKeys.identifier, identifier);
         Navigator.push(
             context,
             MaterialPageRoute(

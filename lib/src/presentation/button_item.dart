@@ -15,6 +15,7 @@ class ButtonItem extends StatelessWidget {
   final TextStyle? textStyle;
   MainAxisAlignment? mainAxisAlignment;
   final Color? bgColor;
+  final bool isEnabled;
 
   static const double _defaultRadius = 10;
 
@@ -28,6 +29,7 @@ class ButtonItem extends StatelessWidget {
     this.height,
     this.bgColor,
     required this.onPressed,
+    this.isEnabled = true,
   }) : super(key: key) {
     buttonType = ButtonEnum.outline;
   }
@@ -44,6 +46,7 @@ class ButtonItem extends StatelessWidget {
     this.mainAxisAlignment,
     this.bgColor,
     required this.onPressed,
+    this.isEnabled = true,
   }) : super(key: key) {
     buttonType = ButtonEnum.filled;
   }
@@ -60,6 +63,7 @@ class ButtonItem extends StatelessWidget {
     this.height,
     this.bgColor,
     required this.onPressed,
+    this.isEnabled = true,
   }) : super(key: key) {
     buttonType = ButtonEnum.text;
   }
@@ -108,7 +112,7 @@ class ButtonItem extends StatelessWidget {
 
       case ButtonEnum.filled:
         return GestureDetector(
-          onTap: onPressed,
+          onTap: isEnabled ? onPressed : null,
           child: Container(
             height: height ?? 60,
             width: width ?? 470,
@@ -122,7 +126,7 @@ class ButtonItem extends StatelessWidget {
               //   )
               // ],
               borderRadius: BorderRadius.circular(borderRadius ?? 15),
-              color: bgColor ?? Theme.of(context).primaryColor,
+              color: isEnabled ? (bgColor ?? Theme.of(context).primaryColor) : Theme.of(context).primaryColor.withOpacity(0.5),
             ),
             child: Row(
               mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.center,
