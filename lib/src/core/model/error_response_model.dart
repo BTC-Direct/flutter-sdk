@@ -15,8 +15,7 @@ class ErrorCodeModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (errorCodeList != null) {
-      data['errorCodeList'] =
-          errorCodeList!.map((v) => v.toJson()).toList();
+      data['errorCodeList'] = errorCodeList!.map((v) => v.toJson()).toList();
     }
     return data;
   }

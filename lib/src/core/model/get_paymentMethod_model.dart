@@ -11,16 +11,13 @@ class PaymentMethodModel {
         paymentMethods!.add(PaymentMethods.fromJson(v));
       });
     }
-    countries = json['countries'] != null
-        ? Countries.fromJson(json['countries'])
-        : null;
+    countries = json['countries'] != null ? Countries.fromJson(json['countries']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (paymentMethods != null) {
-      data['paymentMethods'] =
-          paymentMethods!.map((v) => v.toJson()).toList();
+      data['paymentMethods'] = paymentMethods!.map((v) => v.toJson()).toList();
     }
     if (countries != null) {
       data['countries'] = countries!.toJson();
@@ -109,35 +106,35 @@ class Countries {
 
   Countries(
       {this.at,
-        this.be,
-        this.bg,
-        this.ch,
-        this.cy,
-        this.cz,
-        this.de,
-        this.dk,
-        this.ee,
-        this.es,
-        this.fi,
-        this.fr,
-        this.gb,
-        this.gr,
-        this.hr,
-        this.hu,
-        this.ie,
-        this.it,
-        this.lt,
-        this.lu,
-        this.lv,
-        this.mt,
-        this.nl,
-        this.no,
-        this.pl,
-        this.pt,
-        this.ro,
-        this.se,
-        this.sk,
-        this.sl});
+      this.be,
+      this.bg,
+      this.ch,
+      this.cy,
+      this.cz,
+      this.de,
+      this.dk,
+      this.ee,
+      this.es,
+      this.fi,
+      this.fr,
+      this.gb,
+      this.gr,
+      this.hr,
+      this.hu,
+      this.ie,
+      this.it,
+      this.lt,
+      this.lu,
+      this.lv,
+      this.mt,
+      this.nl,
+      this.no,
+      this.pl,
+      this.pt,
+      this.ro,
+      this.se,
+      this.sk,
+      this.sl});
 
   Countries.fromJson(Map<String, dynamic> json) {
     at = json['at'].cast<String>();

@@ -8,15 +8,7 @@ class UserModel {
   String? registrationDate;
   String? activationDate;
 
-  UserModel(
-      {this.email,
-        this.firstName,
-        this.lastName,
-        this.phoneNumber,
-        this.country,
-        this.isBusiness,
-        this.registrationDate,
-        this.activationDate});
+  UserModel({this.email, this.firstName, this.lastName, this.phoneNumber, this.country, this.isBusiness, this.registrationDate, this.activationDate});
 
   UserModel.fromJson(Map<String, dynamic> json) {
     email = json['email'];
