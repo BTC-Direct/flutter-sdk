@@ -8,11 +8,14 @@ class Repository {
 
   getCoinDataListApiCall() async {
     try {
-      http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/system/currency-pairs"), headers: {"X-Api-Key": xApiKey});
-      var tempData = jsonDecode(response.body);
-      print("getCurrencyPairsApiCall Response ${tempData.toString()}");
+      http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/system/currency-pairs"),
+          headers: {
+        "X-Api-Key": xApiKey
+      }
+      );
+      print("getCurrencyPairsApiCall Response ${response.body.toString()}");
       print("getCurrencyPairsApiCall statusCode ${response.statusCode}");
-      return tempData;
+      return response;
     } catch (e) {
       log(e.toString());
     }
@@ -21,10 +24,7 @@ class Repository {
   getPaymentMethodApiCall() async {
     try {
       http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/buy/payment-methods"), headers: {"X-Api-Key": xApiKey});
-      var tempData = jsonDecode(response.body);
-      print("getPaymentMethodApiCall Response ${tempData.toString()}");
-      print("getPaymentMethodApiCall statusCode ${response.statusCode}");
-      return tempData;
+      return response;
     } catch (e) {
       log(e.toString());
     }
@@ -73,6 +73,18 @@ class Repository {
           "User-Authorization": "Bearer $token"
         },
         body: body
+    );
+    return response;
+  }
+
+  getOrderDataApiCall(String orderId) async {
+    var token = StorageHelper.getValue(StorageKeys.token);
+    http.Response response = await http.get(
+        Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/buy/orders/$orderId"),
+        headers: {
+          "X-Api-Key": xApiKey,
+          "User-Authorization": "Bearer $token"
+        },
     );
     return response;
   }

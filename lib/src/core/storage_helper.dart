@@ -37,4 +37,5 @@ class StorageKeys {
   static const String userId = 'userId';
   static const String refreshToken = 'refreshToken';
   static const String identifier = 'identifier';
+  static const String orderId = 'orderId';
 }

@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+
+
 import 'package:btcdirect/src/core/model/userinfomodel.dart';
 import 'package:btcdirect/src/features/buy/ui/paymentmethod.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
@@ -49,12 +51,12 @@ class _BuyScreenState extends State<BuyScreen> {
 
   @override
   void initState() {
-    super.initState();
     getCoinDataList();
     walletAddress = TextEditingController(text: "My wallet");
     paymentMethod = TextEditingController(text: "Bancontact");
-    startTimer();
     isTimerShow = true;
+    startTimer();
+    super.initState();
   }
 
   @override
@@ -77,7 +79,7 @@ class _BuyScreenState extends State<BuyScreen> {
                 SizedBox(
                   height: h * 0.04,
                 ),
-                isLoading ? const Center(child: CircularProgressIndicator()) : orderView(),
+                isLoading ? SizedBox(height: h / 1.6,child: const Center(child: CircularProgressIndicator())) : orderView(),
               ],
             ),
           ),
@@ -760,17 +762,15 @@ class _BuyScreenState extends State<BuyScreen> {
               } else if (userInfoModel.status?.status == "validated") {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => PaymentMethod(
-                      amount: amount.text,
-                      paymentMethodCode: payMethodList[paymentSelectIndex].code.toString(),
-                      paymentMethodName: payMethodList[paymentSelectIndex].label.toString(),
-                      walletName: walletAddress.text,
-                      walletAddress: myWalletList[walletSelectIndex]['walletAddress'].toString(),
-                      coinTicker: coinList[coinSelectIndex].coinTicker.toString(),
-                      paymentFees: paymentFees,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => PaymentMethod(
+                    amount: amount.text,
+                    paymentMethodCode: payMethodList[paymentSelectIndex].code.toString(),
+                    paymentMethodName: payMethodList[paymentSelectIndex].label.toString(),
+                    walletName: walletAddress.text,
+                    walletAddress: myWalletList[walletSelectIndex]['walletAddress'].toString(),
+                    coinTicker: coinList[coinSelectIndex].coinTicker.toString(),
+                    paymentFees: paymentFees,
+                  ))
                 ).then((value) {
                   startTimer();
                 });
@@ -1198,7 +1198,9 @@ class _BuyScreenState extends State<BuyScreen> {
         if (start == 0) {
           // timer.cancel();
           getCurrencyPrice();
-          onAmountChanged(value: amount.text, isPay: true);
+          if(amount.text.isNotEmpty) {
+            onAmountChanged(value: amount.text, isPay: true);
+          }
           start = 10;
           setState(() {});
         } else {
@@ -1213,19 +1215,39 @@ class _BuyScreenState extends State<BuyScreen> {
     try {
       isLoading = true;
       List<GetPairsModel> currencyPairs = [];
-      var response = await Repository().getCoinDataListApiCall();
-      currencyPairs = List<GetPairsModel>.from(response.map((x) => GetPairsModel.fromJson(x)));
-      for (var i = 0; i < currencyPairs.length; i++) {
-        coinList.add(CoinModel(
-            coinName: currencyPairs[i].currencyPair!.split("-")[0],
-            coinTicker: currencyPairs[i].currencyPair!.split("-")[0],
-            coinIcon: "https://widgets-sandbox.btcdirect.eu/img/currencies/${currencyPairs[i].currencyPair!.split("-")[0]}.svg"));
-        setState(() {});
+      http.Response response = await Repository().getCoinDataListApiCall();
+      var tempData = jsonDecode(response.body);
+      if(response.statusCode == 200){
+        currencyPairs = List<GetPairsModel>.from(tempData.map((x) => GetPairsModel.fromJson(x)));
+        for (var i = 0; i < currencyPairs.length; i++) {
+          coinList.add(CoinModel(
+              coinName: currencyPairs[i].currencyPair!.split("-")[0],
+              coinTicker: currencyPairs[i].currencyPair!.split("-")[0],
+              coinIcon: "https://widgets-sandbox.btcdirect.eu/img/currencies/${currencyPairs[i].currencyPair!.split("-")[0]}.svg"));
+        }
+        getPaymentMethod();
       }
-      getPaymentMethod();
+      else if(response.statusCode == 400){
+        setState(() {
+          isLoading = false;
+        });
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              log(errorCodeList[i].message);
+              print('ErrorMessage ::: ${errorCodeList[i].message}');
+            }
+          }
+        }
+      }
+
     } catch (e) {
-      isLoading = false;
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
       log(e.toString());
     }
   }
@@ -1234,24 +1256,47 @@ class _BuyScreenState extends State<BuyScreen> {
     try {
       isLoading = true;
       PaymentMethodModel payMethodPairs;
-      var response = await Repository().getPaymentMethodApiCall();
-      payMethodPairs = PaymentMethodModel.fromJson(response);
-      for (var i = 0; i < payMethodPairs.paymentMethods!.length; i++) {
-        payMethodList.add(
-          PaymentMethods(
-            code: payMethodPairs.paymentMethods![i].code,
-            fee: payMethodPairs.paymentMethods![i].fee,
-            limit: payMethodPairs.paymentMethods![i].limit,
-            label: payMethodPairs.paymentMethods![i].label,
-          ),
-        );
+      http.Response response = await Repository().getPaymentMethodApiCall();
+      var tempData = jsonDecode(response.body);
+      print("getPaymentMethodApiCall Response ${tempData.toString()}");
+      print("getPaymentMethodApiCall statusCode ${response.statusCode}");
+      if(response.statusCode == 200){
+        payMethodPairs = PaymentMethodModel.fromJson(tempData);
+        for (var i = 0; i < payMethodPairs.paymentMethods!.length; i++) {
+          payMethodList.add(
+            PaymentMethods(
+              code: payMethodPairs.paymentMethods![i].code,
+              fee: payMethodPairs.paymentMethods![i].fee,
+              limit: payMethodPairs.paymentMethods![i].limit,
+              label: payMethodPairs.paymentMethods![i].label,
+            ),
+          );
+        }
+        paymentMethod.text = '${payMethodList.first.label}';
+        setState(() {
+          isLoading = false;
+        });
+      } else if( response.statusCode == 400 ){
+        setState(() {
+          isLoading = false;
+        });
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              log(errorCodeList[i].message);
+              print('ErrorMessage ::: ${errorCodeList[i].message}');
+            }
+          }
+        }
       }
-      paymentMethod.text = '${payMethodList.first.label}';
-      isLoading = false;
-      setState(() {});
+
     } catch (e) {
-      isLoading = false;
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
       log(e.toString());
     }
   }
@@ -1326,14 +1371,3 @@ class _BuyScreenState extends State<BuyScreen> {
   }
 }
 
-class CoinModel {
-  String? coinName;
-  String? coinTicker;
-  String? coinIcon;
-
-  CoinModel({
-    this.coinName,
-    this.coinTicker,
-    this.coinIcon,
-  });
-}

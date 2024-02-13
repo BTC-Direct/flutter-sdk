@@ -26,3 +26,4 @@ export 'package:flutter/rendering.dart';
 export 'package:flutter/services.dart';
 export 'package:flutter_svg/flutter_svg.dart';
 export 'package:pinput/pinput.dart';
+export 'package:btcdirect/src/core/model/coin_model.dart';

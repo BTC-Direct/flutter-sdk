@@ -33,7 +33,9 @@ class _SignInState extends State<SignIn> {
             padding: EdgeInsets.symmetric(
               horizontal: w * 0.06,
             ),
-            child: Column(
+            child: isLoading
+                ? SizedBox(height: h / 1.3, child: const Center(child: CircularProgressIndicator()))
+                : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(

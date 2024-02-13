@@ -71,6 +71,11 @@
       "solution": "Request a new authorization token, or refresh the token."
     },
     {
+      "code": "ER998",
+      "message": "No route found for this request.",
+      "solution": "Make sure you use an existing endpoint. Take a look at the documentation for an overview of all existing endpoints."
+    },
+    {
       "code": "ER062",
       "message": "No country code provided.",
       "solution": "Provide a valid country code."

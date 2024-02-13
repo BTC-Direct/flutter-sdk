@@ -1,8 +1,8 @@
 import 'dart:developer';
 
+import 'package:btcdirect/src/core/model/order_model.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
-import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PaymentMethod extends StatefulWidget {
@@ -35,11 +35,13 @@ class _PaymentMethodState extends State<PaymentMethod> {
   bool isChecked = false;
   bool showError = false;
   bool isLoading = false;
+  bool isOrderPending = false;
+  bool isOrderButtonTapped = false;
   late Timer timer;
+  late Timer paymentMethodTimer;
   int start = 10;
+  int paymentMethodTimerStart = 10;
   String price = "0.0";
-  late String latestLink = 'Unknown';
-  late StreamSubscription sub;
 
   @override
   void initState() {
@@ -47,7 +49,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
     onAmountChanged(value: widget.amount);
     startTimer();
     isTimerShow = true;
-    initUniLinks();
+    if(isOrderButtonTapped){
+      paymentMethodCompleteCheckTimer();
+    }
   }
 
   @override
@@ -55,33 +59,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
     timer.cancel();
     super.dispose();
   }
-  void initUniLinks() async {
-    sub = getLinksStream().listen((String? link) {
-      setState(() {
-        latestLink = link ?? 'Unknown';
-        // Parse the URL and extract parameters here
-        // You can use packages like uri to parse the URL
-      });
-    }, onError: (err) {
-      setState(() {
-        latestLink = 'Failed to get latest link: $err.';
-      });
-    });
 
-    String? initialLink;
-    try {
-      initialLink = await getInitialLink();
-    } on PlatformException {
-      initialLink = 'Failed to get initial link.';
-    } on FormatException {
-      initialLink = 'Bad parse the initial link.';
-    }
-    if (!mounted) return;
-    setState(() {
-      latestLink = initialLink ?? 'Unknown';
-      // Parse the URL and extract parameters here as well
-    });
-  }
   
   @override
   Widget build(BuildContext context) {
@@ -103,7 +81,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
               SizedBox(
                 height: h * 0.04,
               ),
-              isLoading ? SizedBox(height: h / 1.5, child: const Center(child: CircularProgressIndicator())) : paymentView(),
+              isLoading
+                  ? SizedBox(height: h / 1.5, child: const Center(child: CircularProgressIndicator()))
+                  : isOrderPending ? pendingStatusView() :paymentView(),
             ],
           ),
         ),
@@ -579,6 +559,58 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 
+  /// Pending Status View Widget
+
+  pendingStatusView(){
+    double h = MediaQuery.of(context).size.height;
+    double w = MediaQuery.of(context).size.width;
+    return Column(
+      children: [
+        const Text(
+          "Oops! Something went wrong",
+          textAlign: TextAlign.start,
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w600,
+            color: AppColors.blueColor,
+            fontFamily: 'TextaAlt',
+          ),
+        ),
+        SizedBox(
+          height: h * 0.01,
+        ),
+        const Text(
+          "Please reload this page or contact our support team.",
+          textAlign: TextAlign.start,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.blueColor,
+            fontFamily: 'TextaAlt',
+          ),
+        ),
+        SizedBox(
+          height: h * 0.01,
+        ),
+        ButtonItem.filled(
+          text: "Back to order form",
+          fontSize: 20,
+          textStyle: const TextStyle(
+            fontSize: 22,
+            color: AppColors.white,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'TextaAlt',
+          ),
+          bgColor: AppColors.blueColor,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
+
+
   /// Api Call
   void startTimer() {
     const oneSec = Duration(seconds: 1);
@@ -634,8 +666,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
           }
         }
       }
+      setState(() {});
     }
-    setState(() {});
+
   }
 
   paymentConfirm(String quote) async {
@@ -647,15 +680,20 @@ class _PaymentMethodState extends State<PaymentMethod> {
     };
     var token = StorageHelper.getValue(StorageKeys.token);
     print("token :: $token");
-    http.Response response = await Repository().getPaymentConfirmApiCall(body, token);
+    http.Response response = await Repository().getPaymentConfirmApiCall(body,token);
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 201) {
       var paymentUrl = tempData["paymentUrl"].toString();
       var orderId = tempData["orderId"].toString();
+      StorageHelper.setValue(StorageKeys.orderId, orderId);
+      print("orderId ::: $orderId");
+      isOrderButtonTapped = true;
       launchURL(paymentUrl);
       isLoading = false;
       print("urlData ::: ${tempData.toString()}");
-    } else if (response.statusCode == 400) {
+      setState(() {});
+    }
+    else if (response.statusCode == 400) {
       isLoading = false;
       log("Response ${tempData.toString()}");
       var errorCodeList = await AppCommonFunction().getJsonData();
@@ -666,14 +704,76 @@ class _PaymentMethodState extends State<PaymentMethod> {
           }
         }
       }
+      setState(() {});
     }
-    setState(() {});
   }
 
   launchURL(String paymentUrl) async {
     final Uri url = Uri.parse(paymentUrl);
-    if (!await launchUrl(url)) {
-      throw Exception('Could not launch $url');
+    launchUrl(url, mode: LaunchMode.inAppWebView).then((value) {
+      print('value back web view ::: $value');
+    });
+    // if (!await launchUrl(url)) {
+    //   throw Exception('Could not launch $url');
+    // }
+  }
+
+  void paymentMethodCompleteCheckTimer() {
+    const oneSec = Duration(seconds: 1);
+    paymentMethodTimer = Timer.periodic(
+      oneSec, (Timer timer) {
+        if (paymentMethodTimerStart == 0) {
+          // timer.cancel();
+          getOrderDetailsData();
+          paymentMethodTimerStart = 10;
+          setState(() {});
+        } else {
+          paymentMethodTimerStart--;
+          setState(() {});
+        }
+      },
+    );
+  }
+
+  getOrderDetailsData() async{
+    isLoading = true;
+    var orderId = StorageHelper.getValue(StorageKeys.orderId);
+    try{
+      http.Response response = await Repository().getOrderDataApiCall(orderId);
+      var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 201) {
+        OrderModel orderData = OrderModel.fromJson(tempData);
+        if(orderData.status == "completed"){
+          isOrderPending = false;
+        }
+        else{
+          paymentMethodTimer.cancel();
+          isOrderPending = true;
+        }
+        isLoading = false;
+        setState(() {});
+      }
+      else if (response.statusCode == 404) {
+        isLoading = false;
+        paymentMethodTimer.cancel();
+        isOrderPending = true;
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            }
+          }
+        }
+        paymentMethodTimer.cancel();
+        setState(() {});
+      }
+    }
+    catch (e){
+      setState(() {});
+      log(e.toString());
     }
   }
+
 }

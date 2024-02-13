@@ -33,7 +33,6 @@ class MyApp extends StatelessWidget {
       child: const MaterialApp(
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
-        // home: OnBoarding(),
         home: BuyScreen(),
       ),
     );
