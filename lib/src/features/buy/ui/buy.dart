@@ -782,6 +782,11 @@ class _BuyScreenState extends State<BuyScreen> {
                   ),
                 ).then((value) {
                   startTimer();
+                  var token = StorageHelper.getValue(StorageKeys.token);
+                  print("getToken: $token");
+                  if(token != null && token.isNotEmpty) {
+                    getUserInfo(token);
+                  }
                 });
               }
             }
@@ -1189,7 +1194,6 @@ class _BuyScreenState extends State<BuyScreen> {
   }
 
   ///API CALL FUNCTION
-
   void startTimer() {
     const oneSec = Duration(seconds: 1);
     timer = Timer.periodic(
@@ -1354,7 +1358,7 @@ class _BuyScreenState extends State<BuyScreen> {
 
   getUserInfo(String token) async {
     try {
-      var response = await Repository().getUserInfoApiCall(token);
+      var response = await Repository().getUserInfoApiCall(token,context);
       print("Response :: ${response.toString()}");
       userInfoModel = UserInfoModel.fromJson(response);
       print("userInfoModel Response :: ${userInfoModel.toString()}");

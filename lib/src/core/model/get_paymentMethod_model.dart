@@ -54,8 +54,8 @@ class PaymentMethods {
 }
 
 class Fee {
-  double? fixed;
-  double? percentage;
+  num? fixed;
+  num? percentage;
 
   Fee({this.fixed, this.percentage});
 

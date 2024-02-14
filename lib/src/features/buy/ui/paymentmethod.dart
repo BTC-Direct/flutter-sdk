@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:btcdirect/src/core/model/order_model.dart';
+import 'package:btcdirect/src/features/buy/ui/completePayment.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -36,11 +37,11 @@ class _PaymentMethodState extends State<PaymentMethod> {
   bool showError = false;
   bool isLoading = false;
   bool isOrderPending = false;
-  bool isOrderButtonTapped = false;
+  bool isOrderCancelled = false;
   late Timer timer;
   late Timer paymentMethodTimer;
   int start = 10;
-  int paymentMethodTimerStart = 10;
+  int paymentMethodTimerStart = 5;
   String price = "0.0";
 
   @override
@@ -49,9 +50,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
     onAmountChanged(value: widget.amount);
     startTimer();
     isTimerShow = true;
-    if(isOrderButtonTapped){
-      paymentMethodCompleteCheckTimer();
-    }
   }
 
   @override
@@ -566,31 +564,38 @@ class _PaymentMethodState extends State<PaymentMethod> {
     double w = MediaQuery.of(context).size.width;
     return Column(
       children: [
-        const Text(
-          "Oops! Something went wrong",
-          textAlign: TextAlign.start,
-          style: TextStyle(
+        SizedBox(
+          height: h * 0.02,
+        ),
+        SvgPicture.asset('assets/images/error.svg',width: w * 0.2,height: h * 0.15,),
+        SizedBox(
+          height: h * 0.02,
+        ),
+        Text(
+          isOrderCancelled ? "Oops! Your order\nhas been cancelled" :"Oops! Something went\nwrong",
+          textAlign: TextAlign.center,
+          style: const TextStyle(
             fontSize: 26,
-            fontWeight: FontWeight.w600,
-            color: AppColors.blueColor,
+            fontWeight: FontWeight.w700,
+            color: AppColors.black,
             fontFamily: 'TextaAlt',
           ),
         ),
         SizedBox(
-          height: h * 0.01,
+          height: h * 0.02,
         ),
-        const Text(
-          "Please reload this page or contact our support team.",
-          textAlign: TextAlign.start,
+        isOrderCancelled ? Container() : const Text(
+          "Please reload this page or contact our\nsupport team.",
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColors.blueColor,
+            color: AppColors.black,
             fontFamily: 'TextaAlt',
           ),
         ),
         SizedBox(
-          height: h * 0.01,
+          height: h * 0.2,
         ),
         ButtonItem.filled(
           text: "Back to order form",
@@ -650,25 +655,13 @@ class _PaymentMethodState extends State<PaymentMethod> {
   getQuoteChanged() async {
     isLoading = true;
     Map<String, String> body = {"currencyPair": "${widget.coinTicker}-EUR", "fiatAmount": widget.amount.toString(), "cryptoAmount": "", "paymentMethod": widget.paymentMethodCode};
-    http.Response response = await Repository().getQuoteApiCall(body);
+    http.Response response = await Repository().getQuoteApiCall(body,context);
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 200) {
       var quoteData = tempData["quote"].toString();
       print(quoteData);
       paymentConfirm(quoteData);
-    } else if (response.statusCode == 400) {
-      isLoading = false;
-      var errorCodeList = await AppCommonFunction().getJsonData();
-      for (int i = 0; i < errorCodeList.length; i++) {
-        for (int j = 0; j < tempData['errors'].length; j++) {
-          if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-            AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
-          }
-        }
-      }
-      setState(() {});
     }
-
   }
 
   paymentConfirm(String quote) async {
@@ -680,43 +673,33 @@ class _PaymentMethodState extends State<PaymentMethod> {
     };
     var token = StorageHelper.getValue(StorageKeys.token);
     print("token :: $token");
-    http.Response response = await Repository().getPaymentConfirmApiCall(body,token);
+    http.Response response = await Repository().getPaymentConfirmApiCall(body,token,context);
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 201) {
       var paymentUrl = tempData["paymentUrl"].toString();
       var orderId = tempData["orderId"].toString();
       StorageHelper.setValue(StorageKeys.orderId, orderId);
       print("orderId ::: $orderId");
-      isOrderButtonTapped = true;
       launchURL(paymentUrl);
-      isLoading = false;
+      //isLoading = false;
       print("urlData ::: ${tempData.toString()}");
-      setState(() {});
-    }
-    else if (response.statusCode == 400) {
-      isLoading = false;
-      log("Response ${tempData.toString()}");
-      var errorCodeList = await AppCommonFunction().getJsonData();
-      for (int i = 0; i < errorCodeList.length; i++) {
-        for (int j = 0; j < tempData['errors'].length; j++) {
-          if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-            AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
-          }
-        }
-      }
       setState(() {});
     }
   }
 
   launchURL(String paymentUrl) async {
     final Uri url = Uri.parse(paymentUrl);
-    launchUrl(url, mode: LaunchMode.inAppWebView).then((value) {
+    launchUrl(url, mode: LaunchMode.inAppWebView,
+    ).then((value) {
       print('value back web view ::: $value');
+      paymentMethodCompleteCheckTimer();
     });
     // if (!await launchUrl(url)) {
     //   throw Exception('Could not launch $url');
     // }
   }
+
+  /// Payment Method Complete Are Not Check Api Call
 
   void paymentMethodCompleteCheckTimer() {
     const oneSec = Duration(seconds: 1);
@@ -725,7 +708,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
         if (paymentMethodTimerStart == 0) {
           // timer.cancel();
           getOrderDetailsData();
-          paymentMethodTimerStart = 10;
+          paymentMethodTimerStart = 5;
           setState(() {});
         } else {
           paymentMethodTimerStart--;
@@ -739,34 +722,24 @@ class _PaymentMethodState extends State<PaymentMethod> {
     isLoading = true;
     var orderId = StorageHelper.getValue(StorageKeys.orderId);
     try{
-      http.Response response = await Repository().getOrderDataApiCall(orderId);
+      http.Response response = await Repository().getOrderDataApiCall(orderId,context);
       var tempData = jsonDecode(response.body) as Map<String, dynamic>;
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         OrderModel orderData = OrderModel.fromJson(tempData);
         if(orderData.status == "completed"){
           isOrderPending = false;
+          isOrderCancelled = false;
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const CompletePayment()));
+        }else if(orderData.status == "cancelled"){
+          paymentMethodTimer.cancel();
+          isOrderPending = true;
+          isOrderCancelled = true;
         }
-        else{
+        else if (orderData.status == "pending") {
           paymentMethodTimer.cancel();
           isOrderPending = true;
         }
         isLoading = false;
-        setState(() {});
-      }
-      else if (response.statusCode == 404) {
-        isLoading = false;
-        paymentMethodTimer.cancel();
-        isOrderPending = true;
-        log("Response ${tempData.toString()}");
-        var errorCodeList = await AppCommonFunction().getJsonData();
-        for (int i = 0; i < errorCodeList.length; i++) {
-          for (int j = 0; j < tempData['errors'].length; j++) {
-            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
-            }
-          }
-        }
-        paymentMethodTimer.cancel();
         setState(() {});
       }
     }

@@ -4,6 +4,7 @@ import 'package:btcdirect/src/core/model/userinfomodel.dart';
 import 'package:btcdirect/src/features/buy/ui/buy.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -142,15 +143,23 @@ class _SignInState extends State<SignIn> {
                         )),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(top: h * 0.002, bottom: h * 0.01),
-                  child: const Text(
-                    "Forgot Password?",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.blueColor,
-                      fontFamily: 'TextaAlt',
+                InkWell(
+                  onTap: () async {
+                    final Uri url = Uri.parse("https://my-sandbox.btcdirect.eu/en-gb/forgot-password?client=raininfotech");
+                    if (!await launchUrl(url)) {
+                      throw Exception('Could not launch $url');
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(top: h * 0.002, bottom: h * 0.01),
+                    child: const Text(
+                      "Forgot Password?",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.blueColor,
+                        fontFamily: 'TextaAlt',
+                      ),
                     ),
                   ),
                 ),
@@ -168,13 +177,9 @@ class _SignInState extends State<SignIn> {
                   ),
                   bgColor: AppColors.blueColor,
                   onPressed: () {
+                    if(formKey.currentState!.validate()) {
                     signInAccountApiCall(context: context, email: emailController.text, password: passwordController.text);
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => const OnBoarding(),
-                    //   ),
-                    // );
+                    }
                   },
                 ),
                 SizedBox(
@@ -194,15 +199,8 @@ class _SignInState extends State<SignIn> {
     String password = '',
   }) async {
     try {
-      String identifier = AppCommonFunction().generateRandomString(36);
-      print("identifier: $identifier");
       isLoading = true;
-      http.Response response = await http.post(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/user/login"), body: {
-        "emailAddress": email,
-        "password": password,
-      }, headers: {
-        "X-Api-Key": xApiKey,
-      });
+      http.Response response = await Repository().signInAccountApiCall(email, password,context);
       print('response StatusCode: ${response.statusCode}');
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
@@ -211,17 +209,6 @@ class _SignInState extends State<SignIn> {
         await StorageHelper.setValue(StorageKeys.userId, tempData['uuid']);
         await StorageHelper.setValue(StorageKeys.refreshToken, tempData['refreshToken']);
         getUserInfo(tempData['token']);
-      } else if (response.statusCode == 400) {
-        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
-        log("Response ${tempData.toString()}");
-        var errorCodeList = await AppCommonFunction().getJsonData();
-        for (int i = 0; i < errorCodeList.length; i++) {
-          for (int j = 0; j < tempData['errors'].length; j++) {
-            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
-            }
-          }
-        }
       }
       isLoading = false;
       setState(() {});
@@ -234,7 +221,7 @@ class _SignInState extends State<SignIn> {
 
   getUserInfo(String token) async {
     try {
-      var response = await Repository().getUserInfoApiCall(token);
+      var response = await Repository().getUserInfoApiCall(token,context);
       print("Response $response");
       UserInfoModel userInfoModel = UserInfoModel.fromJson(response);
       print("userInfoModel Response :: ${userInfoModel.toString()}");
@@ -245,11 +232,12 @@ class _SignInState extends State<SignIn> {
               builder: (context) => VerifyIdentity(),
             ));
       } else {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BuyScreen(),
-            ));
+        Navigator.popUntil(context, (route) => route.isFirst);
+        // Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => BuyScreen(),
+        //     ));
       }
       setState(() {});
     } catch (e) {

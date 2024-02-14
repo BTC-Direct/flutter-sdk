@@ -624,6 +624,9 @@ class _OnBoardingState extends State<OnBoarding> {
           onPressed: () {
             if (formKey.currentState!.validate()) {
               if (showError = !isChecked) {
+                setState(() {});
+              }
+              else{
                 createAccountApiCall(
                     context: context,
                     firstName: firstNameController.text,

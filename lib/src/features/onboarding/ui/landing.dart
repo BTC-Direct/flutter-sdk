@@ -72,7 +72,7 @@ class _LandingState extends State<Landing> {
                   MaterialPageRoute(
                     builder: (context) => const SignIn(),
                   ),
-                );
+                ).then((value) {});
               },
             ),
             SizedBox(height: h * 0.12),

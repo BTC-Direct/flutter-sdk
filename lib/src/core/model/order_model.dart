@@ -4,7 +4,7 @@ class OrderModel {
   String? currencyPair;
   String? status;
   FeeAmount? feeAmount;
-  double? feePercentage;
+  num? feePercentage;
   String? partnerOrderIdentifier;
   List<OrderNotCompletedReasons>? orderNotCompletedReasons;
   FeeAmount? price;
@@ -97,7 +97,7 @@ class OrderModel {
 }
 
 class FeeAmount {
-  int? amount;
+  num? amount;
   String? currencyCode;
 
   FeeAmount({this.amount, this.currencyCode});
@@ -153,7 +153,7 @@ class OrderNotCompletedReasons {
 }
 
 class Value {
-  double? amount;
+  num? amount;
   String? currencyCode;
 
   Value({this.amount, this.currencyCode});
