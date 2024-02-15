@@ -252,7 +252,6 @@ class _CompletePaymentState extends State<CompletePayment> {
           bgColor: AppColors.blueColor,
           onPressed: () {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const BuyScreen()));
-
           },
         ),
       ]

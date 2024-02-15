@@ -1,4 +1,6 @@
 import 'dart:developer';
+
+import 'package:btcdirect/src/features/onboarding/ui/signin.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,6 +19,7 @@ class _OnBoardingState extends State<OnBoarding> {
   bool isChecked = false;
   bool showError = false;
   bool isCheckBoxValue2 = false;
+  bool isEmailAlready = false;
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -38,8 +41,8 @@ class _OnBoardingState extends State<OnBoarding> {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return FooterContainer(
-      appBarTitle: "Create account",
-      isAppBarLeadShow: true,
+      appBarTitle: isEmailAlready ? "" :"Create account",
+      isAppBarLeadShow: isEmailAlready ? false : true,
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
@@ -47,73 +50,141 @@ class _OnBoardingState extends State<OnBoarding> {
             key: formKey,
             child: isLoading
                 ? SizedBox(height: h, child: const Center(child: CircularProgressIndicator()))
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                : isEmailAlready
+                    ? emailAlreadyView()
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          InkWell(
-                            onTap: () {
-                              isBusinessButton = false;
-                              isPersonalButton = !isPersonalButton;
-                              setState(() {});
-                            },
-                            child: Container(
-                              height: h * 0.06,
-                              width: w * 0.38,
-                              decoration: BoxDecoration(
-                                color: isPersonalButton ? AppColors.backgroundColor : AppColors.transparent,
-                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), bottomLeft: Radius.circular(10)),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Personal',
-                                  style: TextStyle(
-                                    color: isPersonalButton ? AppColors.blueColor : AppColors.greyColor,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: 'TextaAlt',
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  isBusinessButton = false;
+                                  isPersonalButton = !isPersonalButton;
+                                  setState(() {});
+                                },
+                                child: Container(
+                                  height: h * 0.06,
+                                  width: w * 0.38,
+                                  decoration: BoxDecoration(
+                                    color: isPersonalButton ? AppColors.backgroundColor : AppColors.transparent,
+                                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), bottomLeft: Radius.circular(10)),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Personal',
+                                      style: TextStyle(
+                                        color: isPersonalButton ? AppColors.blueColor : AppColors.greyColor,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'TextaAlt',
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              isPersonalButton = false;
-                              isBusinessButton = !isPersonalButton;
-                              setState(() {});
-                            },
-                            child: Container(
-                              height: h * 0.06,
-                              width: w * 0.38,
-                              decoration: BoxDecoration(
-                                color: isBusinessButton ? AppColors.backgroundColor : AppColors.transparent,
-                                borderRadius: const BorderRadius.only(topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Business',
-                                  style: TextStyle(
-                                    color: isBusinessButton ? AppColors.blueColor : AppColors.greyColor,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: 'TextaAlt',
+                              InkWell(
+                                onTap: () {
+                                  isPersonalButton = false;
+                                  isBusinessButton = !isPersonalButton;
+                                  setState(() {});
+                                },
+                                child: Container(
+                                  height: h * 0.06,
+                                  width: w * 0.38,
+                                  decoration: BoxDecoration(
+                                    color: isBusinessButton ? AppColors.backgroundColor : AppColors.transparent,
+                                    borderRadius: const BorderRadius.only(topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Business',
+                                      style: TextStyle(
+                                        color: isBusinessButton ? AppColors.blueColor : AppColors.greyColor,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'TextaAlt',
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
+                          personalInfoContainer(),
                         ],
                       ),
-                      personalInfoContainer(),
-                    ],
-                  ),
           ),
         ),
       ),
     );
+  }
+
+  emailAlreadyView() {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+    return Column(children: [
+      Image.asset('assets/images/email_in_use.png', height: h * 0.2, width: w * 0.4),
+      SizedBox(height: h * 0.02,),
+      const Text(
+        "raininfo2@yopmail.com is already in use",
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: AppColors.black,
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'TextaAlt',
+        ),
+      ),
+      SizedBox(height: h * 0.03,),
+      RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+            children: [
+              const TextSpan(text: "There is already an account registered with this email address. If you've started or completed a previous registration, "),
+              TextSpan(
+                text: "log in",
+                style: const TextStyle(
+                  color: AppColors.blueColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'TextaAlt',
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                  isEmailAlready = false;
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const SignIn()));
+                  },
+              ),
+              const TextSpan(text: " to continue."),
+            ],
+            style: const TextStyle(
+              color: AppColors.greyColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'TextaAlt',
+            )),
+      ),
+      SizedBox(height: h * 0.2,),
+      ButtonItem.filled(
+        text: "Back to previous page",
+        fontSize: 20,
+        textStyle: const TextStyle(
+          fontSize: 24,
+          color: AppColors.white,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'TextaAlt',
+        ),
+        bgColor: AppColors.blueColor,
+        onPressed: () {
+          isEmailAlready = false;
+          passwordController.clear();
+          setState(() {});
+        },
+      ),
+
+    ]);
   }
 
   businessBottomSheet(BuildContext context) {
@@ -527,9 +598,7 @@ class _OnBoardingState extends State<OnBoarding> {
                           fontFamily: 'TextaAlt',
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            //launchUrlString('https://blockx. gitbook.io/blocx./get-started/masternode#vps-console-putty-or-terminal');
-                          },
+                          ..onTap = () {},
                       ),
                       const TextSpan(text: " and "),
                       TextSpan(
@@ -625,8 +694,7 @@ class _OnBoardingState extends State<OnBoarding> {
             if (formKey.currentState!.validate()) {
               if (showError = !isChecked) {
                 setState(() {});
-              }
-              else{
+              } else {
                 createAccountApiCall(
                     context: context,
                     firstName: firstNameController.text,
@@ -937,23 +1005,20 @@ class _OnBoardingState extends State<OnBoarding> {
     try {
       String identifier = AppCommonFunction().generateRandomString(36);
       print("identifier: $identifier");
-      isLoading = true;
-      http.Response response = await http.post(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/user"), body: {
-        "isBusiness": isBusiness.toString(),
-        "identifier": identifier,
-        "firstName": firstName,
-        "lastName": lastName,
-        "email": email,
-        "country": nationalityCode,
-        "password": password,
-        "termsAndConditions": "true",
-        "privacyAgreement": "true",
-        "newsletterSubscription": newsletterSubscription.toString(),
-        "websiteLanguage": "en",
-        "websiteCountry": "gb"
-      }, headers: {
-        "X-Api-Key": xApiKey,
+      setState(() {
+        isLoading = true;
       });
+      http.Response response = await Repository().createAccountApiCall(
+        context,
+        identifier,
+        firstName,
+        lastName,
+        email,
+        password,
+        nationalityCode,
+        isBusiness,
+        newsletterSubscription,
+      );
       if (response.statusCode == 201) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
@@ -971,9 +1036,16 @@ class _OnBoardingState extends State<OnBoarding> {
         var errorCodeList = await AppCommonFunction().getJsonData();
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
-            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            if(tempData['errors'].keys.toList()[j] == "ER002"){
+              setState(() {
+              isEmailAlready = true;
+              });
+            } else{
+              if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
+
           }
         }
       }

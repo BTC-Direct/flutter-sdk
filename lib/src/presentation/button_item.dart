@@ -79,15 +79,6 @@ class ButtonItem extends StatelessWidget {
             width: width ?? 470,
             padding: const EdgeInsets.symmetric(horizontal: 15),
             decoration: BoxDecoration(
-              // boxShadow: [
-              //   BoxShadow(
-              //     color: Get.theme.shadowColor,
-              //     spreadRadius: 1,
-              //     blurRadius: 1.5,
-              //     offset: const Offset(0.5, 0.5),
-              //   ),
-              // ],
-              // color: bgColor ?? AppColors.transparent,
               borderRadius: BorderRadius.circular(borderRadius ?? 15),
               border: Border.all(color: bgColor ?? Theme.of(context).primaryColor, width: 1.2),
             ),

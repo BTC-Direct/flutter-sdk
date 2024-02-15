@@ -1,7 +1,5 @@
 import 'dart:developer';
-
 import 'package:btcdirect/src/core/model/userinfomodel.dart';
-import 'package:btcdirect/src/features/buy/ui/buy.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -145,10 +143,16 @@ class _SignInState extends State<SignIn> {
                 ),
                 InkWell(
                   onTap: () async {
-                    final Uri url = Uri.parse("https://my-sandbox.btcdirect.eu/en-gb/forgot-password?client=raininfotech");
-                    if (!await launchUrl(url)) {
-                      throw Exception('Could not launch $url');
-                    }
+                      http.Response response = await Repository().getClientInfoApiCall();
+                      if(response.statusCode == 200){
+                        var tempData = jsonDecode(response.body)['slug'];
+                        print("tempData Slug $tempData");
+                        final Uri url = Uri.parse("https://my-sandbox.btcdirect.eu/en-gb/forgot-password?client=$tempData");
+                        print('url $url');
+                        if (!await launchUrl(url)) {
+                          throw Exception('Could not launch $url');
+                        }
+                      }
                   },
                   child: Padding(
                     padding: EdgeInsets.only(top: h * 0.002, bottom: h * 0.01),
@@ -182,7 +186,7 @@ class _SignInState extends State<SignIn> {
                     }
                   },
                 ),
-                SizedBox(
+                  SizedBox(
                   height: h * 0.12,
                 ),
               ],
@@ -231,13 +235,10 @@ class _SignInState extends State<SignIn> {
             MaterialPageRoute(
               builder: (context) => VerifyIdentity(),
             ));
+        emailController.clear();
+        passwordController.clear();
       } else {
         Navigator.popUntil(context, (route) => route.isFirst);
-        // Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) => BuyScreen(),
-        //     ));
       }
       setState(() {});
     } catch (e) {

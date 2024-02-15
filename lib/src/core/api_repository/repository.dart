@@ -7,6 +7,21 @@ import 'package:http/http.dart' as http;
 class Repository {
   static var client = http.Client();
 
+  getClientInfoApiCall() async {
+    try {
+      http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/client/info"),
+          headers: {
+        "X-Api-Key": xApiKey
+      }
+      );
+      print("getCurrencyPairsApiCall Response ${response.body.toString()}");
+      print("getCurrencyPairsApiCall statusCode ${response.statusCode}");
+      return response;
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   getCoinDataListApiCall() async {
     try {
       http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/system/currency-pairs"),
@@ -69,6 +84,37 @@ class Repository {
     return tempData;
   }
 
+  createAccountApiCall(
+    BuildContext context,
+    String identifier,
+    String firstName,
+    String lastName,
+    String email,
+    String password ,
+    String nationalityCode,
+    bool isBusiness,
+    bool newsletterSubscription,
+  ) async {
+      http.Response response = await http.post(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/user"), body: {
+        "isBusiness": isBusiness.toString(),
+        "identifier": identifier,
+        "firstName": firstName,
+        "lastName": lastName,
+        "email": email,
+        "country": nationalityCode,
+        "password": password,
+        "termsAndConditions": "true",
+        "privacyAgreement": "true",
+        "newsletterSubscription": newsletterSubscription.toString(),
+        "websiteLanguage": "en",
+        "websiteCountry": "gb"
+      }, headers: {
+        "X-Api-Key": xApiKey,
+      });
+      return response;
+  }
+
+
   getOnAmountChangedApiCall(Object body) async {
     http.Response response = await http.post(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/buy/quote"), headers: {"X-Api-Key": xApiKey}, body: body);
     return response;
@@ -97,7 +143,6 @@ class Repository {
           }
       }
     }
-
   }
 
   getQuoteApiCall(Object body,BuildContext context) async {

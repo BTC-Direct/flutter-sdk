@@ -1,7 +1,5 @@
 import 'dart:developer';
 
-
-
 import 'package:btcdirect/src/core/model/userinfomodel.dart';
 import 'package:btcdirect/src/features/buy/ui/paymentmethod.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
@@ -22,7 +20,6 @@ class _BuyScreenState extends State<BuyScreen> {
   TextEditingController walletAddress = TextEditingController();
   TextEditingController paymentMethod = TextEditingController();
   int coinSelectIndex = 0;
-  int walletSelectIndex = 0;
   int paymentSelectIndex = 0;
   late Timer timer;
   int start = 10;
@@ -36,18 +33,6 @@ class _BuyScreenState extends State<BuyScreen> {
   List<PaymentMethods> payMethodList = [];
   UserInfoModel userInfoModel = UserInfoModel();
   String paymentFees = "0.00";
-  List myWalletList = [
-    {
-      "name": "My wallet",
-      "walletAddress": "0xe6A21cCa767544a610F9227391d91637cffeF688",
-      "icon": "https://widgets-sandbox.btcdirect.eu/img/currencies/USDT.svg",
-    },
-    {
-      "name": "My wallet 2",
-      "walletAddress": "0xe6A21cCa767544a610F9227391d91637cffeF688",
-      "icon": "https://widgets-sandbox.btcdirect.eu/img/currencies/USDC.svg",
-    },
-  ];
 
   @override
   void initState() {
@@ -79,7 +64,7 @@ class _BuyScreenState extends State<BuyScreen> {
                 SizedBox(
                   height: h * 0.04,
                 ),
-                isLoading ? SizedBox(height: h / 1.6,child: const Center(child: CircularProgressIndicator())) : orderView(),
+                isLoading ? SizedBox(height: h / 1.6, child: const Center(child: CircularProgressIndicator())) : orderView(),
               ],
             ),
           ),
@@ -337,33 +322,35 @@ class _BuyScreenState extends State<BuyScreen> {
               onTap: () {
                 coinSelectBottomSheet(context);
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.network(
-                    coinSelectIndex == 0 ? '${coinList.first.coinIcon}' : '${coinList[coinSelectIndex].coinIcon}',
-                    width: 30,
-                    height: 30,
-                  ),
-                  const SizedBox(
-                    width: 6,
-                  ),
-                  Text(
-                    coinSelectIndex == 0 ? "${coinList.first.coinTicker}" : "${coinList[coinSelectIndex].coinTicker}",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black,
-                      fontFamily: 'TextaAlt',
-                    ),
-                  ),
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    color: AppColors.black,
-                    size: 20,
-                  ),
-                ],
-              ),
+              child: coinList.isNotEmpty
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.network(
+                          coinSelectIndex == 0 ? '${coinList.first.coinIcon}' : '${coinList[coinSelectIndex].coinIcon}',
+                          width: 30,
+                          height: 30,
+                        ),
+                        const SizedBox(
+                          width: 6,
+                        ),
+                        Text(
+                          coinSelectIndex == 0 ? "${coinList.first.coinTicker}" : "${coinList[coinSelectIndex].coinTicker}",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.black,
+                            fontFamily: 'TextaAlt',
+                          ),
+                        ),
+                        const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: AppColors.black,
+                          size: 20,
+                        ),
+                      ],
+                    )
+                  : Container(),
             ),
           ),
           validator: (value) {
@@ -372,11 +359,7 @@ class _BuyScreenState extends State<BuyScreen> {
             }
             return null;
           },
-          onEditingComplete: () {
-            // startTimer();
-            // isTimerShow = true;
-            // setState(() {});
-          },
+          onEditingComplete: () {},
         ),
         SizedBox(
           height: h * 0.01,
@@ -441,7 +424,6 @@ class _BuyScreenState extends State<BuyScreen> {
           ),
           suffix: const Icon(Icons.keyboard_arrow_down_outlined, color: AppColors.greyColor),
           onTap: () {
-            //print("wallet icon ::: ${coinList[coinSelectIndex].coinIcon}");
             myWalletAddressBottomSheet(context);
           },
           validator: (value) {
@@ -469,15 +451,15 @@ class _BuyScreenState extends State<BuyScreen> {
           prefix: SizedBox(
             width: 60,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: w * 0.02),
-              child: paymentSelectIndex == 0
+              padding: EdgeInsets.symmetric(horizontal: w * 0.02, vertical: h * 0.01),
+              child: payMethodList.isNotEmpty
                   ? SvgPicture.network(
                       paymentSelectIndex == 0
-                          ? "https://widgets-sandbox.btcdirect.eu/img/payment-methods/bancontact.svg"
+                          ? "https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList.first.code}.svg"
                           : 'https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[paymentSelectIndex].code}.svg',
-                      width: 30,
-                      height: 30,
-                      fit: BoxFit.fitWidth,
+                      width: 25,
+                      height: 25,
+                      fit: BoxFit.contain,
                     )
                   : const SizedBox(),
             ),
@@ -635,7 +617,7 @@ class _BuyScreenState extends State<BuyScreen> {
                     const SizedBox(
                       height: 6,
                     ),
-                     Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Center(
@@ -761,17 +743,17 @@ class _BuyScreenState extends State<BuyScreen> {
                 });
               } else if (userInfoModel.status?.status == "validated") {
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PaymentMethod(
-                    amount: amount.text,
-                    paymentMethodCode: payMethodList[paymentSelectIndex].code.toString(),
-                    paymentMethodName: payMethodList[paymentSelectIndex].label.toString(),
-                    walletName: walletAddress.text,
-                    walletAddress: myWalletList[walletSelectIndex]['walletAddress'].toString(),
-                    coinTicker: coinList[coinSelectIndex].coinTicker.toString(),
-                    paymentFees: paymentFees,
-                  ))
-                ).then((value) {
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PaymentMethod(
+                              amount: amount.text,
+                              paymentMethodCode: payMethodList[paymentSelectIndex].code.toString(),
+                              paymentMethodName: payMethodList[paymentSelectIndex].label.toString(),
+                              walletName: walletAddress.text,
+                              walletAddress: myWalletList[coinSelectIndex]['walletAddress'].toString(),
+                              coinTicker: coinList[coinSelectIndex].coinTicker.toString(),
+                              paymentFees: paymentFees,
+                            ))).then((value) {
                   startTimer();
                 });
               } else {
@@ -784,7 +766,7 @@ class _BuyScreenState extends State<BuyScreen> {
                   startTimer();
                   var token = StorageHelper.getValue(StorageKeys.token);
                   print("getToken: $token");
-                  if(token != null && token.isNotEmpty) {
+                  if (token != null && token.isNotEmpty) {
                     getUserInfo(token);
                   }
                 });
@@ -1018,7 +1000,6 @@ class _BuyScreenState extends State<BuyScreen> {
                               'https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[index].code}.svg',
                               width: 30,
                               height: 30,
-                              fit: BoxFit.fitWidth,
                             ),
                             SizedBox(
                               width: w * 0.04,
@@ -1115,11 +1096,12 @@ class _BuyScreenState extends State<BuyScreen> {
                       height: h * 0.08,
                       margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.008),
                       decoration: BoxDecoration(
-                        color: walletSelectIndex == index ? AppColors.backgroundColor : AppColors.transparent,
+                        color: coinSelectIndex == index ? AppColors.backgroundColor : AppColors.transparent,
                         borderRadius: const BorderRadius.all(Radius.circular(10)),
                       ),
                       child: InkWell(
                         onTap: () {
+                          coinSelectIndex = index;
                           walletAddress.text = myWalletList[index]['name'];
                           Navigator.pop(context);
                         },
@@ -1131,7 +1113,7 @@ class _BuyScreenState extends State<BuyScreen> {
                               width: w * 0.05,
                             ),
                             SvgPicture.network(
-                              '${myWalletList[index]['icon']}',
+                              'https://widgets-sandbox.btcdirect.eu/img/currencies/${myWalletList[index]['coinTicker']}.svg',
                               width: 50,
                               height: 50,
                             ),
@@ -1156,7 +1138,7 @@ class _BuyScreenState extends State<BuyScreen> {
                                 Expanded(
                                   child: Center(
                                     child: Text(
-                                      AppCommonFunction().truncateStringWithEllipsis(myWalletList[index]['walletAddress'],10,5) ,
+                                      AppCommonFunction().truncateStringWithEllipsis(myWalletList[index]['walletAddress'], 10, 5),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
@@ -1172,7 +1154,7 @@ class _BuyScreenState extends State<BuyScreen> {
                             ),
                             const Spacer(),
                             Icon(
-                              walletSelectIndex == index ? Icons.check : Icons.arrow_forward_ios_sharp,
+                              coinSelectIndex == index ? Icons.check : Icons.arrow_forward_ios_sharp,
                               color: AppColors.black,
                               size: 15,
                             ),
@@ -1200,9 +1182,8 @@ class _BuyScreenState extends State<BuyScreen> {
       oneSec,
       (Timer timer) {
         if (start == 0) {
-          // timer.cancel();
           getCurrencyPrice();
-          if(amount.text.isNotEmpty) {
+          if (amount.text.isNotEmpty) {
             onAmountChanged(value: amount.text, isPay: true);
           }
           start = 10;
@@ -1221,17 +1202,20 @@ class _BuyScreenState extends State<BuyScreen> {
       List<GetPairsModel> currencyPairs = [];
       http.Response response = await Repository().getCoinDataListApiCall();
       var tempData = jsonDecode(response.body);
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         currencyPairs = List<GetPairsModel>.from(tempData.map((x) => GetPairsModel.fromJson(x)));
-        for (var i = 0; i < currencyPairs.length; i++) {
-          coinList.add(CoinModel(
-              coinName: currencyPairs[i].currencyPair!.split("-")[0],
-              coinTicker: currencyPairs[i].currencyPair!.split("-")[0],
-              coinIcon: "https://widgets-sandbox.btcdirect.eu/img/currencies/${currencyPairs[i].currencyPair!.split("-")[0]}.svg"));
+        for (int i = 0; i < currencyPairs.length; i++) {
+          for (int j = 0; j < myWalletList.length; j++) {
+            if (currencyPairs[i].currencyPair!.split("-")[0] == myWalletList[j]['coinTicker']) {
+              coinList.add(CoinModel(
+                  coinName: currencyPairs[i].currencyPair!.split("-")[0],
+                  coinTicker: currencyPairs[i].currencyPair!.split("-")[0],
+                  coinIcon: "https://widgets-sandbox.btcdirect.eu/img/currencies/${currencyPairs[i].currencyPair!.split("-")[0]}.svg"));
+            }
+          }
         }
         getPaymentMethod();
-      }
-      else if(response.statusCode == 400){
+      } else if (response.statusCode == 400) {
         setState(() {
           isLoading = false;
         });
@@ -1247,7 +1231,6 @@ class _BuyScreenState extends State<BuyScreen> {
           }
         }
       }
-
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -1264,7 +1247,7 @@ class _BuyScreenState extends State<BuyScreen> {
       var tempData = jsonDecode(response.body);
       print("getPaymentMethodApiCall Response ${tempData.toString()}");
       print("getPaymentMethodApiCall statusCode ${response.statusCode}");
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         payMethodPairs = PaymentMethodModel.fromJson(tempData);
         for (var i = 0; i < payMethodPairs.paymentMethods!.length; i++) {
           payMethodList.add(
@@ -1280,7 +1263,7 @@ class _BuyScreenState extends State<BuyScreen> {
         setState(() {
           isLoading = false;
         });
-      } else if( response.statusCode == 400 ){
+      } else if (response.statusCode == 400) {
         setState(() {
           isLoading = false;
         });
@@ -1296,7 +1279,6 @@ class _BuyScreenState extends State<BuyScreen> {
           }
         }
       }
-
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -1327,7 +1309,7 @@ class _BuyScreenState extends State<BuyScreen> {
     if (value.isNotEmpty || value != "" || value != "0.0") {
       http.Response response = await Repository().getOnAmountChangedApiCall(body);
       var tempData = jsonDecode(response.body) as Map<String, dynamic>;
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         if (!isPay) {
           setState(() {
             amount.text = tempData["fiatAmount"].toString() != "null" ? tempData["fiatAmount"].toString() : "0.00";
@@ -1339,8 +1321,7 @@ class _BuyScreenState extends State<BuyScreen> {
             paymentFees = tempData["paymentMethodCost"].toString() != "null" ? tempData["paymentMethodCost"].toString() : "0.00";
           });
         }
-      }
-      else if(response.statusCode == 400){
+      } else if (response.statusCode == 400) {
         log("Response ${tempData.toString()}");
         var errorCodeList = await AppCommonFunction().getJsonData();
         for (int i = 0; i < errorCodeList.length; i++) {
@@ -1358,7 +1339,7 @@ class _BuyScreenState extends State<BuyScreen> {
 
   getUserInfo(String token) async {
     try {
-      var response = await Repository().getUserInfoApiCall(token,context);
+      var response = await Repository().getUserInfoApiCall(token, context);
       print("Response :: ${response.toString()}");
       userInfoModel = UserInfoModel.fromJson(response);
       print("userInfoModel Response :: ${userInfoModel.toString()}");
@@ -1374,4 +1355,3 @@ class _BuyScreenState extends State<BuyScreen> {
     }
   }
 }
-

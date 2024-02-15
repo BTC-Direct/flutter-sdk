@@ -1,4 +1,5 @@
 import 'package:btcdirect/src/presentation/config_packages.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class VerifyIdentity extends StatefulWidget {
   const VerifyIdentity({super.key});
@@ -8,15 +9,55 @@ class VerifyIdentity extends StatefulWidget {
 }
 
 class _VerifyIdentityState extends State<VerifyIdentity> {
+  bool isLoading = false;
+  bool isWebViewReady = false;
+  late final WebViewController controller;
+
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.startsWith('https://www.youtube.com/')) {
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('https://flutter.dev'));
+  }
+
+  @override
+  void dispose() {
+    // Revert back to the default system UI mode when the screen is disposed
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return FooterContainer(
-      //appBarTitle: "Verify identity",
+      appBarTitle: isWebViewReady ? "Verify identity" :"",
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: w * 0.06),
-        child: Column(
+        padding: isWebViewReady ? EdgeInsets.zero:EdgeInsets.symmetric(horizontal: w * 0.06),
+        child: isWebViewReady
+            ? webViewShow()
+            : Column(
           children: [
             SizedBox(
               height: h * 0.09,
@@ -80,7 +121,11 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
                 fontFamily: 'TextaAlt',
               ),
               bgColor: AppColors.blueColor,
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  isWebViewReady = true;
+                });
+              },
             ),
             SizedBox(
               height: h * 0.13,
@@ -88,6 +133,13 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
           ],
         ),
       ),
+    );
+  }
+
+  webViewShow() {
+    double h = MediaQuery.of(context).size.height;
+    return WebViewWidget(
+      controller: controller,
     );
   }
 

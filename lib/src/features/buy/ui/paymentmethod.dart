@@ -67,7 +67,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
       appBarTitle: "Checkout",
       isAppBarLeadShow: true,
       child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: w * 0.06),
           child: Column(
@@ -499,9 +498,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           fontFamily: 'TextaAlt',
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            //launchUrlString('https://blockx. gitbook.io/blocx./get-started/masternode#vps-console-putty-or-terminal');
-                          },
+                          ..onTap = () {},
                       ),
                       const TextSpan(text: "."),
                     ],
@@ -531,9 +528,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
             ),
           ),
         ),
-        SizedBox(
-          height: h * 0.02,
-        ),
+        SizedBox(height: h * 0.02,),
         ButtonItem.filled(
           text: "Continue order",
           fontSize: 20,
@@ -552,6 +547,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
               getQuoteChanged();
             }
           },
+        ),
+        SizedBox(
+          height: showAllFees ? h * 0.12 :0.0 ,
         ),
       ],
     );
@@ -623,7 +621,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
       oneSec,
       (Timer timer) {
         if (start == 0) {
-          // timer.cancel();
           onAmountChanged(value: widget.amount.toString());
           start = 10;
           setState(() {});
@@ -681,7 +678,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
       StorageHelper.setValue(StorageKeys.orderId, orderId);
       print("orderId ::: $orderId");
       launchURL(paymentUrl);
-      //isLoading = false;
       print("urlData ::: ${tempData.toString()}");
       setState(() {});
     }
