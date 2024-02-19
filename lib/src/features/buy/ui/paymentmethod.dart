@@ -5,6 +5,7 @@ import 'package:btcdirect/src/features/buy/ui/completePayment.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class PaymentMethod extends StatefulWidget {
   String amount;
@@ -38,11 +39,13 @@ class _PaymentMethodState extends State<PaymentMethod> {
   bool isLoading = false;
   bool isOrderPending = false;
   bool isOrderCancelled = false;
+  bool isWebViewReady = false;
   late Timer timer;
   late Timer paymentMethodTimer;
   int start = 10;
   int paymentMethodTimerStart = 5;
   String price = "0.0";
+  late final WebViewController controller;
 
   @override
   void initState() {
@@ -63,7 +66,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
-    return FooterContainer(
+    return isWebViewReady
+          ? webViewShow()
+          : FooterContainer(
       appBarTitle: "Checkout",
       isAppBarLeadShow: true,
       child: SingleChildScrollView(
@@ -555,6 +560,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 
+
   /// Pending Status View Widget
 
   pendingStatusView(){
@@ -610,6 +616,18 @@ class _PaymentMethodState extends State<PaymentMethod> {
           },
         ),
       ],
+    );
+  }
+
+  /// webView widget
+
+  webViewShow() {
+    double h = MediaQuery.of(context).size.height;
+    double w = MediaQuery.of(context).size.width;
+    return SizedBox(
+      height: h,
+      width: w,
+      child: WebViewWidget(controller: controller),
     );
   }
 
@@ -684,6 +702,34 @@ class _PaymentMethodState extends State<PaymentMethod> {
   }
 
   launchURL(String paymentUrl) async {
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.disabled)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {},
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            print("is webBack ::: ${request.url}");
+            if (request.url.startsWith('http://192.168.0.36/btcdirect.html?')) {
+              print("");
+              isWebViewReady = false;
+              paymentMethodCompleteCheckTimer();
+              setState(() {});
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(paymentUrl));
+    isWebViewReady = true;
+    setState(() {});
+  }
+
+  /*launchURL(String paymentUrl) async {
     final Uri url = Uri.parse(paymentUrl);
     launchUrl(url, mode: LaunchMode.inAppWebView,
     ).then((value) {
@@ -693,7 +739,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
     // if (!await launchUrl(url)) {
     //   throw Exception('Could not launch $url');
     // }
-  }
+  }*/
 
   /// Payment Method Complete Are Not Check Api Call
 
@@ -725,6 +771,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
         if(orderData.status == "completed"){
           isOrderPending = false;
           isOrderCancelled = false;
+          paymentMethodTimer.cancel();
           Navigator.push(context, MaterialPageRoute(builder: (context) => const CompletePayment()));
         }else if(orderData.status == "cancelled"){
           paymentMethodTimer.cancel();

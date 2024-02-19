@@ -6,10 +6,11 @@ import 'package:http/http.dart' as http;
 
 class Repository {
   static var client = http.Client();
+  String baseUrl = isSendBox ? "https://api-sandbox.btcdirect.eu/api/" : "https://api.btcdirect.eu/api/";
 
   getClientInfoApiCall() async {
     try {
-      http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/client/info"),
+      http.Response response = await http.get(Uri.parse("${baseUrl}v2/client/info"),
           headers: {
         "X-Api-Key": xApiKey
       }
@@ -24,7 +25,7 @@ class Repository {
 
   getCoinDataListApiCall() async {
     try {
-      http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/system/currency-pairs"),
+      http.Response response = await http.get(Uri.parse("${baseUrl}v1/system/currency-pairs"),
           headers: {
         "X-Api-Key": xApiKey
       }
@@ -39,7 +40,16 @@ class Repository {
 
   getPaymentMethodApiCall() async {
     try {
-      http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/buy/payment-methods"), headers: {"X-Api-Key": xApiKey});
+      http.Response response = await http.get(Uri.parse("${baseUrl}v1/buy/payment-methods"), headers: {"X-Api-Key": xApiKey});
+      return response;
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  getSystemInfoApiCall() async {
+    try {
+      http.Response response = await http.get(Uri.parse("${baseUrl}v1/system/info"), headers: {"X-Api-Key": xApiKey});
       return response;
     } catch (e) {
       log(e.toString());
@@ -48,7 +58,7 @@ class Repository {
 
   getUserInfoApiCall(String token,BuildContext context) async {
     try {
-      http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/user/info"), headers: {
+      http.Response response = await http.get(Uri.parse("${baseUrl}v1/user/info"), headers: {
         "User-Authorization": "Bearer $token",
         "X-Api-Key": xApiKey,
       });
@@ -79,7 +89,7 @@ class Repository {
   }
 
   getPriceApiCall() async {
-    http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/prices"), headers: {"X-Api-Key": xApiKey});
+    http.Response response = await http.get(Uri.parse("${baseUrl}v1/prices"), headers: {"X-Api-Key": xApiKey});
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     return tempData;
   }
@@ -95,7 +105,7 @@ class Repository {
     bool isBusiness,
     bool newsletterSubscription,
   ) async {
-      http.Response response = await http.post(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/user"), body: {
+      http.Response response = await http.post(Uri.parse("${baseUrl}v2/user"), body: {
         "isBusiness": isBusiness.toString(),
         "identifier": identifier,
         "firstName": firstName,
@@ -114,14 +124,24 @@ class Repository {
       return response;
   }
 
+  getVerificationCodeApiCall(String emailCode,String identifier) async {
+    http.Response response = await http.patch(Uri.parse("${baseUrl}v2/user"), body: {
+      "emailCode": emailCode
+    }, headers: {
+      "X-Api-Key": xApiKey,
+      "user-identifier": identifier ?? "",
+    });
+    return response;
+  }
+
 
   getOnAmountChangedApiCall(Object body) async {
-    http.Response response = await http.post(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/buy/quote"), headers: {"X-Api-Key": xApiKey}, body: body);
+    http.Response response = await http.post(Uri.parse("${baseUrl}v1/buy/quote"), headers: {"X-Api-Key": xApiKey}, body: body);
     return response;
   }
 
   signInAccountApiCall(String email,String password,BuildContext context) async {
-    http.Response response = await http.post(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/user/login"),
+    http.Response response = await http.post(Uri.parse("${baseUrl}v1/user/login"),
         body: {
       "emailAddress": email,
       "password": password,
@@ -147,7 +167,7 @@ class Repository {
 
   getQuoteApiCall(Object body,BuildContext context) async {
     var token = StorageHelper.getValue(StorageKeys.token);
-    http.Response response = await http.post(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/buy/quote"),
+    http.Response response = await http.post(Uri.parse("${baseUrl}v1/buy/quote"),
         headers: {
       "X-Api-Key": xApiKey,
       "User-Authorization": "Bearer $token"
@@ -177,7 +197,7 @@ class Repository {
 
   getPaymentConfirmApiCall(Object body,String token,BuildContext context) async {
     http.Response response = await http.post(
-        Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/buy/confirm"),
+        Uri.parse("${baseUrl}v1/buy/confirm"),
         headers: {
           "X-Api-Key": xApiKey,
           "User-Authorization": "Bearer $token"
@@ -210,7 +230,7 @@ class Repository {
   getOrderDataApiCall(String orderId,BuildContext context) async {
     var token = StorageHelper.getValue(StorageKeys.token);
     http.Response response = await http.get(
-        Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/user/buy/orders/$orderId"),
+        Uri.parse("${baseUrl}v1/user/buy/orders/$orderId"),
         headers: {
           "X-Api-Key": xApiKey,
           "User-Authorization": "Bearer $token"
@@ -245,7 +265,7 @@ class Repository {
       "refreshToken": refreshToken
     };
     http.Response response = await http.post(
-        Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/refresh"),
+        Uri.parse("${baseUrl}v1/refresh"),
         headers: {
           "X-Api-Key": xApiKey
         },

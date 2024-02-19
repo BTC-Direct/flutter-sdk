@@ -718,7 +718,7 @@ class _OnBoardingState extends State<OnBoarding> {
   getCountries() async {
     try {
       isLoading = true;
-      http.Response response = await http.get(Uri.parse("https://api-sandbox.btcdirect.eu/api/v1/system/info"), headers: {"X-Api-Key": xApiKey});
+      http.Response response = await Repository().getSystemInfoApiCall();
       if (response.statusCode == 200) {
         var a = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${a["nationalities"]}");

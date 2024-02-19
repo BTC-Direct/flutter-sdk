@@ -161,13 +161,10 @@ class _EmailVerificationState extends State<EmailVerification> {
   verifyEmailApiCall(BuildContext context, String emailCode) async {
     try {
       isLoading = true;
-      var token = StorageHelper.getValue(StorageKeys.token);
-      http.Response response = await http.patch(Uri.parse("https://api-sandbox.btcdirect.eu/api/v2/user"), body: {
-        "emailCode": emailCode
-      }, headers: {
-        "X-Api-Key": xApiKey,
-        "user-identifier": widget.identifier ?? "",
-      });
+      http.Response response = await Repository().getVerificationCodeApiCall(
+        emailCode,
+        widget.identifier!,
+      );
       if (response.statusCode == 202) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("verifyEmail Response ::: ${tempData.toString()}");

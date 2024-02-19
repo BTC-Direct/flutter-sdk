@@ -750,7 +750,7 @@ class _BuyScreenState extends State<BuyScreen> {
                               paymentMethodCode: payMethodList[paymentSelectIndex].code.toString(),
                               paymentMethodName: payMethodList[paymentSelectIndex].label.toString(),
                               walletName: walletAddress.text,
-                              walletAddress: myWalletList[coinSelectIndex]['walletAddress'].toString(),
+                              walletAddress: addressesList[coinSelectIndex].address.toString(),
                               coinTicker: coinList[coinSelectIndex].coinTicker.toString(),
                               paymentFees: paymentFees,
                             ))).then((value) {
@@ -848,6 +848,7 @@ class _BuyScreenState extends State<BuyScreen> {
                             coinSelectIndex = index;
                             start = 10;
                           });
+                          walletAddress.text = addressesList[index].name;
                           onAmountChanged(value: amount.text, isPay: true);
                           getCurrencyPrice();
                           Navigator.pop(context);
@@ -1089,7 +1090,7 @@ class _BuyScreenState extends State<BuyScreen> {
               SizedBox(height: h * 0.01),
               Expanded(
                 child: ListView.builder(
-                  itemCount: myWalletList.length,
+                  itemCount: addressesList.length,
                   itemBuilder: (context, index) {
                     return Container(
                       width: w,
@@ -1102,7 +1103,8 @@ class _BuyScreenState extends State<BuyScreen> {
                       child: InkWell(
                         onTap: () {
                           coinSelectIndex = index;
-                          walletAddress.text = myWalletList[index]['name'];
+                          walletAddress.text = addressesList[index].name;
+                          setState(() {});
                           Navigator.pop(context);
                         },
                         child: Row(
@@ -1113,7 +1115,7 @@ class _BuyScreenState extends State<BuyScreen> {
                               width: w * 0.05,
                             ),
                             SvgPicture.network(
-                              'https://widgets-sandbox.btcdirect.eu/img/currencies/${myWalletList[index]['coinTicker']}.svg',
+                              'https://widgets-sandbox.btcdirect.eu/img/currencies/${addressesList[index].currency}.svg',
                               width: 50,
                               height: 50,
                             ),
@@ -1126,7 +1128,7 @@ class _BuyScreenState extends State<BuyScreen> {
                                 SizedBox(height: h * 0.015),
                                 Center(
                                   child: Text(
-                                    '${myWalletList[index]['name']}',
+                                    addressesList[index].name,
                                     style: const TextStyle(
                                       color: AppColors.black,
                                       fontSize: 14,
@@ -1138,7 +1140,7 @@ class _BuyScreenState extends State<BuyScreen> {
                                 Expanded(
                                   child: Center(
                                     child: Text(
-                                      AppCommonFunction().truncateStringWithEllipsis(myWalletList[index]['walletAddress'], 10, 5),
+                                      AppCommonFunction().truncateStringWithEllipsis(addressesList[index].address, 10, 5),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
@@ -1205,8 +1207,8 @@ class _BuyScreenState extends State<BuyScreen> {
       if (response.statusCode == 200) {
         currencyPairs = List<GetPairsModel>.from(tempData.map((x) => GetPairsModel.fromJson(x)));
         for (int i = 0; i < currencyPairs.length; i++) {
-          for (int j = 0; j < myWalletList.length; j++) {
-            if (currencyPairs[i].currencyPair!.split("-")[0] == myWalletList[j]['coinTicker']) {
+          for (int j = 0; j < addressesList.length; j++) {
+            if (currencyPairs[i].currencyPair!.split("-")[0] == addressesList[j].currency) {
               coinList.add(CoinModel(
                   coinName: currencyPairs[i].currencyPair!.split("-")[0],
                   coinTicker: currencyPairs[i].currencyPair!.split("-")[0],

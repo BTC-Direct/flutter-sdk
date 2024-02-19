@@ -113,7 +113,7 @@ class Buy {
 }
 
 class Limit {
-  int? amount;
+  num? amount;
   String? currencyCode;
 
   Limit({this.amount, this.currencyCode});
