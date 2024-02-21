@@ -146,9 +146,7 @@ class _SignInState extends State<SignIn> {
                       http.Response response = await Repository().getClientInfoApiCall();
                       if(response.statusCode == 200){
                         var tempData = jsonDecode(response.body)['slug'];
-                        print("tempData Slug $tempData");
                         final Uri url = Uri.parse("https://my-sandbox.btcdirect.eu/en-gb/forgot-password?client=$tempData");
-                        print('url $url');
                         if (!await launchUrl(url)) {
                           throw Exception('Could not launch $url');
                         }
@@ -205,7 +203,6 @@ class _SignInState extends State<SignIn> {
     try {
       isLoading = true;
       http.Response response = await Repository().signInAccountApiCall(email, password,context);
-      print('response StatusCode: ${response.statusCode}');
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
@@ -226,9 +223,7 @@ class _SignInState extends State<SignIn> {
   getUserInfo(String token) async {
     try {
       var response = await Repository().getUserInfoApiCall(token,context);
-      print("Response $response");
       UserInfoModel userInfoModel = UserInfoModel.fromJson(response);
-      print("userInfoModel Response :: ${userInfoModel.toString()}");
       if (userInfoModel.status?.status == "pending") {
         Navigator.push(
             context,

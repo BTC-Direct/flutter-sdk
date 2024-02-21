@@ -740,7 +740,6 @@ class _OnBoardingState extends State<OnBoarding> {
       }
     } catch (e) {
       isLoading = false;
-      print("getCountriesError :::: $e");
       setState(() {});
     }
   }
@@ -1004,7 +1003,6 @@ class _OnBoardingState extends State<OnBoarding> {
   }) async {
     try {
       String identifier = AppCommonFunction().generateRandomString(36);
-      print("identifier: $identifier");
       setState(() {
         isLoading = true;
       });

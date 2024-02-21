@@ -15,8 +15,6 @@ class Repository {
         "X-Api-Key": xApiKey
       }
       );
-      print("getCurrencyPairsApiCall Response ${response.body.toString()}");
-      print("getCurrencyPairsApiCall statusCode ${response.statusCode}");
       return response;
     } catch (e) {
       log(e.toString());
@@ -30,8 +28,6 @@ class Repository {
         "X-Api-Key": xApiKey
       }
       );
-      print("getCurrencyPairsApiCall Response ${response.body.toString()}");
-      print("getCurrencyPairsApiCall statusCode ${response.statusCode}");
       return response;
     } catch (e) {
       log(e.toString());
@@ -64,8 +60,6 @@ class Repository {
       });
       var tempData = jsonDecode(response.body);
       if(response.statusCode == 200){
-        print("getUserInfoApiCall Response ${tempData.toString()}");
-        print("getUserInfoApiCall statusCode ${response.statusCode}");
         return tempData;
       } else{
         log("Response ${tempData.toString()}");
@@ -77,7 +71,7 @@ class Repository {
               for (int i = 0; i < errorCodeList.length; i++) {
                 if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
                   AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
-                  print("${errorCodeList[i].message}");
+                  log("${errorCodeList[i].message}");
                 }
               }
             }
@@ -140,6 +134,34 @@ class Repository {
     return response;
   }
 
+  getVerificationStatusApiCall(BuildContext context) async {
+    var token = StorageHelper.getValue(StorageKeys.token);
+    http.Response response = await http.get(Uri.parse("${baseUrl}v2/user/verification-status"),  headers: {
+      "X-Api-Key": xApiKey,
+      "User-Authorization": "Bearer $token"
+    });
+    if(response.statusCode == 200){
+      return response;
+    } else{
+      var tempData = jsonDecode(response.body);
+      log("Response ${tempData.toString()}");
+      for (int j = 0; j < tempData['errors'].length; j++) {
+        if (tempData['errors'].keys.toList()[j] == "ER701") {
+          getNewTokenApiCall(context).then((value) {
+            getVerificationStatusApiCall(context);
+          });
+        }else{
+          var errorCodeList = await AppCommonFunction().getJsonData();
+          for (int i = 0; i < errorCodeList.length; i++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            }
+          }
+        }
+      }
+    }
+  }
+
   signInAccountApiCall(String email,String password,BuildContext context) async {
     http.Response response = await http.post(Uri.parse("${baseUrl}v1/user/login"),
         body: {
@@ -158,7 +180,6 @@ class Repository {
           for (int i = 0; i < errorCodeList.length; i++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
               AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
-              print("${errorCodeList[i].message}");
             }
           }
       }
@@ -187,7 +208,6 @@ class Repository {
           for (int i = 0; i < errorCodeList.length; i++) {
               if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
                 AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
-                print("${errorCodeList[i].message}");
               }
           }
         }
@@ -219,7 +239,6 @@ class Repository {
           for (int i = 0; i < errorCodeList.length; i++) {
               if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
                 AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
-                print("${errorCodeList[i].message}");
               }
           }
         }
@@ -251,7 +270,6 @@ class Repository {
           for (int i = 0; i < errorCodeList.length; i++) {
               if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
                 AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
-                print("${errorCodeList[i].message}");
               }
           }
         }

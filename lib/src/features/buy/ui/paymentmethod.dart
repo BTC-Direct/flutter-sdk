@@ -674,7 +674,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 200) {
       var quoteData = tempData["quote"].toString();
-      print(quoteData);
       paymentConfirm(quoteData);
     }
   }
@@ -687,16 +686,13 @@ class _PaymentMethodState extends State<PaymentMethod> {
       "returnUrl": "http://192.168.0.36/btcdirect.html?step=payment-completed"
     };
     var token = StorageHelper.getValue(StorageKeys.token);
-    print("token :: $token");
     http.Response response = await Repository().getPaymentConfirmApiCall(body,token,context);
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 201) {
       var paymentUrl = tempData["paymentUrl"].toString();
       var orderId = tempData["orderId"].toString();
       StorageHelper.setValue(StorageKeys.orderId, orderId);
-      print("orderId ::: $orderId");
       launchURL(paymentUrl);
-      print("urlData ::: ${tempData.toString()}");
       setState(() {});
     }
   }
@@ -712,9 +708,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
           onPageFinished: (String url) {},
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest request) {
-            print("is webBack ::: ${request.url}");
             if (request.url.startsWith('http://192.168.0.36/btcdirect.html?')) {
-              print("");
               isWebViewReady = false;
               paymentMethodCompleteCheckTimer();
               setState(() {});
@@ -728,18 +722,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
     isWebViewReady = true;
     setState(() {});
   }
-
-  /*launchURL(String paymentUrl) async {
-    final Uri url = Uri.parse(paymentUrl);
-    launchUrl(url, mode: LaunchMode.inAppWebView,
-    ).then((value) {
-      print('value back web view ::: $value');
-      paymentMethodCompleteCheckTimer();
-    });
-    // if (!await launchUrl(url)) {
-    //   throw Exception('Could not launch $url');
-    // }
-  }*/
 
   /// Payment Method Complete Are Not Check Api Call
 

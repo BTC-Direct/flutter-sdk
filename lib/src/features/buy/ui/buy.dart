@@ -765,7 +765,6 @@ class _BuyScreenState extends State<BuyScreen> {
                 ).then((value) {
                   startTimer();
                   var token = StorageHelper.getValue(StorageKeys.token);
-                  print("getToken: $token");
                   if (token != null && token.isNotEmpty) {
                     getUserInfo(token);
                   }
@@ -1228,7 +1227,6 @@ class _BuyScreenState extends State<BuyScreen> {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
               AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
               log(errorCodeList[i].message);
-              print('ErrorMessage ::: ${errorCodeList[i].message}');
             }
           }
         }
@@ -1247,8 +1245,6 @@ class _BuyScreenState extends State<BuyScreen> {
       PaymentMethodModel payMethodPairs;
       http.Response response = await Repository().getPaymentMethodApiCall();
       var tempData = jsonDecode(response.body);
-      print("getPaymentMethodApiCall Response ${tempData.toString()}");
-      print("getPaymentMethodApiCall statusCode ${response.statusCode}");
       if (response.statusCode == 200) {
         payMethodPairs = PaymentMethodModel.fromJson(tempData);
         for (var i = 0; i < payMethodPairs.paymentMethods!.length; i++) {
@@ -1276,7 +1272,6 @@ class _BuyScreenState extends State<BuyScreen> {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
               AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
               log(errorCodeList[i].message);
-              print('ErrorMessage ::: ${errorCodeList[i].message}');
             }
           }
         }
@@ -1331,7 +1326,6 @@ class _BuyScreenState extends State<BuyScreen> {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
               // AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
               log(errorCodeList[i].message);
-              print('ErrorMessage ::: ${errorCodeList[i].message}');
             }
           }
         }
@@ -1342,9 +1336,7 @@ class _BuyScreenState extends State<BuyScreen> {
   getUserInfo(String token) async {
     try {
       var response = await Repository().getUserInfoApiCall(token, context);
-      print("Response :: ${response.toString()}");
       userInfoModel = UserInfoModel.fromJson(response);
-      print("userInfoModel Response :: ${userInfoModel.toString()}");
       if (userInfoModel.status?.status == "pending") {
         isUserVerified = true;
       } else {

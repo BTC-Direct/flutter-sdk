@@ -86,6 +86,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_idensic_mobile_sdk_plugin:
+    dependency: "direct main"
+    description:
+      name: flutter_idensic_mobile_sdk_plugin
+      sha256: ef0d08d533596d276de00254d49887d843d06ccaf8897a345a4e2e5657bae203
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.29.0"
   flutter_lints:
     dependency: "direct dev"
     description:

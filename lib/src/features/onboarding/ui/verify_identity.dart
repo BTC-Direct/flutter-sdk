@@ -1,5 +1,8 @@
+import 'dart:developer';
 import 'package:btcdirect/src/presentation/config_packages.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_idensic_mobile_sdk_plugin/flutter_idensic_mobile_sdk_plugin.dart';
+import 'package:http/http.dart' as http;
+
 
 class VerifyIdentity extends StatefulWidget {
   const VerifyIdentity({super.key});
@@ -11,40 +14,14 @@ class VerifyIdentity extends StatefulWidget {
 class _VerifyIdentityState extends State<VerifyIdentity> {
   bool isLoading = false;
   bool isWebViewReady = false;
-  late final WebViewController controller;
-
+  String kycAccessToken = "";
+  SNSMobileSDK? snsMobileSDK;
+  //late final WebViewController controller;
 
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          onWebResourceError: (WebResourceError error) {},
-          onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://www.youtube.com/')) {
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse('https://flutter.dev'));
-  }
-
-  @override
-  void dispose() {
-    // Revert back to the default system UI mode when the screen is disposed
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    super.dispose();
+    getKYCAccessToken();
   }
 
   @override
@@ -52,12 +29,11 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return FooterContainer(
-      appBarTitle: isWebViewReady ? "Verify identity" :"",
+      appBarTitle: isWebViewReady ? "Verify identity" : "",
       child: Padding(
-        padding: isWebViewReady ? EdgeInsets.zero:EdgeInsets.symmetric(horizontal: w * 0.06),
-        child: isWebViewReady
-            ? webViewShow()
-            : Column(
+        padding: isWebViewReady ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: w * 0.06),
+        child:
+            Column(
           children: [
             SizedBox(
               height: h * 0.09,
@@ -123,7 +99,7 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
               bgColor: AppColors.blueColor,
               onPressed: () {
                 setState(() {
-                  isWebViewReady = true;
+                  launchSDK();
                 });
               },
             ),
@@ -136,11 +112,45 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
     );
   }
 
-  webViewShow() {
-    double h = MediaQuery.of(context).size.height;
-    return WebViewWidget(
-      controller: controller,
-    );
+  getKYCAccessToken() async {
+    try {
+      http.Response response = await Repository().getVerificationStatusApiCall(context);
+      var tempData = jsonDecode(response.body) ;
+      if (response.statusCode == 200) {
+        kycAccessToken = tempData[3]['data']['accessToken'];
+      } else if (response.statusCode == 400) {
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              log(errorCodeList[i].message);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+
+  }
+
+  void launchSDK() async {
+    String accessToken = kycAccessToken;
+    onTokenExpiration() async {
+      return Future<String>.delayed(const Duration(seconds: 2), () => getKYCAccessToken());
+    }
+
+    final builder = SNSMobileSDK.init(accessToken, onTokenExpiration);
+
+    snsMobileSDK = builder.withLocale(const Locale("en")).withDebug(true).build();
+
+    final result = await snsMobileSDK!.launch();
+      if(result.success == true) {
+        Navigator.popUntil(context, (route) => route.isFirst);
+      }
+    print("Completed with result: $result");
   }
 
   bottomSheet(BuildContext context) {
