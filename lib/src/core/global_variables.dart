@@ -4,7 +4,7 @@ import 'package:btcdirect/src/presentation/config_packages.dart';
 
 bool isSendBox = true;
 
-String xApiKey = "";
+String xApiKey = "YOUR_API_KEY";
 
 List<WalletAddressModel> addressesList = [
   WalletAddressModel(address: '0xe6A21cCa767544a610F9227391d91637cffeF688',currency: 'USDT',id: '1234567',name: 'My wallet'),

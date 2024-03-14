@@ -25,8 +25,8 @@ class _OnBoardingState extends State<OnBoarding> {
   TextEditingController emailController = TextEditingController();
   TextEditingController nationalityController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController searchTextController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  List<Nationality> countryList = [];
   List<Nationality> combinedItemsList = [];
   int countrySelectIndex = -1;
 
@@ -41,7 +41,7 @@ class _OnBoardingState extends State<OnBoarding> {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return FooterContainer(
-      appBarTitle: isEmailAlready ? "" :"Create account",
+      appBarTitle: isEmailAlready ? "" : "Create account",
       isAppBarLeadShow: isEmailAlready ? false : true,
       child: SingleChildScrollView(
         child: Padding(
@@ -126,7 +126,9 @@ class _OnBoardingState extends State<OnBoarding> {
     double h = MediaQuery.of(context).size.height;
     return Column(children: [
       Image.asset('assets/images/email_in_use.png', height: h * 0.2, width: w * 0.4),
-      SizedBox(height: h * 0.02,),
+      SizedBox(
+        height: h * 0.02,
+      ),
       const Text(
         "raininfo2@yopmail.com is already in use",
         textAlign: TextAlign.center,
@@ -137,7 +139,9 @@ class _OnBoardingState extends State<OnBoarding> {
           fontFamily: 'TextaAlt',
         ),
       ),
-      SizedBox(height: h * 0.03,),
+      SizedBox(
+        height: h * 0.03,
+      ),
       RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
@@ -153,7 +157,7 @@ class _OnBoardingState extends State<OnBoarding> {
                 ),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
-                  isEmailAlready = false;
+                    isEmailAlready = false;
                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const SignIn()));
                   },
               ),
@@ -166,7 +170,9 @@ class _OnBoardingState extends State<OnBoarding> {
               fontFamily: 'TextaAlt',
             )),
       ),
-      SizedBox(height: h * 0.2,),
+      SizedBox(
+        height: h * 0.2,
+      ),
       ButtonItem.filled(
         text: "Back to previous page",
         fontSize: 20,
@@ -183,7 +189,6 @@ class _OnBoardingState extends State<OnBoarding> {
           setState(() {});
         },
       ),
-
     ]);
   }
 
@@ -532,8 +537,8 @@ class _OnBoardingState extends State<OnBoarding> {
               "Minimum of 8 characters",
               style: TextStyle(
                 color: AppColors.greyColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
                 fontFamily: 'TextaAlt',
               ),
             ),
@@ -544,7 +549,16 @@ class _OnBoardingState extends State<OnBoarding> {
         ),
         CommonTextFormField(
           textEditingController: passwordController,
-          validator: (p1) => FieldValidator.validatePassword(p1, text: "This field is required", validText: "Please enter valid password"),
+          validator: (p1) {
+            if(p1 == null || p1.isEmpty) {
+              return  "This field is required";
+            }else{
+              if(p1.length < 8) {
+                return "Please enter valid password";
+              }
+            }
+            // FieldValidator.validatePassword(p1, text: "This field is required", validText: "Please enter valid password");
+          } ,
           obscure: isPasswordShow,
           suffix: GestureDetector(
             onTap: () {
@@ -598,7 +612,16 @@ class _OnBoardingState extends State<OnBoarding> {
                           fontFamily: 'TextaAlt',
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {},
+                          ..onTap = () async {
+                            http.Response response = await Repository().getClientInfoApiCall();
+                            if (response.statusCode == 200) {
+                              var tempData = jsonDecode(response.body)['slug'];
+                              final Uri url = Uri.parse("https://btcdirect.eu/en-eu/terms-of-service?client=$tempData");
+                              if (!await launchUrl(url)) {
+                                throw Exception('Could not launch $url');
+                              }
+                            }
+                          },
                       ),
                       const TextSpan(text: " and "),
                       TextSpan(
@@ -610,8 +633,15 @@ class _OnBoardingState extends State<OnBoarding> {
                           fontFamily: 'TextaAlt',
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            //launchUrlString('https://blockx. gitbook.io/blocx./get-started/masternode#vps-console-putty-or-terminal');
+                          ..onTap = () async {
+                            http.Response response = await Repository().getClientInfoApiCall();
+                            if (response.statusCode == 200) {
+                              var tempData = jsonDecode(response.body)['slug'];
+                              final Uri url = Uri.parse("https://my-sandbox.btcdirect.eu/en-gb/privacy-policy?client=$tempData");
+                              if (!await launchUrl(url)) {
+                                throw Exception('Could not launch $url');
+                              }
+                            }
                           },
                       ),
                       const TextSpan(text: "."),
@@ -716,6 +746,7 @@ class _OnBoardingState extends State<OnBoarding> {
   }
 
   getCountries() async {
+    List<Nationality> countryList = [];
     try {
       isLoading = true;
       http.Response response = await Repository().getSystemInfoApiCall();
@@ -747,6 +778,13 @@ class _OnBoardingState extends State<OnBoarding> {
   nationalitySelectBottomSheet(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
+    List<Nationality> searchList = [];
+    if(combinedItemsList.isNotEmpty){
+      searchList = List.from(combinedItemsList);
+    } else {
+      getCountries();
+      setState(() {});
+    }
 
     showModalBottomSheet<void>(
       context: context,
@@ -757,140 +795,195 @@ class _OnBoardingState extends State<OnBoarding> {
         ),
       ),
       builder: (BuildContext context) {
-        return SizedBox(
-          height: h * 0.9,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: h * 0.01),
-              Row(
-                children: [
-                  SizedBox(width: w / 2.8),
-                  const Text(
-                    "Nationality",
-                    style: TextStyle(
-                      color: AppColors.black,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'TextaAlt',
-                    ),
-                  ),
-                  const Spacer(),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Icon(
-                          Icons.close,
-                          color: AppColors.black,
-                          size: 26,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: h * 0.01),
-              Padding(
-                padding: EdgeInsets.only(left: w * 0.08),
-                child: const Text(
-                  "All",
-                  style: TextStyle(color: AppColors.black, fontSize: 18, fontWeight: FontWeight.w700, fontFamily: 'TextaAlt'),
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: combinedItemsList.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: w,
-                      height: h * 0.08,
-                      margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.008),
-                      decoration: BoxDecoration(
-                        color: countrySelectIndex == index ? AppColors.backgroundColor.withOpacity(0.4) : AppColors.transparent,
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            countrySelectIndex = index;
-                            nationalityController.text = '${combinedItemsList[index].name}';
-                            Navigator.pop(context);
-                          });
-                        },
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            SizedBox(
-                              width: w * 0.05,
+        return StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          return SizedBox(
+            height: h * 0.9,
+            child: isLoading
+                ? SizedBox(height: h, child: const Center(child: CircularProgressIndicator()))
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: h * 0.01),
+                      Row(
+                        children: [
+                          SizedBox(width: w / 2.8),
+                          const Text(
+                            "Nationality",
+                            style: TextStyle(
+                              color: AppColors.black,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'TextaAlt',
                             ),
-                            combinedItemsList[index].code == ""
-                                ? Container(
-                                    height: 30,
-                                    width: 35,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.backgroundColor,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                  )
-                                : SvgPicture.network(
-                                    'https://widgets-sandbox.btcdirect.eu/img/flags/${(combinedItemsList[index].code)?.toLowerCase()}.svg',
-                                    width: 25,
-                                    height: 25,
-                                  ),
-                            SizedBox(
-                              width: w * 0.04,
-                            ),
-                            Center(
-                              child: Text(
-                                '${combinedItemsList[index].name}',
-                                style: const TextStyle(
+                          ),
+                          const Spacer(),
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: InkWell(
+                                onTap: () {
+                                  searchTextController.clear();
+                                  Navigator.pop(context);
+                                },
+                                child: const Icon(
+                                  Icons.close,
                                   color: AppColors.black,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'TextaAlt',
+                                  size: 26,
                                 ),
                               ),
                             ),
-                            const Spacer(),
-                            Icon(
-                              countrySelectIndex == index ? Icons.check : null,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: h * 0.01),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: TextFormField(
+                          controller: searchTextController,
+                          cursorColor: AppColors.black,
+                          style: const TextStyle(
+                            color: AppColors.black,
+                          ),
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.only(left: 8),
+                            prefixIcon: const Icon(
+                              Icons.search,
                               color: AppColors.black,
-                              size: 15,
                             ),
-                            if (combinedItemsList[index].code == "")
-                              Icon(
-                                countrySelectIndex == index ? null : Icons.info_sharp,
-                                color: AppColors.greyColor,
-                                size: 22,
-                              ),
-                            SizedBox(
-                              width: w * 0.02,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: AppColors.blueColor, width: 1.5),
                             ),
-                          ],
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Colors.black, width: 1.5),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            if (searchList.isNotEmpty) {
+                              if (value.isNotEmpty) {
+                                List<Nationality> tempSearchList = searchList.where((nationalityName) => nationalityName.name!.toLowerCase().contains(value.toLowerCase())).toList();
+                                setState(() {
+                                  searchList = tempSearchList;
+                                  print('combinedItemsList length: ${searchList.length}');
+                                });
+                              }else{
+                                setState(() {
+                                  searchList = combinedItemsList;
+                                });
+                              }
+                            }else{
+                              setState(() {
+                                searchList = combinedItemsList;
+                              });
+                            }
+                          },
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: h * 0.01),
-            ],
-          ),
-        );
+                      SizedBox(height: h * 0.02),
+                      Padding(
+                        padding: EdgeInsets.only(left: w * 0.08),
+                        child: const Text(
+                          "All",
+                          style: TextStyle(color: AppColors.black, fontSize: 18, fontWeight: FontWeight.w700, fontFamily: 'TextaAlt'),
+                        ),
+                      ),
+                      searchList.isEmpty
+                          ? const Expanded(child: Center(child: Text("No Data Found", style: TextStyle(color: AppColors.black, fontSize: 18, fontWeight: FontWeight.w700, fontFamily: 'TextaAlt'))))
+                          : Expanded(
+                              child: ListView.builder(
+                                itemCount: searchList.length,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    width: w,
+                                    height: h * 0.08,
+                                    margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.008),
+                                    decoration: BoxDecoration(
+                                      color: countrySelectIndex == index ? AppColors.backgroundColor.withOpacity(0.4) : AppColors.transparent,
+                                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                    ),
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          countrySelectIndex = index;
+                                          nationalityController.text = '${searchList[index].name}';
+                                          Navigator.pop(context);
+                                        });
+                                      },
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          SizedBox(
+                                            width: w * 0.05,
+                                          ),
+                                          searchList[index].code == ""
+                                              ? Container(
+                                                  height: 30,
+                                                  width: 35,
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.backgroundColor,
+                                                    borderRadius: BorderRadius.circular(6),
+                                                  ),
+                                                )
+                                              : SvgPicture.network(
+                                                  'https://widgets-sandbox.btcdirect.eu/img/flags/${(searchList[index].code)?.toLowerCase()}.svg',
+                                                  width: 25,
+                                                  height: 25,
+                                                ),
+                                          SizedBox(
+                                            width: w * 0.04,
+                                          ),
+                                          Center(
+                                            child: Text(
+                                              '${searchList[index].name}',
+                                              style: const TextStyle(
+                                                color: AppColors.black,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w600,
+                                                fontFamily: 'TextaAlt',
+                                              ),
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Icon(
+                                            countrySelectIndex == index ? Icons.check : null,
+                                            color: AppColors.black,
+                                            size: 15,
+                                          ),
+                                          if (searchList[index].code == "")
+                                            Icon(
+                                              countrySelectIndex == index ? null : Icons.info_sharp,
+                                              color: AppColors.greyColor,
+                                              size: 22,
+                                            ),
+                                          SizedBox(
+                                            width: w * 0.02,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                      SizedBox(height: h * 0.01),
+                    ],
+                  ),
+          );
+        });
       },
     ).then((value) {
-      if (combinedItemsList[countrySelectIndex].code == "") {
-        otherNationalityBottomSheet(context);
+      if(nationalityController.text.isNotEmpty){
+        if (searchList[countrySelectIndex].code == "") {
+          otherNationalityBottomSheet(context);
+        }
       }
     });
   }
+
 
   otherNationalityBottomSheet(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
@@ -1034,16 +1127,15 @@ class _OnBoardingState extends State<OnBoarding> {
         var errorCodeList = await AppCommonFunction().getJsonData();
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
-            if(tempData['errors'].keys.toList()[j] == "ER002"){
+            if (tempData['errors'].keys.toList()[j] == "ER002") {
               setState(() {
-              isEmailAlready = true;
+                isEmailAlready = true;
               });
-            } else{
+            } else {
               if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
                 AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
               }
             }
-
           }
         }
       }

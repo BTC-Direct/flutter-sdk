@@ -1,4 +1,5 @@
 import 'package:btcdirect/src/presentation/config_packages.dart';
+import 'package:http/http.dart' as http;
 
 class FooterContainer extends StatelessWidget {
   final double? height;
@@ -16,7 +17,7 @@ class FooterContainer extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: AppColors.transparent,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: isAppBarLeadShow
             ? InkWell(
@@ -54,7 +55,7 @@ class FooterContainer extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
+                  /*Padding(
                     padding: const EdgeInsets.only(left: 18.0, top: 18, bottom: 8, right: 18),
                     child: RichText(
                         textAlign: TextAlign.center,
@@ -63,19 +64,19 @@ class FooterContainer extends StatelessWidget {
                             text: "Powered by",
                             style: TextStyle(
                               color: AppColors.greyColor,
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: FontWeight.w400,
                               fontFamily: 'TextaAlt',
                             ),
                           ),
                           WidgetSpan(
-                            child: Image.asset("assets/images/logo.png", height: h * 0.03),
+                            child: Image.asset("assets/images/logo.png", height: h * 0.029,alignment: Alignment.center),
                           ),
                           const TextSpan(
-                            text: " Your trusted crypto partner.Need help? ",
+                            text: " Your trusted crypto partner.\nNeed help? ",
                             style: TextStyle(
                               color: AppColors.greyColor,
-                              fontSize: 14,
+                              fontSize: 15,
                               fontWeight: FontWeight.w400,
                               fontFamily: 'TextaAlt',
                             ),
@@ -84,7 +85,7 @@ class FooterContainer extends StatelessWidget {
                             text: "Contact support.",
                             style: const TextStyle(
                               color: AppColors.blueColor,
-                              fontSize: 13,
+                              fontSize: 16,
                               fontWeight: FontWeight.w400,
                               fontFamily: 'TextaAlt',
                             ),
@@ -94,6 +95,76 @@ class FooterContainer extends StatelessWidget {
                               },
                           )
                         ])),
+                  ),*/
+                  Padding(
+                    padding: const EdgeInsets.only(left: 18.0, top: 18, bottom: 8, right: 18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Powered by ",
+                              style: TextStyle(
+                                color: AppColors.greyColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: 'TextaAlt',
+                              ),
+                            ),
+                            Image.asset("assets/images/logo.png", height: h * 0.029, alignment: Alignment.center),
+                            const Text(
+                              ". Your trusted crypto partner.",
+                              style: TextStyle(
+                                color: AppColors.greyColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: 'TextaAlt',
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Need help? ",
+                              style: TextStyle(
+                                color: AppColors.greyColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: 'TextaAlt',
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () async {
+                                http.Response response =
+                                    await Repository().getClientInfoApiCall();
+                                if (response.statusCode == 200) {
+                                  var tempData =
+                                  jsonDecode(response.body)['slug'];
+                                  final Uri url = Uri.parse("https://support.btcdirect.eu/hc/en-gb?client=$tempData");
+                                  if (!await launchUrl(url)) {
+                                throw Exception('Could not launch $url');
+                                }
+                              }
+                              },
+                              child: const Text(
+                                "Contact support.",
+                                style: TextStyle(
+                                  color: AppColors.blueColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: 'TextaAlt',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      ],
+                    ),
                   ),
                 ],
               ),

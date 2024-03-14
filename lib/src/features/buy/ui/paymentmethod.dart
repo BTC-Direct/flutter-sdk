@@ -195,7 +195,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
         Row(
           children: [
             Text(
-              "${widget.coinTicker} €$price",
+              "${widget.coinTicker} $price",
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -294,6 +294,46 @@ class _PaymentMethodState extends State<PaymentMethod> {
             ),
           ),
         ),
+        /*Row(
+          children: [
+            Text(
+              "€${widget.paymentFees}",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.black,
+                fontFamily: 'TextaAlt',
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  showAllFees = !showAllFees;
+                });
+              },
+              child: Row(
+                children: [
+                  const Spacer(),
+                  Text(
+                    showAllFees ? 'Hide Fees' : 'All Fees Included',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.blueColor,
+                      fontFamily: 'TextaAlt',
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  Icon(
+                    showAllFees ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                    color: AppColors.blueColor,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),*/
         GestureDetector(
           onTap: () {
             setState(() {
@@ -335,7 +375,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(
-                      height: 12,
+                      height: 6,
                     ),
                     Row(
                       children: [
@@ -353,10 +393,12 @@ class _PaymentMethodState extends State<PaymentMethod> {
                         const SizedBox(
                           width: 10,
                         ),
-                        const Icon(
-                          Icons.info_sharp,
+                        IconButton(
+                          onPressed: () {
+                            paymentMethodInfoBottomSheet(context);
+                          },
+                          icon: const Icon(Icons.info_sharp,size: 20,),
                           color: AppColors.greyColor,
-                          size: 20,
                         ),
                         const Spacer(),
                         Text(
@@ -370,13 +412,10 @@ class _PaymentMethodState extends State<PaymentMethod> {
                         )
                       ],
                     ),
-                    const SizedBox(
-                      height: 6,
-                    ),
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Center(
+                        const Center(
                           child: Text(
                             'Network fee',
                             style: TextStyle(
@@ -387,16 +426,18 @@ class _PaymentMethodState extends State<PaymentMethod> {
                             ),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 10,
                         ),
-                        Icon(
-                          Icons.info_sharp,
+                        IconButton(
+                          onPressed: () {
+                            paymentMethodInfoBottomSheet(context);
+                          },
+                          icon: const Icon(Icons.info_sharp,size: 20,),
                           color: AppColors.greyColor,
-                          size: 20,
                         ),
-                        Spacer(),
-                        Text(
+                        const Spacer(),
+                        const Text(
                           "€0.00",
                           style: TextStyle(
                             fontSize: 18,
@@ -406,9 +447,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           ),
                         )
                       ],
-                    ),
-                    const SizedBox(
-                      height: 6,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -434,6 +472,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           ),
                         )
                       ],
+                    ),
+                    const SizedBox(
+                      height: 6,
                     ),
                   ],
                 ),
@@ -498,18 +539,28 @@ class _PaymentMethodState extends State<PaymentMethod> {
                         text: "general terms and conditions",
                         style: const TextStyle(
                           color: AppColors.blueColor,
-                          fontSize: 15,
+                          fontSize: 18,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'TextaAlt',
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {},
+                          ..onTap = () async {
+                            http.Response response =
+                                await Repository().getClientInfoApiCall();
+                            if (response.statusCode == 200) {
+                              var tempData = jsonDecode(response.body)['slug'];
+                              final Uri url = Uri.parse("https://btcdirect.eu/en-eu/terms-of-service?client=$tempData");
+                              if (!await launchUrl(url)) {
+                            throw Exception('Could not launch $url');
+                            }
+                          }
+                          },
                       ),
                       const TextSpan(text: "."),
                     ],
                     style: const TextStyle(
                       color: AppColors.black,
-                      fontSize: 15,
+                      fontSize: 18,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'TextaAlt',
                     )),
@@ -526,7 +577,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
               "Please check the checkbox to continue.",
               style: TextStyle(
                 color: AppColors.redColor,
-                fontSize: 13,
+                fontSize: 17,
                 fontWeight: FontWeight.w500,
                 fontFamily: 'TextaAlt',
               ),
@@ -560,6 +611,77 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 
+  paymentMethodInfoBottomSheet(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(25.0),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: h * 0.26,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: h * 0.01),
+              Row(
+                children: [
+                  SizedBox(width: w / 3.5),
+                  const Text(
+                    "Payment method",
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'TextaAlt',
+                    ),
+                  ),
+                  const Spacer(),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Icon(
+                          Icons.close,
+                          color: AppColors.black,
+                          size: 26,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: h * 0.01),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                child: Center(
+                  child: Text(
+                    "Payment method fees depend on the payment\nmethod selected. These fees are charged to us\nby the payment processor. Tip: Check carefully\nwhat is most advantageous for you and save on\nyour purchase.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'TextaAlt',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   /// Pending Status View Widget
 

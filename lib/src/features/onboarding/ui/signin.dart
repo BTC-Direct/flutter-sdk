@@ -122,7 +122,16 @@ class _SignInState extends State<SignIn> {
                 ),
                 CommonTextFormField(
                   textEditingController: passwordController,
-                  validator: (p1) => FieldValidator.validatePassword(p1, text: "This field is required", validText: "Please enter valid password"),
+                  validator: (p1) {
+                        //FieldValidator.validatePassword(p1, text: "This field is required", validText: "Please enter valid password");
+                        if(p1 == null || p1.isEmpty) {
+                          return  "This field is required";
+                        }else{
+                          if(p1.length < 8) {
+                            return "Please enter valid password";
+                          }
+                        }
+                  },
                   obscure: isPasswordShow,
                   suffix: GestureDetector(
                     onTap: () {
