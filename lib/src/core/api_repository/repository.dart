@@ -118,15 +118,48 @@ class Repository {
       return response;
   }
 
-  getVerificationCodeApiCall(String emailCode,String identifier) async {
+  identifierGetVerificationCodeApiCall(String emailCode,String identifier) async {
     http.Response response = await http.patch(Uri.parse("${baseUrl}v2/user"), body: {
       "emailCode": emailCode
     }, headers: {
       "X-Api-Key": xApiKey,
-      "user-identifier": identifier ?? "",
+      "user-identifier": identifier,
     });
     return response;
   }
+
+  identifierDetReSendEmailApiCall(String email,String identifier) async {
+    http.Response response = await http.patch(Uri.parse("${baseUrl}v2/user"), body: {
+      "email": email
+    }, headers: {
+      "X-Api-Key": xApiKey,
+      "user-identifier": identifier,
+    });
+    return response;
+  }
+
+  tokenGetVerificationCodeApiCall(String emailCode) async {
+    var token = StorageHelper.getValue(StorageKeys.token);
+    http.Response response = await http.patch(Uri.parse("${baseUrl}v2/user"), body: {
+      "emailCode": emailCode
+    }, headers: {
+      "X-Api-Key": xApiKey,
+      "User-Authorization": "Bearer $token"
+    });
+    return response;
+  }
+
+  tokenDetReSendEmailApiCall(String email) async {
+    var token = StorageHelper.getValue(StorageKeys.token);
+    http.Response response = await http.patch(Uri.parse("${baseUrl}v2/user"), body: {
+      "email": email
+    }, headers: {
+      "X-Api-Key": xApiKey,
+      "User-Authorization": "Bearer $token"
+    });
+    return response;
+  }
+
 
 
   getOnAmountChangedApiCall(Object body) async {

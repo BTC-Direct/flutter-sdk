@@ -34,6 +34,8 @@ class _BuyScreenState extends State<BuyScreen> {
   List<PaymentMethods> payMethodList = [];
   UserInfoModel userInfoModel = UserInfoModel();
   String paymentFees = "0.00";
+  String networkFees = "0.00";
+  num totalFees = 0.00;
   String? paymentMethodCode;
 
   @override
@@ -189,12 +191,12 @@ class _BuyScreenState extends State<BuyScreen> {
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          amount.text = "50,000.00";
-                          onAmountChanged(value: "50,000.00", isPay: true);
+                          amount.text = "2500";
+                          onAmountChanged(value: "2500", isPay: true);
                           isAmountValid = false;
                         },
                     ),
-                    const TextSpan(text: "to automatically fill in your maximum amount of €50,000.00."),
+                    const TextSpan(text: "to automatically fill in your maximum amount of €2500.00."),
                   ],
                   style: const TextStyle(
                     color: AppColors.black,
@@ -255,7 +257,7 @@ class _BuyScreenState extends State<BuyScreen> {
           onChanged: (p0) async {
             if (p0.isNotEmpty || p0 != "") {
               final double enteredValue = double.parse(p0);
-              if (enteredValue >= 30) {
+              if (enteredValue >= 30 &&enteredValue <= 2500.00) {
                 isAmountValid = false;
                 onAmountChanged(value: p0, isPay: true);
                 var token = await StorageHelper.getValue(StorageKeys.token);
@@ -264,18 +266,8 @@ class _BuyScreenState extends State<BuyScreen> {
                 }
               } else {
                 isAmountValid = true;
-              }
-              if(p0.length >= 5){
-                if (enteredValue <= 50000.00) {
-                  isAmountValid = false;
-                  isAmountMaximumValid = false;
-                  onAmountChanged(value: p0, isPay: true);
-                  var token = await StorageHelper.getValue(StorageKeys.token);
-                  if (token != null && token != "") {
-                    getUserInfo(token);
-                  }
-                } else {
-                  isAmountValid = true;
+                isAmountMaximumValid = false;
+                if(enteredValue >= 2500.00){
                   isAmountMaximumValid = true;
                 }
               }
@@ -540,7 +532,7 @@ class _BuyScreenState extends State<BuyScreen> {
               ),
               const Spacer(),
               Text(
-                "€${amount.text}.00",
+                  amount.text.isEmpty ? "0.00" :"€${double.parse(amount.text).toStringAsFixed(2)}",
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -582,18 +574,15 @@ class _BuyScreenState extends State<BuyScreen> {
           padding: const EdgeInsets.all(8.0),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 500),
-            height: showAllFees ? 120.0 : 0.0,
+            height: showAllFees ? 125.0 : 0.0,
             width: w,
             color: AppColors.backgroundColor.withOpacity(0.4),
             child: SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: w * 0.05),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  //crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(
-                      height: 6,
-                    ),
                     Row(
                       children: [
                         const Center(
@@ -648,15 +637,15 @@ class _BuyScreenState extends State<BuyScreen> {
                         ),
                         IconButton(
                           onPressed: () {
-                            paymentMethodInfoBottomSheet(context);
+                            networkFeeInfoBottomSheet(context);
                           },
                           icon: const Icon(Icons.info_sharp,size: 20,),
                           color: AppColors.greyColor,
                         ),
                         const Spacer(),
-                        const Text(
-                          "€0.00",
-                          style: TextStyle(
+                         Text(
+                          "€$networkFees",
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             color: AppColors.greyColor,
@@ -680,7 +669,7 @@ class _BuyScreenState extends State<BuyScreen> {
                           ),
                         ),
                         Text(
-                          "€$paymentFees",
+                          "€${totalFees.toStringAsFixed(2)}",
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -689,9 +678,6 @@ class _BuyScreenState extends State<BuyScreen> {
                           ),
                         )
                       ],
-                    ),
-                    const SizedBox(
-                      height: 6,
                     ),
                   ],
                 ),
@@ -742,14 +728,26 @@ class _BuyScreenState extends State<BuyScreen> {
                                           email: '${userInfoModel.emailAddress}',
                                         ),
                                       ),
-                                    );
+                                    ).then((value) {
+                                      startTimer();
+                                      var token = StorageHelper.getValue(StorageKeys.token);
+                                      if (token != null && token.isNotEmpty) {
+                                        getUserInfo(token);
+                                      }
+                                    });
                                   } else {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => const VerifyIdentity(),
                                       ),
-                                    );
+                                    ).then((value) {
+                                      startTimer();
+                                      var token = StorageHelper.getValue(StorageKeys.token);
+                                      if (token != null && token.isNotEmpty) {
+                                        getUserInfo(token);
+                                      }
+                                    });
                                   }
                                 },
                             ),
@@ -804,6 +802,7 @@ class _BuyScreenState extends State<BuyScreen> {
                               walletAddress: addressesList[coinSelectIndex].address.toString(),
                               coinTicker: coinList[coinSelectIndex].coinTicker.toString(),
                               paymentFees: paymentFees,
+                              networkFees: networkFees,
                             ))).then((value) {
                   startTimer();
                 });
@@ -982,113 +981,115 @@ class _BuyScreenState extends State<BuyScreen> {
         ),
       ),
       builder: (BuildContext context) {
-        return SizedBox(
-          height: h * 0.70,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: h * 0.01),
-              Row(
-                children: [
-                  SizedBox(width: w / 3.5),
-                  const Text(
-                    "Payment method",
-                    style: TextStyle(
-                      color: AppColors.black,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'TextaAlt',
+        return SafeArea(
+          child: SizedBox(
+            height: h,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: h * 0.01),
+                Row(
+                  children: [
+                    SizedBox(width: w / 3.5),
+                    const Text(
+                      "Payment method",
+                      style: TextStyle(
+                        color: AppColors.black,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'TextaAlt',
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Icon(
-                          Icons.close,
-                          color: AppColors.black,
-                          size: 26,
+                    const Spacer(),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Icon(
+                            Icons.close,
+                            color: AppColors.black,
+                            size: 26,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: h * 0.01),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: payMethodList.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: w,
-                      height: h * 0.08,
-                      margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.004),
-                      decoration: BoxDecoration(
-                        color:  index == 0 ? AppColors.backgroundColor : AppColors.transparent,
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            // paymentSelectIndex = index;
-                            paymentMethod.text = '${payMethodList[index].label}';
-                            paymentMethodCode = '${payMethodList[index].code}';
-                            selectedItem = payMethodList[index];
-                            payMethodList.remove(selectedItem);
-                            payMethodList.insert(0, selectedItem);
-                            Navigator.pop(context);
-                            log('images:- https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[paymentSelectIndex].code}.svg',);
-                          });
-                        },
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            SizedBox(
-                              width: w * 0.04,
-                            ),
-                            SvgPicture.network(
-                              'https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[index].code}.svg',
-                              width: 30,
-                              height: 30,
-                            ),
-                            SizedBox(
-                              width: w * 0.04,
-                            ),
-                            Center(
-                              child: Text(
-                                '${payMethodList[index].label}',
-                                style: const TextStyle(
-                                  color: AppColors.black,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'TextaAlt',
+                  ],
+                ),
+                SizedBox(height: h * 0.01),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: payMethodList.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        width: w,
+                        height: h * 0.08,
+                        margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.004),
+                        decoration: BoxDecoration(
+                          color:  index == 0 ? AppColors.backgroundColor : AppColors.transparent,
+                          borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              // paymentSelectIndex = index;
+                              paymentMethod.text = '${payMethodList[index].label}';
+                              paymentMethodCode = '${payMethodList[index].code}';
+                              selectedItem = payMethodList[index];
+                              payMethodList.remove(selectedItem);
+                              payMethodList.insert(0, selectedItem);
+                              Navigator.pop(context);
+                              log('images:- https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[paymentSelectIndex].code}.svg',);
+                            });
+                          },
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(
+                                width: w * 0.04,
+                              ),
+                              SvgPicture.network(
+                                'https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[index].code}.svg',
+                                width: 30,
+                                height: 30,
+                              ),
+                              SizedBox(
+                                width: w * 0.04,
+                              ),
+                              Center(
+                                child: Text(
+                                  '${payMethodList[index].label}',
+                                  style: const TextStyle(
+                                    color: AppColors.black,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'TextaAlt',
+                                  ),
                                 ),
                               ),
-                            ),
-                            const Spacer(),
-                            Icon(
-                              index == 0 ? Icons.check : null,
-                              color: AppColors.black,
-                              size: 15,
-                            ),
-                            SizedBox(
-                              width: w * 0.02,
-                            ),
-                          ],
+                              const Spacer(),
+                              Icon(
+                                index == 0 ? Icons.check : null,
+                                color: AppColors.black,
+                                size: 15,
+                              ),
+                              SizedBox(
+                                width: w * 0.02,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -1108,52 +1109,118 @@ class _BuyScreenState extends State<BuyScreen> {
       ),
       builder: (BuildContext context) {
         return SizedBox(
-          height: h * 0.26,
+          height: h * 0.3,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: h * 0.01),
-              Row(
-                children: [
-                  SizedBox(width: w / 3.5),
-                  const Text(
-                    "Payment method",
-                    style: TextStyle(
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(
+                      Icons.close,
                       color: AppColors.black,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'TextaAlt',
+                      size: 26,
                     ),
                   ),
-                  const Spacer(),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Icon(
-                          Icons.close,
-                          color: AppColors.black,
-                          size: 26,
-                        ),
-                      ),
-                    ),
+                ),
+              ),
+              const Center(
+                child: Text(
+                  "Payment method",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'TextaAlt',
                   ),
-                ],
+                ),
               ),
               SizedBox(height: h * 0.01),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                 child: Center(
                   child: Text(
-                    "Payment method fees depend on the payment\nmethod selected. These fees are charged to us\nby the payment processor. Tip: Check carefully\nwhat is most advantageous for you and save on\nyour purchase.",
+                    "Payment method fees depend on the payment\nmethod selected. These fees are charged to us\nby the payment processor. Tip: Check carefully\nwhat is most advantageous for you and save on your purchase.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.black,
-                      fontSize: 20,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'TextaAlt',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  networkFeeInfoBottomSheet(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(25.0),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: h * 0.3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: h * 0.01),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(
+                      Icons.close,
+                      color: AppColors.black,
+                      size: 26,
+                    ),
+                  ),
+                ),
+              ),
+              const Center(
+                child: Text(
+                  "Network fee",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'TextaAlt',
+                  ),
+                ),
+              ),
+              SizedBox(height: h * 0.01),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                child: Center(
+                  child: Text(
+                    "The network fees serve as compensation for miners who verify and record transactions. They play a crucial role in network maintenance and ensure the security and speed of transactions.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 18,
                       fontWeight: FontWeight.w400,
                       fontFamily: 'TextaAlt',
                     ),
@@ -1345,7 +1412,7 @@ class _BuyScreenState extends State<BuyScreen> {
           }
         }
         getPaymentMethod();
-      } else if (response.statusCode == 400) {
+      } else if (response.statusCode >= 400) {
         setState(() {
           isLoading = false;
         });
@@ -1391,7 +1458,7 @@ class _BuyScreenState extends State<BuyScreen> {
         setState(() {
           isLoading = false;
         });
-      } else if (response.statusCode == 400) {
+      } else if (response.statusCode >= 400) {
         setState(() {
           isLoading = false;
         });
@@ -1441,14 +1508,17 @@ class _BuyScreenState extends State<BuyScreen> {
           setState(() {
             amount.text = tempData["fiatAmount"].toString() != "null" ? tempData["fiatAmount"].toString() : "0.00";
             paymentFees = tempData["paymentMethodCost"].toString() != "null" ? tempData["paymentMethodCost"].toString() : "0.00";
+            networkFees = tempData["networkFeeCost"].toString() != "null" ? tempData["networkFeeCost"].toString() : "0.00";
           });
         } else {
           setState(() {
             coinAmount.text = tempData["cryptoAmount"].toString() != "null" ? tempData["cryptoAmount"].toString() : "0.00";
             paymentFees = tempData["paymentMethodCost"].toString() != "null" ? tempData["paymentMethodCost"].toString() : "0.00";
+            networkFees = tempData["networkFeeCost"].toString() != "null" ? tempData["networkFeeCost"].toString() : "0.00";
           });
         }
-      } else if (response.statusCode == 400) {
+        totalFees = double.parse(paymentFees) + double.parse(networkFees);
+      } else if (response.statusCode >= 400) {
         log("Response ${tempData.toString()}");
         var errorCodeList = await AppCommonFunction().getJsonData();
         for (int i = 0; i < errorCodeList.length; i++) {

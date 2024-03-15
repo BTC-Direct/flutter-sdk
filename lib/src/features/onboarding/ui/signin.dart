@@ -233,12 +233,24 @@ class _SignInState extends State<SignIn> {
     try {
       var response = await Repository().getUserInfoApiCall(token,context);
       UserInfoModel userInfoModel = UserInfoModel.fromJson(response);
-      if (userInfoModel.status?.status == "pending") {
+      if (userInfoModel.status?.details?.emailAddressVerificationStatus == "pending") {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VerifyIdentity(),
-            ));
+          context,
+          MaterialPageRoute(
+            builder: (context) => EmailVerification(
+              email: '${userInfoModel.emailAddress}',
+            ),
+          ),
+        );
+        emailController.clear();
+        passwordController.clear();
+      } else if (userInfoModel.status?.details?.identityVerificationStatus == "open")  {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const VerifyIdentity(),
+          ),
+        );
         emailController.clear();
         passwordController.clear();
       } else {

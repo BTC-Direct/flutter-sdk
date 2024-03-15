@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:btcdirect/src/features/onboarding/ui/signin.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:flutter_idensic_mobile_sdk_plugin/flutter_idensic_mobile_sdk_plugin.dart';
 import 'package:http/http.dart' as http;
@@ -32,8 +33,7 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
       appBarTitle: isWebViewReady ? "Verify identity" : "",
       child: Padding(
         padding: isWebViewReady ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: w * 0.06),
-        child:
-            Column(
+        child: Column(
           children: [
             SizedBox(
               height: h * 0.09,
@@ -117,8 +117,14 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
       http.Response response = await Repository().getVerificationStatusApiCall(context);
       var tempData = jsonDecode(response.body) ;
       if (response.statusCode == 200) {
-        kycAccessToken = tempData[3]['data']['accessToken'];
-      } else if (response.statusCode == 400) {
+        for (int i = 0; i < tempData.length; i++) {
+          if (tempData[i]['name'] == "kyc") {
+            kycAccessToken = tempData[i]['data']['accessToken'];
+            break;
+          }
+        }
+        log('kycAccessToken $kycAccessToken');
+      } else if (response.statusCode >= 400) {
         log("Response ${tempData.toString()}");
         var errorCodeList = await AppCommonFunction().getJsonData();
         for (int i = 0; i < errorCodeList.length; i++) {
@@ -148,7 +154,12 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
 
     final result = await snsMobileSDK!.launch();
       if(result.success == true) {
-        Navigator.popUntil(context, (route) => route.isFirst);
+        var token = StorageHelper.getValue(StorageKeys.token);
+        if(token.isNotEmpty){
+          Navigator.popUntil(context, (route) => route.isFirst);
+        }else{
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const SignIn()));
+        }
       }
     print("Completed with result: $result");
   }

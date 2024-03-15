@@ -129,10 +129,10 @@ class _OnBoardingState extends State<OnBoarding> {
       SizedBox(
         height: h * 0.02,
       ),
-      const Text(
-        "raininfo2@yopmail.com is already in use",
+      Text(
+        "${emailController.text} is already in use",
         textAlign: TextAlign.center,
-        style: TextStyle(
+        style: const TextStyle(
           color: AppColors.black,
           fontSize: 24,
           fontWeight: FontWeight.w600,
@@ -607,7 +607,7 @@ class _OnBoardingState extends State<OnBoarding> {
                         text: "terms and conditions",
                         style: const TextStyle(
                           color: AppColors.blueColor,
-                          fontSize: 15,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'TextaAlt',
                         ),
@@ -628,7 +628,7 @@ class _OnBoardingState extends State<OnBoarding> {
                         text: "privacy policy",
                         style: const TextStyle(
                           color: AppColors.blueColor,
-                          fontSize: 15,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'TextaAlt',
                         ),
@@ -648,7 +648,7 @@ class _OnBoardingState extends State<OnBoarding> {
                     ],
                     style: const TextStyle(
                       color: AppColors.black,
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'TextaAlt',
                     )),
@@ -665,7 +665,7 @@ class _OnBoardingState extends State<OnBoarding> {
               "Please check the checkbox to continue.",
               style: TextStyle(
                 color: AppColors.redColor,
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
                 fontFamily: 'TextaAlt',
               ),
@@ -676,7 +676,7 @@ class _OnBoardingState extends State<OnBoarding> {
           height: h * 0.03,
         ),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Checkbox(
               value: isCheckBoxValue2,
@@ -693,13 +693,12 @@ class _OnBoardingState extends State<OnBoarding> {
               }),
               activeColor: AppColors.blueColor,
             ),
-            SizedBox(
-              width: w * 0.76,
-              child: const Text(
+            const Expanded(
+              child: Text(
                 "Yes, I would like to regularly receive the newsletter by email and be informed about offers and promotions.",
                 style: TextStyle(
                   color: AppColors.black,
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'TextaAlt',
                 ),
@@ -757,7 +756,7 @@ class _OnBoardingState extends State<OnBoarding> {
         combinedItemsList = List.from(countryList)..addAll(List.generate(1, (index) => Nationality(name: "Other nationality", code: "", idSelfieRequired: true)));
         isLoading = false;
         setState(() {});
-      } else if (response.statusCode == 400) {
+      } else if (response.statusCode >= 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
         var errorCodeList = await AppCommonFunction().getJsonData();
@@ -984,7 +983,6 @@ class _OnBoardingState extends State<OnBoarding> {
     });
   }
 
-
   otherNationalityBottomSheet(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
@@ -1121,7 +1119,7 @@ class _OnBoardingState extends State<OnBoarding> {
             MaterialPageRoute(
               builder: (context) => EmailVerification(email: user.email.toString(), identifier: identifier),
             ));
-      } else if (response.statusCode == 400) {
+      } else if (response.statusCode >= 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
         var errorCodeList = await AppCommonFunction().getJsonData();

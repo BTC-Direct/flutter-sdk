@@ -16,6 +16,7 @@ class EmailVerification extends StatefulWidget {
 class _EmailVerificationState extends State<EmailVerification> {
   final smartAuth = SmartAuth();
   bool isLoading = false;
+  String reSendText = "";
   final pinputController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -41,7 +42,7 @@ class _EmailVerificationState extends State<EmailVerification> {
           padding: EdgeInsets.symmetric(horizontal: w * 0.06),
           child: Form(
             key: formKey,
-            child: Column(
+            child: isLoading ? const Center(child: CircularProgressIndicator()) : Column(
               children: [
                 SizedBox(
                   height: h * 0.025,
@@ -83,7 +84,6 @@ class _EmailVerificationState extends State<EmailVerification> {
                   controller: pinputController,
                   length: 6,
                   errorText: "Invalid code",
-                  focusNode: FocusNode(),
                   validator: (value) {
                     if (value!.length < 6) {
                       return 'Invalid code';
@@ -92,33 +92,40 @@ class _EmailVerificationState extends State<EmailVerification> {
                   },
                   onSubmitted: (value) {
                     debugPrint('onSubmitted: $value');
-                    FocusScope.of(context);
+                    FocusScope.of(context).focusedChild?.unfocus();
+                    setState(() {});
                   },
                   onCompleted: (value) {
                     debugPrint('onCompleted: $value');
-                    FocusScope.of(context);
+                    FocusScope.of(context).focusedChild?.unfocus();
+                    setState(() {});
                   },
                 ),
                 SizedBox(
                   height: h * 0.01,
                 ),
-                RichText(
+                reSendText.isEmpty
+                    ? RichText(
                   text: TextSpan(
                       children: [
                         const TextSpan(text: "Didn't receive a code?  "),
                         TextSpan(
-                          text: "Resend",
-                          style: const TextStyle(
-                            color: AppColors.blueColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'TextaAlt',
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              //launchUrlString('https://blockx. gitbook.io/blocx./get-started/masternode#vps-console-putty-or-terminal');
-                            },
-                        ),
+                                text: "Resend",
+                                style: const TextStyle(
+                                  color: AppColors.blueColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'TextaAlt',
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    if (widget.identifier != null) {
+                                      identifierReSendEmailApiCall(context, widget.email);
+                                    }else{
+                                      tokenReSendEmailApiCall(context, widget.email);
+                                    }
+                                  },
+                              ),
                         const TextSpan(text: "."),
                       ],
                       style: const TextStyle(
@@ -127,7 +134,13 @@ class _EmailVerificationState extends State<EmailVerification> {
                         fontWeight: FontWeight.w500,
                         fontFamily: 'TextaAlt',
                       )),
-                ),
+                )
+                    : Text(reSendText,style: const TextStyle(
+                  color: AppColors.greyColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'TextaAlt',
+                )),
                 SizedBox(
                   height: h * 0.16,
                 ),
@@ -143,7 +156,11 @@ class _EmailVerificationState extends State<EmailVerification> {
                   bgColor: AppColors.blueColor,
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
-                      verifyEmailApiCall(context, pinputController.text);
+                      if (widget.identifier != null) {
+                        identifierVerifyEmailApiCall(context, pinputController.text);
+                      }else{
+                        tokenVerifyEmailApiCall(context, pinputController.text);
+                      }
                     }
                   },
                 ),
@@ -158,12 +175,12 @@ class _EmailVerificationState extends State<EmailVerification> {
     );
   }
 
-  verifyEmailApiCall(BuildContext context, String emailCode) async {
+  identifierVerifyEmailApiCall(BuildContext context, String emailCode) async {
     try {
       isLoading = true;
-      http.Response response = await Repository().getVerificationCodeApiCall(
+      http.Response response = await Repository().identifierGetVerificationCodeApiCall(
         emailCode,
-        widget.identifier!,
+        widget.identifier ?? '',
       );
       if (response.statusCode == 202) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
@@ -173,13 +190,13 @@ class _EmailVerificationState extends State<EmailVerification> {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => VerifyIdentity(),
+              builder: (context) => const VerifyIdentity(),
             ));
-      } else if (response.statusCode == 400) {
+      } else if (response.statusCode >= 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
         var errorCodeList = await AppCommonFunction().getJsonData();
-        print("errorCodeList: $errorCodeList");
+        //print("errorCodeList: $errorCodeList");
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
@@ -196,4 +213,115 @@ class _EmailVerificationState extends State<EmailVerification> {
       setState(() {});
     }
   }
+
+  identifierReSendEmailApiCall(BuildContext context, String email) async {
+    try {
+      isLoading = true;
+      http.Response response = await Repository().identifierDetReSendEmailApiCall(
+        email,
+        widget.identifier ?? "",
+      );
+      if (response.statusCode == 202) {
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        isLoading = false;
+        AppCommonFunction().successSnackBar(context: context, message: 'Verification code sent successfully');
+      } else if (response.statusCode >= 400) {
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        //print("errorCodeList: $errorCodeList");
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            }
+          }
+        }
+      }
+      isLoading = false;
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+      isLoading = false;
+      setState(() {});
+    }
+  }
+
+  tokenVerifyEmailApiCall(BuildContext context, String emailCode) async {
+    try {
+      isLoading = true;
+      http.Response response = await Repository().tokenGetVerificationCodeApiCall(
+        emailCode
+      );
+      if (response.statusCode == 202) {
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        log("verifyEmail Response ::: ${tempData.toString()}");
+        var user = UserModel.fromJson(tempData);
+        log("verifyEmail Response ${user.toString()}");
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const VerifyIdentity(),
+            ));
+      }
+      else if (response.statusCode >= 400) {
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        //print("errorCodeList: $errorCodeList");
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            }
+          }
+        }
+      }
+      isLoading = false;
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+      isLoading = false;
+      setState(() {});
+    }
+  }
+
+  tokenReSendEmailApiCall(BuildContext context, String email) async {
+    try {
+      isLoading = true;
+      http.Response response = await Repository().tokenDetReSendEmailApiCall(
+        email
+      );
+      if (response.statusCode == 202) {
+        // var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        isLoading = false;
+        reSendText = 'Email sent';
+        setState(() {});
+        Future.delayed(const Duration(seconds: 2), () {
+          reSendText = '';
+          setState(() {});
+        });
+        //AppCommonFunction().successSnackBar(context: context, message: 'Verification code sent successfully');
+      } else if (response.statusCode >= 400) {
+        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        //print("errorCodeList: $errorCodeList");
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            }
+          }
+        }
+      }
+      isLoading = false;
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+      isLoading = false;
+      setState(() {});
+    }
+  }
+
 }

@@ -97,7 +97,7 @@ class FooterContainer extends StatelessWidget {
                         ])),
                   ),*/
                   Padding(
-                    padding: const EdgeInsets.only(left: 18.0, top: 18, bottom: 8, right: 18),
+                    padding: const EdgeInsets.only(left: 8.0, top: 18, bottom: 8, right: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [

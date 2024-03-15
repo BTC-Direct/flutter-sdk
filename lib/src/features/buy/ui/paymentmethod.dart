@@ -15,6 +15,7 @@ class PaymentMethod extends StatefulWidget {
   String paymentMethodName;
   String coinTicker;
   String paymentFees;
+  String networkFees;
 
   PaymentMethod(
       {super.key,
@@ -24,7 +25,8 @@ class PaymentMethod extends StatefulWidget {
       required this.walletName,
       required this.paymentMethodName,
       required this.coinTicker,
-      required this.paymentFees
+      required this.paymentFees,
+      required this.networkFees
       });
 
   @override
@@ -45,6 +47,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
   int start = 10;
   int paymentMethodTimerStart = 5;
   String price = "0.0";
+  num totalFees = 0.0;
   late final WebViewController controller;
 
   @override
@@ -53,6 +56,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
     onAmountChanged(value: widget.amount);
     startTimer();
     isTimerShow = true;
+    totalFees = double.parse(widget.paymentFees) + double.parse(widget.networkFees);
   }
 
   @override
@@ -198,7 +202,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
               "${widget.coinTicker} $price",
               style: const TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: AppColors.black,
                 fontFamily: 'TextaAlt',
               ),
@@ -287,53 +291,13 @@ class _PaymentMethodState extends State<PaymentMethod> {
           child: const Text(
             "Fees",
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
               color: AppColors.black,
               fontFamily: 'TextaAlt',
             ),
           ),
         ),
-        /*Row(
-          children: [
-            Text(
-              "€${widget.paymentFees}",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.black,
-                fontFamily: 'TextaAlt',
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  showAllFees = !showAllFees;
-                });
-              },
-              child: Row(
-                children: [
-                  const Spacer(),
-                  Text(
-                    showAllFees ? 'Hide Fees' : 'All Fees Included',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.blueColor,
-                      fontFamily: 'TextaAlt',
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                  Icon(
-                    showAllFees ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                    color: AppColors.blueColor,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),*/
         GestureDetector(
           onTap: () {
             setState(() {
@@ -342,15 +306,24 @@ class _PaymentMethodState extends State<PaymentMethod> {
           },
           child: Row(
             children: [
+              Text(
+                '€${totalFees.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.black,
+                  fontFamily: 'TextaAlt',
+                ),
+              ),
               const Spacer(),
               Text(
-                showAllFees ? 'Hide Fees' : 'All Fees Included',
+                showAllFees ? 'Hide details' : 'View details',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: AppColors.blueColor,
                   fontFamily: 'TextaAlt',
-                  decoration: TextDecoration.underline,
+                  //decoration: TextDecoration.underline,
                 ),
               ),
               Icon(
@@ -365,18 +338,15 @@ class _PaymentMethodState extends State<PaymentMethod> {
           padding: const EdgeInsets.all(8.0),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 500),
-            height: showAllFees ? 120.0 : 0.0,
+            height: showAllFees ? 125.0 : 0.0,
             width: w,
             color: AppColors.backgroundColor.withOpacity(0.4),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: w * 0.05),
-                child:  Column(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: w * 0.05),
+              child: SingleChildScrollView(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(
-                      height: 6,
-                    ),
                     Row(
                       children: [
                         const Center(
@@ -391,7 +361,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           ),
                         ),
                         const SizedBox(
-                          width: 10,
+                          width: 6,
                         ),
                         IconButton(
                           onPressed: () {
@@ -427,19 +397,19 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           ),
                         ),
                         const SizedBox(
-                          width: 10,
+                          width: 6,
                         ),
                         IconButton(
                           onPressed: () {
-                            paymentMethodInfoBottomSheet(context);
+                            networkFeeInfoBottomSheet(context);
                           },
                           icon: const Icon(Icons.info_sharp,size: 20,),
                           color: AppColors.greyColor,
                         ),
                         const Spacer(),
-                        const Text(
-                          "€0.00",
-                          style: TextStyle(
+                        Text(
+                          "€${widget.networkFees}",
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             color: AppColors.greyColor,
@@ -463,18 +433,15 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           ),
                         ),
                         Text(
-                          "€${widget.paymentFees}",
+                          "€${totalFees.toStringAsFixed(2)}",
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 20,
                             fontWeight: FontWeight.w600,
                             color: AppColors.black,
                             fontFamily: 'TextaAlt',
                           ),
                         )
                       ],
-                    ),
-                    const SizedBox(
-                      height: 6,
                     ),
                   ],
                 ),
@@ -497,7 +464,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
               ),
               const Spacer(),
               Text(
-                "€${widget.amount}",
+                widget.amount.isEmpty ? "€0.00" : "€${double.parse(widget.amount).toStringAsFixed(2)}",
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -539,7 +506,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                         text: "general terms and conditions",
                         style: const TextStyle(
                           color: AppColors.blueColor,
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'TextaAlt',
                         ),
@@ -560,7 +527,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                     ],
                     style: const TextStyle(
                       color: AppColors.black,
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'TextaAlt',
                     )),
@@ -584,7 +551,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
             ),
           ),
         ),
-        SizedBox(height: h * 0.02,),
+        SizedBox(height: h * 0.09,),
         ButtonItem.filled(
           text: "Continue order",
           fontSize: 20,
@@ -605,7 +572,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
           },
         ),
         SizedBox(
-          height: showAllFees ? h * 0.12 :0.0 ,
+          height: h * 0.12,
         ),
       ],
     );
@@ -624,52 +591,118 @@ class _PaymentMethodState extends State<PaymentMethod> {
       ),
       builder: (BuildContext context) {
         return SizedBox(
-          height: h * 0.26,
+          height: h * 0.3,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: h * 0.01),
-              Row(
-                children: [
-                  SizedBox(width: w / 3.5),
-                  const Text(
-                    "Payment method",
-                    style: TextStyle(
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(
+                      Icons.close,
                       color: AppColors.black,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'TextaAlt',
+                      size: 26,
                     ),
                   ),
-                  const Spacer(),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Icon(
-                          Icons.close,
-                          color: AppColors.black,
-                          size: 26,
-                        ),
-                      ),
-                    ),
+                ),
+              ),
+              const Center(
+                child: Text(
+                  "Payment method",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'TextaAlt',
                   ),
-                ],
+                ),
               ),
               SizedBox(height: h * 0.01),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10.0),
                 child: Center(
                   child: Text(
-                    "Payment method fees depend on the payment\nmethod selected. These fees are charged to us\nby the payment processor. Tip: Check carefully\nwhat is most advantageous for you and save on\nyour purchase.",
+                    "Payment method fees depend on the payment\nmethod selected. These fees are charged to us\nby the payment processor. Tip: Check carefully\nwhat is most advantageous for you and save on your purchase.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.black,
-                      fontSize: 20,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'TextaAlt',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  networkFeeInfoBottomSheet(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(25.0),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: h * 0.3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: h * 0.01),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(
+                      Icons.close,
+                      color: AppColors.black,
+                      size: 26,
+                    ),
+                  ),
+                ),
+              ),
+              const Center(
+                child: Text(
+                  "Network fee",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'TextaAlt',
+                  ),
+                ),
+              ),
+              SizedBox(height: h * 0.01),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                child: Center(
+                  child: Text(
+                    "The network fees serve as compensation for miners who verify and record transactions. They play a crucial role in network maintenance and ensure the security and speed of transactions.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontSize: 18,
                       fontWeight: FontWeight.w400,
                       fontFamily: 'TextaAlt',
                     ),
