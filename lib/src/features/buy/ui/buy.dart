@@ -4,6 +4,7 @@ import 'package:btcdirect/src/core/model/userinfomodel.dart';
 import 'package:btcdirect/src/features/buy/ui/paymentmethod.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class BuyScreen extends StatefulWidget {
   const BuyScreen({super.key});
@@ -30,6 +31,7 @@ class _BuyScreenState extends State<BuyScreen> {
   bool isAmountValid = false;
   bool isAmountMaximumValid = false;
   bool isUserVerified = false;
+  bool isBankTransferButtonEnabled = false;
   List<CoinModel> coinList = [];
   List<PaymentMethods> payMethodList = [];
   UserInfoModel userInfoModel = UserInfoModel();
@@ -45,6 +47,7 @@ class _BuyScreenState extends State<BuyScreen> {
     paymentMethod = TextEditingController(text: "Bancontact");
     isTimerShow = true;
     startTimer();
+    updateButtonState();
     super.initState();
   }
 
@@ -177,65 +180,65 @@ class _BuyScreenState extends State<BuyScreen> {
             padding: EdgeInsets.symmetric(horizontal: w * 0.03, vertical: h * 0.015),
             child: isAmountMaximumValid
                 ? RichText(
-              text: TextSpan(
-                  children: [
-                    const TextSpan(text: "You can not currently order this amount using this currency."),
-                    TextSpan(
-                      text: "Click here ",
-                      style: const TextStyle(
-                        color: AppColors.blueColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: 'TextaAlt',
-                        package: "btc_direct",
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          amount.text = "2500";
-                          onAmountChanged(value: "2500", isPay: true);
-                          isAmountValid = false;
-                        },
-                    ),
-                    const TextSpan(text: "to automatically fill in your maximum amount of €2500.00."),
-                  ],
-                  style: const TextStyle(
-                    color: AppColors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'TextaAlt',
-                    package: "btc_direct",
-                  )),
-            )
+                    text: TextSpan(
+                        children: [
+                          const TextSpan(text: "You can not currently order this amount using this currency."),
+                          TextSpan(
+                            text: "Click here ",
+                            style: const TextStyle(
+                              color: AppColors.blueColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'TextaAlt',
+                              package: "btc_direct",
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                amount.text = "2500";
+                                onAmountChanged(value: "2500", isPay: true);
+                                isAmountValid = false;
+                              },
+                          ),
+                          const TextSpan(text: "to automatically fill in your maximum amount of €2500.00."),
+                        ],
+                        style: const TextStyle(
+                          color: AppColors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'TextaAlt',
+                          package: "btc_direct",
+                        )),
+                  )
                 : RichText(
-              text: TextSpan(
-                  children: [
-                    const TextSpan(text: "Your order must be at least €30.00. "),
-                    TextSpan(
-                      text: "Click here ",
-                      style: const TextStyle(
-                        color: AppColors.blueColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: 'TextaAlt',
-                        package: "btc_direct",
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          amount.text = "30";
-                          onAmountChanged(value: "30", isPay: true);
-                          isAmountValid = false;
-                        },
-                    ),
-                    const TextSpan(text: "to automatically fill in the minimum amount of €30.00."),
-                  ],
-                  style: const TextStyle(
-                    color: AppColors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'TextaAlt',
-                    package: "btc_direct",
-                  )),
-            ),
+                    text: TextSpan(
+                        children: [
+                          const TextSpan(text: "Your order must be at least €30.00. "),
+                          TextSpan(
+                            text: "Click here ",
+                            style: const TextStyle(
+                              color: AppColors.blueColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'TextaAlt',
+                              package: "btc_direct",
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                amount.text = "30";
+                                onAmountChanged(value: "30", isPay: true);
+                                isAmountValid = false;
+                              },
+                          ),
+                          const TextSpan(text: "to automatically fill in the minimum amount of €30.00."),
+                        ],
+                        style: const TextStyle(
+                          color: AppColors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'TextaAlt',
+                          package: "btc_direct",
+                        )),
+                  ),
           ),
         ),
         Padding(
@@ -257,7 +260,7 @@ class _BuyScreenState extends State<BuyScreen> {
           onChanged: (p0) async {
             if (p0.isNotEmpty || p0 != "") {
               final double enteredValue = double.parse(p0);
-              if (enteredValue >= 30 &&enteredValue <= 2500.00) {
+              if (enteredValue >= 30 && enteredValue <= 2500.00) {
                 isAmountValid = false;
                 onAmountChanged(value: p0, isPay: true);
                 var token = await StorageHelper.getValue(StorageKeys.token);
@@ -267,7 +270,7 @@ class _BuyScreenState extends State<BuyScreen> {
               } else {
                 isAmountValid = true;
                 isAmountMaximumValid = false;
-                if(enteredValue >= 2500.00){
+                if (enteredValue >= 2500.00) {
                   isAmountMaximumValid = true;
                 }
               }
@@ -321,6 +324,8 @@ class _BuyScreenState extends State<BuyScreen> {
               return 'Amount is required';
             } else if (double.parse(value) < 30) {
               return "The minimum amount is €30.00";
+            } else if (double.parse(value) > 2500.00 && isAmountMaximumValid == true) {
+              return "The maximum amount is €2500.00";
             } else {
               return null;
             }
@@ -427,14 +432,14 @@ class _BuyScreenState extends State<BuyScreen> {
             const Spacer(),
             coinList.isNotEmpty
                 ? Text(
-              "${coinList[coinSelectIndex].coinTicker} €$price",
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.greyColor,
-                fontFamily: 'TextaAlt',
-              ),
-            )
+                    "${coinList[coinSelectIndex].coinTicker} €$price",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.greyColor,
+                      fontFamily: 'TextaAlt',
+                    ),
+                  )
                 : Container(),
           ],
         ),
@@ -457,13 +462,13 @@ class _BuyScreenState extends State<BuyScreen> {
             width: 60,
             child: coinList.isNotEmpty
                 ? Padding(
-              padding: EdgeInsets.symmetric(horizontal: w * 0.02, vertical: h * 0.01),
-              child: SvgPicture.network(
-                '${coinList[coinSelectIndex].coinIcon}',
-                width: 25,
-                height: 25,
-              ),
-            )
+                    padding: EdgeInsets.symmetric(horizontal: w * 0.02, vertical: h * 0.01),
+                    child: SvgPicture.network(
+                      '${coinList[coinSelectIndex].coinIcon}',
+                      width: 25,
+                      height: 25,
+                    ),
+                  )
                 : Container(),
           ),
           suffix: const Icon(Icons.keyboard_arrow_down_outlined, color: AppColors.greyColor),
@@ -498,7 +503,7 @@ class _BuyScreenState extends State<BuyScreen> {
               padding: EdgeInsets.symmetric(horizontal: w * 0.02, vertical: h * 0.01),
               child: payMethodList.isNotEmpty
                   ? SvgPicture.network(
-                       "https://widgets-sandbox.btcdirect.eu/img/payment-methods/$paymentMethodCode.svg",
+                      "https://widgets-sandbox.btcdirect.eu/img/payment-methods/$paymentMethodCode.svg",
                       width: 25,
                       height: 25,
                       fit: BoxFit.contain,
@@ -532,7 +537,7 @@ class _BuyScreenState extends State<BuyScreen> {
               ),
               const Spacer(),
               Text(
-                  amount.text.isEmpty ? "0.00" :"€${double.parse(amount.text).toStringAsFixed(2)}",
+                amount.text.isEmpty ? "0.00" : "€${double.parse(amount.text).toStringAsFixed(2)}",
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -599,11 +604,14 @@ class _BuyScreenState extends State<BuyScreen> {
                         const SizedBox(
                           width: 10,
                         ),
-                         IconButton(
+                        IconButton(
                           onPressed: () {
                             paymentMethodInfoBottomSheet(context);
                           },
-                          icon: const Icon(Icons.info_sharp,size: 20,),
+                          icon: const Icon(
+                            Icons.info_sharp,
+                            size: 20,
+                          ),
                           color: AppColors.greyColor,
                         ),
                         const Spacer(),
@@ -639,11 +647,14 @@ class _BuyScreenState extends State<BuyScreen> {
                           onPressed: () {
                             networkFeeInfoBottomSheet(context);
                           },
-                          icon: const Icon(Icons.info_sharp,size: 20,),
+                          icon: const Icon(
+                            Icons.info_sharp,
+                            size: 20,
+                          ),
                           color: AppColors.greyColor,
                         ),
                         const Spacer(),
-                         Text(
+                        Text(
                           "€$networkFees",
                           style: const TextStyle(
                             fontSize: 18,
@@ -971,7 +982,8 @@ class _BuyScreenState extends State<BuyScreen> {
   paymentMethodBottomSheet(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
-   late PaymentMethods selectedItem;
+    late PaymentMethods selectedItem;
+    updateButtonState();
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -1025,16 +1037,17 @@ class _BuyScreenState extends State<BuyScreen> {
                   child: ListView.builder(
                     itemCount: payMethodList.length,
                     itemBuilder: (context, index) {
+                      bool isBank = payMethodList[index].label == 'Bank Transfer';
                       return Container(
                         width: w,
                         height: h * 0.08,
                         margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.004),
                         decoration: BoxDecoration(
-                          color:  index == 0 ? AppColors.backgroundColor : AppColors.transparent,
+                          color: index == 0 ? AppColors.backgroundColor : AppColors.transparent,
                           borderRadius: const BorderRadius.all(Radius.circular(10)),
                         ),
                         child: InkWell(
-                          onTap: () {
+                          onTap: (isBankTransferButtonEnabled || !(payMethodList[index].label == 'Bank Transfer')) ? () {
                             setState(() {
                               // paymentSelectIndex = index;
                               paymentMethod.text = '${payMethodList[index].label}';
@@ -1043,9 +1056,11 @@ class _BuyScreenState extends State<BuyScreen> {
                               payMethodList.remove(selectedItem);
                               payMethodList.insert(0, selectedItem);
                               Navigator.pop(context);
-                              log('images:- https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[paymentSelectIndex].code}.svg',);
+                              log(
+                                'images:- https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[paymentSelectIndex].code}.svg',
+                              );
                             });
-                          },
+                          } : null,
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -1061,17 +1076,68 @@ class _BuyScreenState extends State<BuyScreen> {
                               SizedBox(
                                 width: w * 0.04,
                               ),
-                              Center(
-                                child: Text(
-                                  '${payMethodList[index].label}',
-                                  style: const TextStyle(
-                                    color: AppColors.black,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: 'TextaAlt',
-                                  ),
-                                ),
-                              ),
+                              isBankTransferButtonEnabled
+                                  ? Center(
+                                      child: Text(
+                                        '${payMethodList[index].label}',
+                                        style: const TextStyle(
+                                          color: AppColors.black,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'TextaAlt',
+                                        ),
+                                      ),
+                                    )
+                                  : payMethodList[index].label == 'Bank Transfer'
+                                      ? Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Center(
+                                              child: Text(
+                                                '${payMethodList[index].label}',
+                                                style: const TextStyle(
+                                                  color: AppColors.greyColor,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontFamily: 'TextaAlt',
+                                                ),
+                                              ),
+                                            ),
+                                            const Center(
+                                              child: Text(
+                                                'Mon-Fri 09:00AM - 6:00PM',
+                                                style: TextStyle(
+                                                  color: AppColors.greyColor,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  fontFamily: 'TextaAlt',
+                                                ),
+                                              ),
+                                            ),
+                                            const Center(
+                                              child: Text(
+                                                'Mon-Fri 09:00AM - 18:00PM',
+                                                style: TextStyle(
+                                                  color: AppColors.greyColor,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  fontFamily: 'TextaAlt',
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : Center(
+                                          child: Text(
+                                            '${payMethodList[index].label}',
+                                            style: const TextStyle(
+                                              color: AppColors.black,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: 'TextaAlt',
+                                            ),
+                                          ),
+                                        ),
                               const Spacer(),
                               Icon(
                                 index == 0 ? Icons.check : null,
@@ -1370,6 +1436,23 @@ class _BuyScreenState extends State<BuyScreen> {
         );
       },
     );
+  }
+
+  void updateButtonState() {
+    DateTime currentCETTime = AppCommonFunction().getCETDateTime();
+    // var formattedDate = DateFormat('yyyy MM dd hh:mm:ss a').format(currentCETTime);
+    DateTime startTime = DateTime(currentCETTime.year, currentCETTime.month, currentCETTime.day, 9, 0);
+    DateTime endTime = DateTime(currentCETTime.year, currentCETTime.month, currentCETTime.day, 18, 0);
+
+    if (currentCETTime.isAfter(startTime) && currentCETTime.isBefore(endTime)) {
+      setState(() {
+        isBankTransferButtonEnabled = true;
+      });
+    } else {
+      setState(() {
+        isBankTransferButtonEnabled = false;
+      });
+    }
   }
 
   ///API CALL FUNCTION

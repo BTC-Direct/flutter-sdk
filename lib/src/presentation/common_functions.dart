@@ -44,4 +44,11 @@ class AppCommonFunction {
 
     return '$leftPart...$rightPart';
   }
+
+  DateTime getCETDateTime() {
+    var now = DateTime.now().toUtc();
+    var cetOffset = const Duration(hours: 1);
+    var cetTime = now.add(cetOffset);
+    return cetTime;
+  }
 }

@@ -1,11 +1,15 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:btcdirect/src/core/model/order_model.dart';
 import 'package:btcdirect/src/features/buy/ui/completePayment.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart' as webview_flutter_android;
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class PaymentMethod extends StatefulWidget {
   String amount;
@@ -49,14 +53,15 @@ class _PaymentMethodState extends State<PaymentMethod> {
   String price = "0.0";
   num totalFees = 0.0;
   late final WebViewController controller;
+  late final PlatformWebViewControllerCreationParams params;
 
   @override
   void initState() {
-    super.initState();
     onAmountChanged(value: widget.amount);
     startTimer();
     isTimerShow = true;
     totalFees = double.parse(widget.paymentFees) + double.parse(widget.networkFees);
+    super.initState();
   }
 
   @override
@@ -838,7 +843,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
       "quote": quote,
       "walletAddress": widget.walletAddress,
       "destinationTag": "",
-      "returnUrl": "http://192.168.0.36/btcdirect.html?step=payment-completed"
+      "returnUrl": "https://www.raininfotech.in/"
     };
     var token = StorageHelper.getValue(StorageKeys.token);
     http.Response response = await Repository().getPaymentConfirmApiCall(body,token,context);
@@ -853,8 +858,25 @@ class _PaymentMethodState extends State<PaymentMethod> {
   }
 
   launchURL(String paymentUrl) async {
+    /*if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    controller = WebViewController.fromPlatformCreationParams(params);
+
+    if (Platform.isAndroid) {
+      final myAndroidController = controller.platform as webview_flutter_android.AndroidWebViewController;
+
+      myAndroidController.setOnShowFileSelector(_androidFilePicker);
+
+    }*/
     controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.disabled)
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
@@ -863,7 +885,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
           onPageFinished: (String url) {},
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('http://192.168.0.36/btcdirect.html?')) {
+            if (request.url.startsWith('https://www.raininfotech.in/')) {
               isWebViewReady = false;
               paymentMethodCompleteCheckTimer();
               setState(() {});
@@ -876,6 +898,28 @@ class _PaymentMethodState extends State<PaymentMethod> {
       ..loadRequest(Uri.parse(paymentUrl));
     isWebViewReady = true;
     setState(() {});
+  }
+  Future<List<String>> _androidFilePicker(webview_flutter_android.FileSelectorParams params) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      String filePath = result.files.single.path!;
+      String fileName = result.files.single.name;
+
+      // Convert the file to base64
+      List<int> fileBytes = await File(filePath).readAsBytes();
+
+      //convert filepath into uri
+      final filePath1 = (await getTemporaryDirectory()).uri.resolve(fileName);
+      final file = await File.fromUri(filePath1).create(recursive: true);
+
+      //convert file in bytes
+      await file.writeAsBytes(fileBytes, flush: true);
+
+      return [file.uri.toString()];
+    }
+
+    return [];
   }
 
   /// Payment Method Complete Are Not Check Api Call

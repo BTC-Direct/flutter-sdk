@@ -128,7 +128,11 @@ class _SignInState extends State<SignIn> {
                           return  "This field is required";
                         }else{
                           if(p1.length < 8) {
-                            return "Please enter valid password";
+                            return "Minimum of 8 characters";
+                          }else if(p1.length > 64){
+                            return 'Maximum of 64 characters';
+                          }else{
+                            return null;
                           }
                         }
                   },

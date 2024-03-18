@@ -40,7 +40,10 @@ dependencies:
   http: any
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.4
-  webview_flutter: ^4.5.0 
+  webview_flutter: ^4.5.0
+  file_picker: ^6.2.0
+  path_provider: ^2.1.2
+  intl: ^0.17.0
   flutter_idensic_mobile_sdk_plugin: ^1.29.0
 
 dev_dependencies:

@@ -28,6 +28,7 @@ class _OnBoardingState extends State<OnBoarding> {
   TextEditingController searchTextController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   List<Nationality> combinedItemsList = [];
+  List<Nationality> mostCommonItemsList = [];
   int countrySelectIndex = -1;
 
   @override
@@ -550,15 +551,19 @@ class _OnBoardingState extends State<OnBoarding> {
         CommonTextFormField(
           textEditingController: passwordController,
           validator: (p1) {
-            if(p1 == null || p1.isEmpty) {
-              return  "This field is required";
-            }else{
-              if(p1.length < 8) {
-                return "Please enter valid password";
+            if (p1 == null || p1.isEmpty) {
+              return "This field is required";
+            } else {
+              if (p1.length < 8) {
+                return "Minimum of 8 characters";
+              } else if (p1.length > 64) {
+                return 'Maximum of 64 characters';
+              } else {
+                return null;
               }
             }
             // FieldValidator.validatePassword(p1, text: "This field is required", validText: "Please enter valid password");
-          } ,
+          },
           obscure: isPasswordShow,
           suffix: GestureDetector(
             onTap: () {
@@ -754,6 +759,7 @@ class _OnBoardingState extends State<OnBoarding> {
         log("Response ${a["nationalities"]}");
         countryList = List<Nationality>.from(a["nationalities"].map((x) => Nationality.fromJson(x)));
         combinedItemsList = List.from(countryList)..addAll(List.generate(1, (index) => Nationality(name: "Other nationality", code: "", idSelfieRequired: true)));
+        //combinedItemsList.sort((a, b) => a.name!.toLowerCase().compareTo(b.name!.toLowerCase()));
         isLoading = false;
         setState(() {});
       } else if (response.statusCode >= 400) {
@@ -778,7 +784,7 @@ class _OnBoardingState extends State<OnBoarding> {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     List<Nationality> searchList = [];
-    if(combinedItemsList.isNotEmpty){
+    if (combinedItemsList.isNotEmpty) {
       searchList = List.from(combinedItemsList);
     } else {
       getCountries();
@@ -796,7 +802,7 @@ class _OnBoardingState extends State<OnBoarding> {
       builder: (BuildContext context) {
         return StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
           return SizedBox(
-            height: h * 0.9,
+            height: h,
             child: isLoading
                 ? SizedBox(height: h, child: const Center(child: CircularProgressIndicator()))
                 : Column(
@@ -868,12 +874,12 @@ class _OnBoardingState extends State<OnBoarding> {
                                   searchList = tempSearchList;
                                   print('combinedItemsList length: ${searchList.length}');
                                 });
-                              }else{
+                              } else {
                                 setState(() {
                                   searchList = combinedItemsList;
                                 });
                               }
-                            }else{
+                            } else {
                               setState(() {
                                 searchList = combinedItemsList;
                               });
@@ -882,92 +888,246 @@ class _OnBoardingState extends State<OnBoarding> {
                         ),
                       ),
                       SizedBox(height: h * 0.02),
-                      Padding(
-                        padding: EdgeInsets.only(left: w * 0.08),
-                        child: const Text(
-                          "All",
-                          style: TextStyle(color: AppColors.black, fontSize: 18, fontWeight: FontWeight.w700, fontFamily: 'TextaAlt'),
-                        ),
-                      ),
-                      searchList.isEmpty
-                          ? const Expanded(child: Center(child: Text("No Data Found", style: TextStyle(color: AppColors.black, fontSize: 18, fontWeight: FontWeight.w700, fontFamily: 'TextaAlt'))))
-                          : Expanded(
-                              child: ListView.builder(
-                                itemCount: searchList.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    width: w,
-                                    height: h * 0.08,
-                                    margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.008),
-                                    decoration: BoxDecoration(
-                                      color: countrySelectIndex == index ? AppColors.backgroundColor.withOpacity(0.4) : AppColors.transparent,
-                                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                    ),
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          countrySelectIndex = index;
-                                          nationalityController.text = '${searchList[index].name}';
-                                          Navigator.pop(context);
-                                        });
-                                      },
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          SizedBox(
-                                            width: w * 0.05,
-                                          ),
-                                          searchList[index].code == ""
-                                              ? Container(
-                                                  height: 30,
-                                                  width: 35,
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.backgroundColor,
-                                                    borderRadius: BorderRadius.circular(6),
-                                                  ),
-                                                )
-                                              : SvgPicture.network(
-                                                  'https://widgets-sandbox.btcdirect.eu/img/flags/${(searchList[index].code)?.toLowerCase()}.svg',
-                                                  width: 25,
-                                                  height: 25,
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: w * 0.08),
+                                child: const Text(
+                                  "Most common",
+                                  style: TextStyle(color: AppColors.black, fontSize: 20, fontWeight: FontWeight.w700, fontFamily: 'TextaAlt'),
+                                ),
+                              ),
+                              searchList.isEmpty
+                                  ? const SizedBox()
+                                  : SizedBox(
+                                      height: h * 0.25,
+                                      child: ListView.builder(
+                                        itemCount: searchList.length,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemBuilder: (context, index) {
+                                          if (searchList[index].name == "Belgium" || searchList[index].name == "Netherlands" || searchList[index].name == "Spain") {
+                                            return Container(
+                                              width: w,
+                                              height: h * 0.08,
+                                              margin: EdgeInsets.symmetric(horizontal: w * 0.08),
+                                              decoration: BoxDecoration(
+                                                color: countrySelectIndex == index ? AppColors.backgroundColor.withOpacity(0.4) : AppColors.transparent,
+                                                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                              ),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  setState(() {
+                                                    countrySelectIndex = index;
+                                                    nationalityController.text = '${searchList[index].name}';
+                                                    Navigator.pop(context);
+                                                  });
+                                                },
+                                                child: Row(
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    SizedBox(
+                                                      width: w * 0.05,
+                                                    ),
+                                                    SvgPicture.network(
+                                                      'https://widgets-sandbox.btcdirect.eu/img/flags/${(searchList[index].code)?.toLowerCase()}.svg',
+                                                      width: 25,
+                                                      height: 25,
+                                                    ),
+                                                    SizedBox(
+                                                      width: w * 0.04,
+                                                    ),
+                                                    Center(
+                                                      child: Text(
+                                                        '${searchList[index].name}',
+                                                        style: const TextStyle(
+                                                          color: AppColors.black,
+                                                          fontSize: 20,
+                                                          fontWeight: FontWeight.w600,
+                                                          fontFamily: 'TextaAlt',
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const Spacer(),
+                                                    Icon(
+                                                      countrySelectIndex == index ? Icons.check : null,
+                                                      color: AppColors.black,
+                                                      size: 15,
+                                                    ),
+                                                    SizedBox(
+                                                      width: w * 0.02,
+                                                    ),
+                                                  ],
                                                 ),
-                                          SizedBox(
-                                            width: w * 0.04,
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              '${searchList[index].name}',
-                                              style: const TextStyle(
-                                                color: AppColors.black,
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w600,
-                                                fontFamily: 'TextaAlt',
+                                              ),
+                                            );
+                                          } else {
+                                            return Container();
+                                          }
+                                        },
+                                      ),
+                                    ),
+                              Padding(
+                                padding: EdgeInsets.only(left: w * 0.08, top: 8),
+                                child: const Text(
+                                  "All",
+                                  style: TextStyle(color: AppColors.black, fontSize: 20, fontWeight: FontWeight.w700, fontFamily: 'TextaAlt'),
+                                ),
+                              ),
+                              searchList.isEmpty
+                                  ? Container(
+                                      width: w,
+                                      height: h * 0.08,
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal: w * 0.08,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: countrySelectIndex == 0 ? AppColors.backgroundColor.withOpacity(0.4) : AppColors.transparent,
+                                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            Navigator.pop(context);
+                                            otherNationalityBottomSheet(context);
+                                          });
+                                        },
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            SizedBox(
+                                              width: w * 0.05,
+                                            ),
+                                            Container(
+                                              height: 30,
+                                              width: 35,
+                                              decoration: BoxDecoration(
+                                                color: AppColors.backgroundColor,
+                                                borderRadius: BorderRadius.circular(6),
                                               ),
                                             ),
-                                          ),
-                                          const Spacer(),
-                                          Icon(
-                                            countrySelectIndex == index ? Icons.check : null,
-                                            color: AppColors.black,
-                                            size: 15,
-                                          ),
-                                          if (searchList[index].code == "")
-                                            Icon(
-                                              countrySelectIndex == index ? null : Icons.info_sharp,
+                                            SizedBox(
+                                              width: w * 0.04,
+                                            ),
+                                            const Center(
+                                              child: Text(
+                                                'Other nationality',
+                                                style: TextStyle(
+                                                  color: AppColors.black,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontFamily: 'TextaAlt',
+                                                ),
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            const Icon(
+                                              Icons.info_sharp,
                                               color: AppColors.greyColor,
                                               size: 22,
                                             ),
-                                          SizedBox(
-                                            width: w * 0.02,
-                                          ),
-                                        ],
+                                            SizedBox(
+                                              width: w * 0.02,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox(
+                                      height: h * 3.1,
+                                      child: ListView.builder(
+                                        itemCount: searchList.length,
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemBuilder: (context, index) {
+                                          if (searchList[index].name == "Belgium" || searchList[index].name == "Netherlands" || searchList[index].name == "Spain") {
+                                            return Container();
+                                          } else {
+                                            return Container(
+                                              width: w,
+                                              height: h * 0.08,
+                                              margin: EdgeInsets.symmetric(
+                                                horizontal: w * 0.08,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: countrySelectIndex == index ? AppColors.backgroundColor.withOpacity(0.4) : AppColors.transparent,
+                                                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                              ),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  setState(() {
+                                                    countrySelectIndex = index;
+                                                    nationalityController.text = '${searchList[index].name}';
+                                                    Navigator.pop(context);
+                                                  });
+                                                },
+                                                child: Row(
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    SizedBox(
+                                                      width: w * 0.05,
+                                                    ),
+                                                    searchList[index].code == ""
+                                                        ? Container(
+                                                            height: 30,
+                                                            width: 35,
+                                                            decoration: BoxDecoration(
+                                                              color: AppColors.backgroundColor,
+                                                              borderRadius: BorderRadius.circular(6),
+                                                            ),
+                                                          )
+                                                        : SvgPicture.network(
+                                                            'https://widgets-sandbox.btcdirect.eu/img/flags/${(searchList[index].code)?.toLowerCase()}.svg',
+                                                            width: 25,
+                                                            height: 25,
+                                                          ),
+                                                    SizedBox(
+                                                      width: w * 0.04,
+                                                    ),
+                                                    Center(
+                                                      child: Text(
+                                                        '${searchList[index].name}',
+                                                        style: const TextStyle(
+                                                          color: AppColors.black,
+                                                          fontSize: 20,
+                                                          fontWeight: FontWeight.w600,
+                                                          fontFamily: 'TextaAlt',
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const Spacer(),
+                                                    Icon(
+                                                      countrySelectIndex == index ? Icons.check : null,
+                                                      color: AppColors.black,
+                                                      size: 15,
+                                                    ),
+                                                    if (searchList[index].code == "")
+                                                      Icon(
+                                                        countrySelectIndex == index ? null : Icons.info_sharp,
+                                                        color: AppColors.greyColor,
+                                                        size: 22,
+                                                      ),
+                                                    SizedBox(
+                                                      width: w * 0.02,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
+                            ],
+                          ),
+                        ),
+                      ),
                       SizedBox(height: h * 0.01),
                     ],
                   ),
@@ -975,7 +1135,7 @@ class _OnBoardingState extends State<OnBoarding> {
         });
       },
     ).then((value) {
-      if(nationalityController.text.isNotEmpty){
+      if (nationalityController.text.isNotEmpty) {
         if (searchList[countrySelectIndex].code == "") {
           otherNationalityBottomSheet(context);
         }
