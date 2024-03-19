@@ -47,7 +47,7 @@ class _BuyScreenState extends State<BuyScreen> {
     paymentMethod = TextEditingController(text: "Bancontact");
     isTimerShow = true;
     startTimer();
-    updateButtonState();
+    isBankTransferButtonEnabled = updateButtonState();
     super.initState();
   }
 
@@ -983,7 +983,7 @@ class _BuyScreenState extends State<BuyScreen> {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     late PaymentMethods selectedItem;
-    updateButtonState();
+    //updateButtonState();
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -1438,20 +1438,22 @@ class _BuyScreenState extends State<BuyScreen> {
     );
   }
 
-  void updateButtonState() {
+  bool updateButtonState() {
     DateTime currentCETTime = AppCommonFunction().getCETDateTime();
-    // var formattedDate = DateFormat('yyyy MM dd hh:mm:ss a').format(currentCETTime);
-    DateTime startTime = DateTime(currentCETTime.year, currentCETTime.month, currentCETTime.day, 9, 0);
-    DateTime endTime = DateTime(currentCETTime.year, currentCETTime.month, currentCETTime.day, 18, 0);
-
-    if (currentCETTime.isAfter(startTime) && currentCETTime.isBefore(endTime)) {
-      setState(() {
-        isBankTransferButtonEnabled = true;
-      });
+    var formattedDate = DateFormat('yyyy MM dd hh:mm:ss a').format(currentCETTime);
+    print("formattedDate ::: $formattedDate");
+    int currentHour = currentCETTime.hour;
+    int minute = currentCETTime.minute;
+    if (currentHour >= 9 && currentHour < 18) {
+      return true;// It's within working hours
+    } else if (currentHour == 18 && minute == 0) {
+      return true;// Include 6:00 PM as working hours
+    } else if (currentHour >= 0 && currentHour < 6) {
+      return false;// It's before 6:00 AM
+    } else if (currentHour == 6 && minute == 0) {
+      return false;// Include 6:00 AM as non-working hours
     } else {
-      setState(() {
-        isBankTransferButtonEnabled = false;
-      });
+      return false;// It's after 6:00 PM
     }
   }
 

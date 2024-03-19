@@ -4,12 +4,9 @@ import 'dart:io';
 import 'package:btcdirect/src/core/model/order_model.dart';
 import 'package:btcdirect/src/features/buy/ui/completePayment.dart';
 import 'package:btcdirect/src/presentation/config_packages.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:flutter_webview_pro/webview_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_android/webview_flutter_android.dart' as webview_flutter_android;
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
+
 
 class PaymentMethod extends StatefulWidget {
   String amount;
@@ -30,8 +27,7 @@ class PaymentMethod extends StatefulWidget {
       required this.paymentMethodName,
       required this.coinTicker,
       required this.paymentFees,
-      required this.networkFees
-      });
+      required this.networkFees});
 
   @override
   State<PaymentMethod> createState() => _PaymentMethodState();
@@ -46,14 +42,15 @@ class _PaymentMethodState extends State<PaymentMethod> {
   bool isOrderPending = false;
   bool isOrderCancelled = false;
   bool isWebViewReady = false;
+  bool isWebControllerCall = false;
   late Timer timer;
   late Timer paymentMethodTimer;
   int start = 10;
   int paymentMethodTimerStart = 5;
   String price = "0.0";
   num totalFees = 0.0;
-  late final WebViewController controller;
-  late final PlatformWebViewControllerCreationParams params;
+  String webViewUrl = "";
+  final Completer<WebViewController> _controller = Completer<WebViewController>();
 
   @override
   void initState() {
@@ -61,6 +58,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
     startTimer();
     isTimerShow = true;
     totalFees = double.parse(widget.paymentFees) + double.parse(widget.networkFees);
+    if (Platform.isAndroid) {
+      WebView.platform = SurfaceAndroidWebView();
+    }
     super.initState();
   }
 
@@ -70,36 +70,37 @@ class _PaymentMethodState extends State<PaymentMethod> {
     super.dispose();
   }
 
-  
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return isWebViewReady
-          ? webViewShow()
-          : FooterContainer(
-      appBarTitle: "Checkout",
-      isAppBarLeadShow: true,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: w * 0.06),
-          child: Column(
-            children: [
-              SizedBox(
-                height: h * 0.01,
+        ? webViewShow()
+        : FooterContainer(
+            appBarTitle: "Checkout",
+            isAppBarLeadShow: true,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: w * 0.06),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: h * 0.01,
+                    ),
+                    topContainerView(),
+                    SizedBox(
+                      height: h * 0.04,
+                    ),
+                    isLoading
+                        ? SizedBox(height: h / 1.5, child: const Center(child: CircularProgressIndicator()))
+                        : isOrderPending
+                            ? pendingStatusView()
+                            : paymentView(),
+                  ],
+                ),
               ),
-              topContainerView(),
-              SizedBox(
-                height: h * 0.04,
-              ),
-              isLoading
-                  ? SizedBox(height: h / 1.5, child: const Center(child: CircularProgressIndicator()))
-                  : isOrderPending ? pendingStatusView() :paymentView(),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          );
   }
 
   topContainerView() {
@@ -372,7 +373,10 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           onPressed: () {
                             paymentMethodInfoBottomSheet(context);
                           },
-                          icon: const Icon(Icons.info_sharp,size: 20,),
+                          icon: const Icon(
+                            Icons.info_sharp,
+                            size: 20,
+                          ),
                           color: AppColors.greyColor,
                         ),
                         const Spacer(),
@@ -408,7 +412,10 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           onPressed: () {
                             networkFeeInfoBottomSheet(context);
                           },
-                          icon: const Icon(Icons.info_sharp,size: 20,),
+                          icon: const Icon(
+                            Icons.info_sharp,
+                            size: 20,
+                          ),
                           color: AppColors.greyColor,
                         ),
                         const Spacer(),
@@ -517,15 +524,14 @@ class _PaymentMethodState extends State<PaymentMethod> {
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () async {
-                            http.Response response =
-                                await Repository().getClientInfoApiCall();
+                            http.Response response = await Repository().getClientInfoApiCall();
                             if (response.statusCode == 200) {
                               var tempData = jsonDecode(response.body)['slug'];
                               final Uri url = Uri.parse("https://btcdirect.eu/en-eu/terms-of-service?client=$tempData");
                               if (!await launchUrl(url)) {
-                            throw Exception('Could not launch $url');
+                                throw Exception('Could not launch $url');
+                              }
                             }
-                          }
                           },
                       ),
                       const TextSpan(text: "."),
@@ -556,7 +562,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
             ),
           ),
         ),
-        SizedBox(height: h * 0.09,),
+        SizedBox(
+          height: h * 0.09,
+        ),
         ButtonItem.filled(
           text: "Continue order",
           fontSize: 20,
@@ -723,7 +731,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
 
   /// Pending Status View Widget
 
-  pendingStatusView(){
+  pendingStatusView() {
     double h = MediaQuery.of(context).size.height;
     double w = MediaQuery.of(context).size.width;
     return Column(
@@ -731,12 +739,16 @@ class _PaymentMethodState extends State<PaymentMethod> {
         SizedBox(
           height: h * 0.02,
         ),
-        SvgPicture.asset('assets/images/error.svg',width: w * 0.2,height: h * 0.15,),
+        SvgPicture.asset(
+          'assets/images/error.svg',
+          width: w * 0.2,
+          height: h * 0.15,
+        ),
         SizedBox(
           height: h * 0.02,
         ),
         Text(
-          isOrderCancelled ? "Oops! Your order\nhas been cancelled" :"Oops! Something went\nwrong",
+          isOrderCancelled ? "Oops! Your order\nhas been cancelled" : "Oops! Something went\nwrong",
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 26,
@@ -748,16 +760,18 @@ class _PaymentMethodState extends State<PaymentMethod> {
         SizedBox(
           height: h * 0.02,
         ),
-        isOrderCancelled ? Container() : const Text(
-          "Please reload this page or contact our\nsupport team.",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppColors.black,
-            fontFamily: 'TextaAlt',
-          ),
-        ),
+        isOrderCancelled
+            ? Container()
+            : const Text(
+                "Please reload this page or contact our\nsupport team.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                  fontFamily: 'TextaAlt',
+                ),
+              ),
         SizedBox(
           height: h * 0.2,
         ),
@@ -787,10 +801,34 @@ class _PaymentMethodState extends State<PaymentMethod> {
     return SizedBox(
       height: h,
       width: w,
-      child: WebViewWidget(controller: controller),
+      child: WebView(
+        initialUrl: webViewUrl,
+        javascriptMode: JavascriptMode.unrestricted,
+        onWebViewCreated: (WebViewController webViewController) {
+          _controller.complete(webViewController);
+        },
+        onProgress: (int progress) {},
+        javascriptChannels: const <JavascriptChannel>{},
+        navigationDelegate: (NavigationRequest request) {
+          if (request.url.startsWith('https://www.btcdirectapp.com')) {
+            isWebViewReady = false;
+            paymentMethodCompleteCheckTimer();
+            setState(() {});
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
+        onPageStarted: (String url) {
+          print('Page started loading: $url');
+        },
+        onPageFinished: (String url) {
+          // isLoading = true;
+          // setState(() {});
+        },
+        backgroundColor: Colors.white,
+      ),
     );
   }
-
 
   /// Api Call
   void startTimer() {
@@ -830,7 +868,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
   getQuoteChanged() async {
     isLoading = true;
     Map<String, String> body = {"currencyPair": "${widget.coinTicker}-EUR", "fiatAmount": widget.amount.toString(), "cryptoAmount": "", "paymentMethod": widget.paymentMethodCode};
-    http.Response response = await Repository().getQuoteApiCall(body,context);
+    http.Response response = await Repository().getQuoteApiCall(body, context);
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 200) {
       var quoteData = tempData["quote"].toString();
@@ -839,87 +877,18 @@ class _PaymentMethodState extends State<PaymentMethod> {
   }
 
   paymentConfirm(String quote) async {
-    Map<String, String> body = {
-      "quote": quote,
-      "walletAddress": widget.walletAddress,
-      "destinationTag": "",
-      "returnUrl": "https://www.raininfotech.in/"
-    };
+    Map<String, String> body = {"quote": quote, "walletAddress": widget.walletAddress, "destinationTag": "", "returnUrl": "https://www.btcdirectapp.com"};
     var token = StorageHelper.getValue(StorageKeys.token);
-    http.Response response = await Repository().getPaymentConfirmApiCall(body,token,context);
+    http.Response response = await Repository().getPaymentConfirmApiCall(body, token, context);
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 201) {
       var paymentUrl = tempData["paymentUrl"].toString();
       var orderId = tempData["orderId"].toString();
       StorageHelper.setValue(StorageKeys.orderId, orderId);
-      launchURL(paymentUrl);
+      webViewUrl = paymentUrl;
+      isWebViewReady = true;
       setState(() {});
     }
-  }
-
-  launchURL(String paymentUrl) async {
-    /*if (WebViewPlatform.instance is WebKitWebViewPlatform) {
-      params = WebKitWebViewControllerCreationParams(
-        allowsInlineMediaPlayback: true,
-        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
-      );
-    } else {
-      params = const PlatformWebViewControllerCreationParams();
-    }
-
-    controller = WebViewController.fromPlatformCreationParams(params);
-
-    if (Platform.isAndroid) {
-      final myAndroidController = controller.platform as webview_flutter_android.AndroidWebViewController;
-
-      myAndroidController.setOnShowFileSelector(_androidFilePicker);
-
-    }*/
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {},
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          onWebResourceError: (WebResourceError error) {},
-          onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://www.raininfotech.in/')) {
-              isWebViewReady = false;
-              paymentMethodCompleteCheckTimer();
-              setState(() {});
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(paymentUrl));
-    isWebViewReady = true;
-    setState(() {});
-  }
-  Future<List<String>> _androidFilePicker(webview_flutter_android.FileSelectorParams params) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null) {
-      String filePath = result.files.single.path!;
-      String fileName = result.files.single.name;
-
-      // Convert the file to base64
-      List<int> fileBytes = await File(filePath).readAsBytes();
-
-      //convert filepath into uri
-      final filePath1 = (await getTemporaryDirectory()).uri.resolve(fileName);
-      final file = await File.fromUri(filePath1).create(recursive: true);
-
-      //convert file in bytes
-      await file.writeAsBytes(fileBytes, flush: true);
-
-      return [file.uri.toString()];
-    }
-
-    return [];
   }
 
   /// Payment Method Complete Are Not Check Api Call
@@ -927,7 +896,8 @@ class _PaymentMethodState extends State<PaymentMethod> {
   void paymentMethodCompleteCheckTimer() {
     const oneSec = Duration(seconds: 1);
     paymentMethodTimer = Timer.periodic(
-      oneSec, (Timer timer) {
+      oneSec,
+      (Timer timer) {
         if (paymentMethodTimerStart == 0) {
           // timer.cancel();
           getOrderDetailsData();
@@ -941,36 +911,33 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 
-  getOrderDetailsData() async{
+  getOrderDetailsData() async {
     isLoading = true;
     var orderId = StorageHelper.getValue(StorageKeys.orderId);
-    try{
-      http.Response response = await Repository().getOrderDataApiCall(orderId,context);
+    try {
+      http.Response response = await Repository().getOrderDataApiCall(orderId, context);
       var tempData = jsonDecode(response.body) as Map<String, dynamic>;
       if (response.statusCode == 200) {
         OrderModel orderData = OrderModel.fromJson(tempData);
-        if(orderData.status == "completed"){
+        if (orderData.status == "completed") {
           isOrderPending = false;
           isOrderCancelled = false;
           paymentMethodTimer.cancel();
           Navigator.push(context, MaterialPageRoute(builder: (context) => const CompletePayment()));
-        }else if(orderData.status == "cancelled"){
+        } else if (orderData.status == "cancelled") {
           paymentMethodTimer.cancel();
           isOrderPending = true;
           isOrderCancelled = true;
-        }
-        else if (orderData.status == "pending") {
+        } else if (orderData.status == "pending") {
           paymentMethodTimer.cancel();
           isOrderPending = true;
         }
         isLoading = false;
         setState(() {});
       }
-    }
-    catch (e){
+    } catch (e) {
       setState(() {});
       log(e.toString());
     }
   }
-
 }
