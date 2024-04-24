@@ -224,7 +224,12 @@ class _EmailVerificationState extends State<EmailVerification> {
       if (response.statusCode == 202) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         isLoading = false;
-        AppCommonFunction().successSnackBar(context: context, message: 'Verification code sent successfully');
+        reSendText = 'Email sent.';
+        setState(() {});
+        Future.delayed(const Duration(seconds: 2), () {
+          reSendText = '';
+          setState(() {});
+        });
       } else if (response.statusCode >= 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
@@ -295,7 +300,7 @@ class _EmailVerificationState extends State<EmailVerification> {
       if (response.statusCode == 202) {
         // var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         isLoading = false;
-        reSendText = 'Email sent';
+        reSendText = 'Email sent.';
         setState(() {});
         Future.delayed(const Duration(seconds: 2), () {
           reSendText = '';

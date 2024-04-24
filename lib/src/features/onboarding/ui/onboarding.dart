@@ -786,6 +786,14 @@ class _OnBoardingState extends State<OnBoarding> {
     List<Nationality> searchList = [];
     if (combinedItemsList.isNotEmpty) {
       searchList = List.from(combinedItemsList);
+      int i = searchList.indexWhere((element) => element.name == "Belgium");
+      Nationality tempB = Nationality(name: searchList[i].name, code: searchList[i].code, idSelfieRequired: searchList[i].idSelfieRequired);
+      int j = searchList.indexWhere((element) => element.name == "Netherlands");
+      Nationality tempN = Nationality(name: searchList[j].name, code: searchList[j].code, idSelfieRequired: searchList[j].idSelfieRequired);
+      searchList.removeAt(i);
+      searchList.insert(i,tempN);
+      searchList.removeAt(j);
+      searchList.insert(j,tempB);
     } else {
       getCountries();
       setState(() {});
@@ -809,7 +817,7 @@ class _OnBoardingState extends State<OnBoarding> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: h * 0.01),
+                      SizedBox(height: h * 0.04),
                       Row(
                         children: [
                           SizedBox(width: w / 2.8),
@@ -909,7 +917,8 @@ class _OnBoardingState extends State<OnBoarding> {
                                         itemCount: searchList.length,
                                         physics: const NeverScrollableScrollPhysics(),
                                         itemBuilder: (context, index) {
-                                          if (searchList[index].name == "Belgium" || searchList[index].name == "Netherlands" || searchList[index].name == "Spain") {
+                                          if (searchList[index].name == "Netherlands" || searchList[index].name == "Belgium" || searchList[index].name == "Spain") {
+
                                             return Container(
                                               width: w,
                                               height: h * 0.08,
@@ -1045,7 +1054,7 @@ class _OnBoardingState extends State<OnBoarding> {
                                         shrinkWrap: true,
                                         physics: const NeverScrollableScrollPhysics(),
                                         itemBuilder: (context, index) {
-                                          if (searchList[index].name == "Belgium" || searchList[index].name == "Netherlands" || searchList[index].name == "Spain") {
+                                          if (searchList[index].name == "Netherlands" || searchList[index].name == "Belgium" || searchList[index].name == "Spain") {
                                             return Container();
                                           } else {
                                             return Container(
