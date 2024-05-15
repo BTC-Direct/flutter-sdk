@@ -477,7 +477,7 @@ class _BuyScreenState extends State<BuyScreen> {
           },
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Chooes your wallet address.';
+              return 'Choose your wallet address.';
             }
             return null;
           },

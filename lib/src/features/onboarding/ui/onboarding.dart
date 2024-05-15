@@ -514,7 +514,7 @@ class _OnBoardingState extends State<OnBoarding> {
           },
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Chooes your nationality.';
+              return 'Choose your nationality.';
             }
             return null;
           },

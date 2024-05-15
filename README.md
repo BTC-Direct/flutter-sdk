@@ -1,16 +1,92 @@
-# btcdirect
+# BTC Direct SDK for Flutter
 
-A new Flutter project.
+-   Native implementation of the BTC Direct Onramp for Flutter.
+    [![pub](https://img.shields.io/pub/v/btc_direct.svg)](https://pub.dev/packages/btc_direct) [![points](https://img.shields.io/pub/points/btc_direct)](https://pub.dev/packages/btc_direct) [![popularity](https://img.shields.io/pub/popularity/btc_direct)](https://pub.dev/packages/btc_direct) [![likes](https://img.shields.io/pub/likes/btc_direct)](https://pub.dev/packages/btc_direct)
 
-## Getting Started
+-   The BTC Direct SDK for Flutter allows you to integrate BTC Direct Onramp and let your users buy and sell their favorite crypto — without ever leaving your platform.
 
-This project is a starting point for a Flutter application.
+### Features
 
-A few resources to get you started if this is your first Flutter project:
+-   Secure and easy-to-use API for buying and selling crypto
+-   Seamless integration into your Flutter app
+-   Comprehensive documentation and examples
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Requirements
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+-   iOS 13.0 or later is required.
+-   Update your ios/Podfile:
+    ```ruby
+    source 'https://cdn.cocoapods.org/'
+    source 'https://github.com/SumSubstance/Specs.git'
+    # Enable MRTDReader (NFC) module
+    ENV['IDENSIC_WITH_MRTDREADER'] = 'true'
+    # Enable VideoIdent module
+    ENV['IDENSIC_WITH_VIDEOIDENT'] = 'true'
+    ```
+-   Update your ios/Runner/Info.plist:
+    ```xml
+    <key>NSCameraUsageDescription</key>
+    <string>Let us take a photo.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Time to record a video.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Let us pick a photo.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Please provide us with your geolocation data to prove your current location.</string>
+    <key>NFCReaderUsageDescription</key>
+    <string>Let us scan the document for more precise recognition</string>
+    <key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+    <array>
+    <string>A0000002471001</string>
+    <string>A0000002472001</string>
+    <string>00000000000000</string>
+    </array>
+    ```
+-   Ensure that you have bitcode disabled for the whole project and for the flutter_idensic_mobile_sdk_plugin target under Pods project in particular (Pods -> flutter_idensic_mobile_sdk_plugin -> Build Settings -> Enable Bitcode -> No). See more details here.
+
+### Android
+
+-   Change the minSdkVersion to 21 (or higher) in your android/app/build.gradle file.
+-   Declare the following permissions:
+    ```xml
+    <uses-permission android:name="android.permission.INTERNET" />
+    ```
+
+## Installation
+
+Add btc_direct as a dependency in your pubspec.yaml file.
+
+## Usage
+
+TODO: Add usage example
+
+## Privacy
+
+### iOS
+
+<b>Requirements</b>
+
+-   Usage: App Functionality (covers fraud prevention)
+-   Are the device IDs collected from this app linked to the user’s identity? Yes
+-   Do you or your third-party partners use device IDs for tracking purposes? Yes
+
+### Android
+
+<b>Requirement</b>
+
+-   Any data provided by the user is solely used for facilitating transactions through BTC Direct and is not shared with any third parties. See more details here.
+-   When publishing to the Play Store, disclose the usage of Device Identifiers as follows:
+    -   Data Types: Device or other IDs
+    -   Collected: Yes
+    -   Shared: No
+    -   Processed Ephemerally: No
+    -   Required or Optional: Required
+    -   Purposes: Fraud Prevention
+
+## Contributing
+
+We welcome contributions to the BTC Direct SDK for Flutter! Please submit a pull request with your proposed changes.
+
+## License
+
+The BTC Direct SDK for

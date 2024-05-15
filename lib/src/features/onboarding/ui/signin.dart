@@ -53,7 +53,7 @@ class _SignInState extends State<SignIn> {
                     textAlign: TextAlign.center,
                     text: TextSpan(
                         children: [
-                          const TextSpan(text: "please enter your details. Don't have\nan account? "),
+                          const TextSpan(text: "Please enter your details. Don't have\nan account? "),
                           TextSpan(
                             text: "Create new account",
                             style: const TextStyle(

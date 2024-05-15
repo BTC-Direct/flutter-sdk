@@ -31,7 +31,7 @@ class _LandingState extends State<Landing> {
             SizedBox(height: h * 0.05),
             const Center(
               child: Text(
-                "welcome to europe's\nfavorite crypto platform.",
+                "Welcome to europe's\nfavorite crypto platform.",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.black, fontSize: 24, fontFamily: 'TextaAlt', fontWeight: FontWeight.w700),
               ),
