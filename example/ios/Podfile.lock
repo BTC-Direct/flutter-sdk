@@ -1,0 +1,68 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_idensic_mobile_sdk_plugin (1.29.0):
+    - Flutter
+    - IdensicMobileSDK (= 1.29.0)
+    - IdensicMobileSDK/MRTDReader (= 1.29.0)
+  - IdensicMobileSDK (1.29.0):
+    - IdensicMobileSDK/Default (= 1.29.0)
+  - IdensicMobileSDK/Core (1.29.0)
+  - IdensicMobileSDK/Default (1.29.0):
+    - IdensicMobileSDK/Core
+  - IdensicMobileSDK/MRTDReader (1.29.0):
+    - IdensicMobileSDK/MRTDReader-latest
+  - IdensicMobileSDK/MRTDReader-latest (1.29.0):
+    - IdensicMobileSDK/Core
+    - OpenSSL-Universal
+  - OpenSSL-Universal (1.1.2200)
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - smart_auth (0.0.1):
+    - Flutter
+  - url_launcher_ios (0.0.1):
+    - Flutter
+  - webview_flutter_wkwebview (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_idensic_mobile_sdk_plugin (from `.symlinks/plugins/flutter_idensic_mobile_sdk_plugin/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - smart_auth (from `.symlinks/plugins/smart_auth/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
+
+SPEC REPOS:
+  https://github.com/SumSubstance/Specs.git:
+    - IdensicMobileSDK
+  trunk:
+    - OpenSSL-Universal
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_idensic_mobile_sdk_plugin:
+    :path: ".symlinks/plugins/flutter_idensic_mobile_sdk_plugin/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  smart_auth:
+    :path: ".symlinks/plugins/smart_auth/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+  webview_flutter_wkwebview:
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
+
+SPEC CHECKSUMS:
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_idensic_mobile_sdk_plugin: 3175c6c4419a55688290318fcd830654e5a89f60
+  IdensicMobileSDK: dd6ef271f5c7513525a2d34e7bab0a401487aa2e
+  OpenSSL-Universal: 6e1ae0555546e604dbc632a2b9a24a9c46c41ef6
+  shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
+  smart_auth: 4bedbc118723912d0e45a07e8ab34039c19e04f2
+  url_launcher_ios: bbd758c6e7f9fd7b5b1d4cde34d2b95fcce5e812
+  webview_flutter_wkwebview: 4f3e50f7273d31e5500066ed267e3ae4309c5ae4
+
+PODFILE CHECKSUM: 005422de9d7a4618e87692e96adda010ace924fa
+
+COCOAPODS: 1.15.2
