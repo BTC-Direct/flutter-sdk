@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class Repository {
   static var client = http.Client();
-  String baseUrl = isSendBox ? "https://api-sandbox.btcdirect.eu/api/" : "https://api.btcdirect.eu/api/";
+  String baseUrl = isSandBox ? "https://api-sandbox.btcdirect.eu/api/" : "https://api.btcdirect.eu/api/";
 
   getClientInfoApiCall() async {
     try {

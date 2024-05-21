@@ -598,12 +598,6 @@ class _OnBoardingState extends State<OnBoarding> {
                 setState(() {});
               },
               side: const BorderSide(color: CommonColors.greyColor, width: 1.5),
-              fillColor: MaterialStateProperty.resolveWith((states) {
-                if (!states.contains(MaterialState.selected)) {
-                  return CommonColors.backgroundColor.withOpacity(0.4);
-                }
-                return null;
-              }),
               activeColor: CommonColors.blueColor,
             ),
             Expanded(
@@ -693,12 +687,6 @@ class _OnBoardingState extends State<OnBoarding> {
                 setState(() {});
               },
               side: const BorderSide(color: CommonColors.greyColor, width: 1.5),
-              fillColor: MaterialStateProperty.resolveWith((states) {
-                if (!states.contains(MaterialState.selected)) {
-                  return CommonColors.backgroundColor.withOpacity(0.4);
-                }
-                return null;
-              }),
               activeColor: CommonColors.blueColor,
             ),
             const Expanded(

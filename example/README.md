@@ -1,8 +1,7 @@
 # BTC Direct
 
 ## IMPORTANT
-myAddressesList: A list containing information about the sender's wallet
-address.
+* `myAddressesList`: A list containing information about the sender's wallet address.
 * `address`: The sender's wallet address.
 * `currency`: The currency in which the transaction will be made.
 * `id`: An identifier for the wallet address.

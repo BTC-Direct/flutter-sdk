@@ -1,9 +1,6 @@
 import 'dart:developer';
-
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:btc_direct/src/core/model/userinfo_model.dart';
 import 'package:btc_direct/src/features/buy/ui/paymentmethod.dart';
-
 import 'package:btc_direct/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -61,6 +58,11 @@ class _BTCDirectState extends State<BTCDirect> {
     timer.cancel();
   }
 
+  /// Initializes the data for the application.
+  /// This function ensures that the Flutter binding is initialized, sets the preferred
+  /// orientations to portrait up and portrait down, initializes the storage helper,
+  /// and clears the addresses list.
+  /// Returns a `Future` that completes when the initialization is complete.
   Future initData() async {
     WidgetsFlutterBinding.ensureInitialized();
     await SystemChrome.setPreferredOrientations([
@@ -71,9 +73,17 @@ class _BTCDirectState extends State<BTCDirect> {
     addressesList.clear();
   }
 
-  getAllData() {
+
+  /// Gets all the required data and initializes the state.
+  /// Sets the xApiKey and isSandBox values from the widget.
+  /// If the widget contains the addresses list, copies the addresses to the state.
+  /// Enables the immersive mode for the app.
+  /// Calls the getCoinDataList function to fetch the coin data.
+  /// Initializes the wallet address and payment method text controllers.
+  /// Starts the timer and enables or disables the bank transfer button based on the payment method.
+  void getAllData() {
     xApiKey = widget.xApiKey;
-    isSendBox = widget.isSandBox;
+    isSandBox = widget.isSandBox;
     if (widget.myAddressesList.isNotEmpty) {
       for (int i = 0; i < widget.myAddressesList.length; i++) {
         addressesList.add(WalletAddressModel(
@@ -85,7 +95,7 @@ class _BTCDirectState extends State<BTCDirect> {
       }
     }
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    log("xApiKey *** $xApiKey *** ::: addressesList *** ${addressesList.length} *** ::: isSendBox *** $isSendBox");
+    log("xApiKey *** $xApiKey *** ::: addressesList *** ${addressesList.length} *** ::: isSendBox *** $isSandBox");
     getCoinDataList(context);
     walletAddress = TextEditingController(text: "My wallet");
     paymentMethod = TextEditingController(text: "Bancontact");
@@ -133,7 +143,7 @@ class _BTCDirectState extends State<BTCDirect> {
       children: [
         Column(
           children: [
-            AutoSizeText(
+            Text(
               "Order",
               maxLines: 1,
               style: TextStyle(
@@ -158,7 +168,7 @@ class _BTCDirectState extends State<BTCDirect> {
         ),
         Column(
           children: [
-            AutoSizeText(
+            Text(
               "Payment",
               maxLines: 1,
               style: TextStyle(
@@ -183,7 +193,7 @@ class _BTCDirectState extends State<BTCDirect> {
         ),
         Column(
           children: [
-            AutoSizeText(
+            Text(
               "Complete",
               style: TextStyle(
                 fontSize: 20,
@@ -1499,6 +1509,18 @@ class _BTCDirectState extends State<BTCDirect> {
     );
   }
 
+    /// Updates the button state based on the current CET time.
+    ///
+    /// This function retrieves the current CET time using the `getCETDateTime` method from the `AppCommonFunction` class.
+    /// It then formats the current time using the `DateFormat` class and prints it if the app is in debug mode.
+    /// The function checks the current hour and minute of the CET time and returns a boolean value based on the following conditions:
+    /// - If the current hour is between 9 and 17 (inclusive), it returns `true` indicating that it is within working hours.
+    /// - If the current hour is 18 and the minute is 0, it returns `true` indicating that it includes 6:00 PM as working hours.
+    /// - If the current hour is between 0 and 5 (inclusive), it returns `false` indicating that it is before 6:00 AM.
+    /// - If the current hour is 6 and the minute is 0, it returns `false` indicating that it includes 6:00 AM as non-working hours.
+    /// - Otherwise, it returns `false` indicating that it is after 6:00 PM.
+    ///
+    /// Returns a boolean value indicating the state of the button.
   bool updateButtonState() {
     DateTime currentCETTime = AppCommonFunction().getCETDateTime();
     var formattedDate = DateFormat('yyyy MM dd hh:mm:ss a').format(currentCETTime);
@@ -1541,7 +1563,17 @@ class _BTCDirectState extends State<BTCDirect> {
     );
   }
 
-  getCoinDataList(BuildContext context) async {
+  /// Fetches the coin data from the API and updates the state accordingly.
+  /// This function calls the `getCoinDataListApiCall` function from the Repository class
+  /// and decodes the response body into a list of `GetPairsModel`.
+  /// It then iterates over the list and checks if the currency pair of each
+  /// model matches with any of the currencies in the `addressesList`. If a match is
+  /// found, it adds a `CoinModel` to the `coinList`.
+  /// Finally, it calls the `getPaymentMethod` function to fetch the payment
+  /// methods.
+  /// This function is called when the widget is mounted.
+  /// [context]: The context of the widget.
+  Future<void> getCoinDataList(BuildContext context) async {
     try {
       isLoading = true;
       List<GetPairsModel> currencyPairs = [];
@@ -1587,7 +1619,17 @@ class _BTCDirectState extends State<BTCDirect> {
     }
   }
 
-  getPaymentMethod(BuildContext context) async {
+
+  /// Fetches the payment methods from the API and updates the state accordingly.
+  /// This function calls the `getPaymentMethodApiCall` function from the Repository class
+  /// and decodes the response body into a `PaymentMethodModel`.
+  /// It then iterates over the list of payment methods and adds each payment method
+  /// to the `payMethodList`.
+  /// Finally, it sets the `paymentMethod` text controller to the first payment method's label
+  /// and the `paymentMethodCode` to the first payment method's code.
+  /// This function is called when the widget is mounted.
+  /// [context]: The context of the widget.
+  Future<void> getPaymentMethod(BuildContext context) async {
     try {
       isLoading = true;
       PaymentMethodModel payMethodPairs;
@@ -1600,8 +1642,8 @@ class _BTCDirectState extends State<BTCDirect> {
             PaymentMethods(
               code: payMethodPairs.paymentMethods![i].code,
               fee: payMethodPairs.paymentMethods![i].fee,
-              limit: payMethodPairs.paymentMethods![i].limit,
               label: payMethodPairs.paymentMethods![i].label,
+              limit: payMethodPairs.paymentMethods![i].limit,
             ),
           );
         }
@@ -1635,14 +1677,37 @@ class _BTCDirectState extends State<BTCDirect> {
     }
   }
 
-  getCurrencyPrice() async {
+  /// Fetches the current price of the selected cryptocurrency currency from the API and
+  /// updates the state accordingly.
+  /// This function calls the `getPriceApiCall` function from the Repository class and
+  /// decodes the response body into a price value.
+  /// The function then parses the price value as a double and updates the `price` state.
+  /// The function is called automatically when the user selects a different cryptocurrency
+  /// currency from the dropdown list.
+  void getCurrencyPrice() async {
     var response = await Repository().getPriceApiCall();
     setState(() {
       price = double.parse(response["buy"]["${coinList[coinSelectIndex].coinTicker}-EUR"].toString());
     });
   }
 
-  onAmountChanged({required String value, required bool isPay}) async {
+  /// This function is used to call the API for getting the amount related data such as
+  /// fiat amount, payment method cost, and network fee cost.
+  /// The API is called with the selected cryptocurrency currency, the amount of fiat or
+  /// cryptocurrency currency, and the selected payment method.
+  /// The response is then parsed and the state is updated accordingly.
+  /// The function is used in the onAmountChanged callback of the text form field.
+  /// If the amount is not empty or equals to "0.0", the API is called.
+  /// If the API call is successful, the fiat amount, payment method cost,
+  /// and network fee cost are updated in the state.
+  /// If the API call is unsuccessful, the error messages are logged.
+  /// The function takes two parameters: `value` which is the amount of fiat or
+  /// cryptocurrency currency and `isPay` which is a boolean indicating whether it's a
+  /// fiat or cryptocurrency currency.
+  /// The function is synchronous.
+  /// [value]: The amount of fiat or cryptocurrency currency.
+  /// [isPay]: A boolean indicating whether it's a fiat or cryptocurrency currency.
+  Future<void> onAmountChanged({required String value, required bool isPay}) async {
     Map<String, String> body = isPay
         ? {
             "currencyPair": "${coinList[coinSelectIndex].coinTicker}-EUR",
@@ -1687,7 +1752,15 @@ class _BTCDirectState extends State<BTCDirect> {
     }
   }
 
-  getUserInfo(String token) async {
+  /// Fetches the user info from the API and updates the state accordingly.
+  /// This function calls the `getUserInfoApiCall` function from the Repository class
+  /// and decodes the response body into a `UserInfoModel`.
+  /// It then checks the status of the user info and sets the `isUserVerified` state
+  /// to true if the status is "pending" and false otherwise.
+  /// Finally, it calls the `setState` function to update the state.
+  /// [token]: The token which is used to authenticate the API call.
+  /// [context]: The context of the widget.
+  Future<void> getUserInfo(String token) async {
     try {
       var response = await Repository().getUserInfoApiCall(token, context);
       userInfoModel = UserInfoModel.fromJson(response);

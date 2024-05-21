@@ -5,7 +5,7 @@ export 'package:btc_direct/src/core/api_repository/repository.dart';
 export 'package:btc_direct/src/core/global_variables.dart';
 export 'package:btc_direct/src/core/model/error_response_model.dart';
 export 'package:btc_direct/src/core/model/get_pairs_model.dart';
-export 'package:btc_direct/src/core/model/get_paymentMethod_model.dart';
+export 'package:btc_direct/src/core/model/get_payment_method_model.dart';
 export 'package:btc_direct/src/core/model/nationality_model.dart';
 export 'package:btc_direct/src/core/model/user_response_model.dart';
 export 'package:btc_direct/src/core/storage_helper.dart';

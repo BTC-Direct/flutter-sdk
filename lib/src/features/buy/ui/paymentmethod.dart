@@ -501,12 +501,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
                 });
               },
               side: const BorderSide(color: CommonColors.greyColor, width: 1.5),
-              fillColor: MaterialStateProperty.resolveWith((states) {
-                if (!states.contains(MaterialState.selected)) {
-                  return CommonColors.backgroundColor.withOpacity(0.4);
-                }
-                return null;
-              }),
               activeColor: CommonColors.blueColor,
             ),
             Expanded(

@@ -1,9 +1,8 @@
-# BTC Direct SDK for Flutter
+# BTC Direct SDK
 
--   Native implementation of the BTC Direct Onramp for Flutter.
-    [![pub](https://img.shields.io/pub/v/btc_direct.svg)](https://pub.dev/packages/btc_direct) [![points](https://img.shields.io/pub/points/btc_direct)](https://pub.dev/packages/btc_direct) [![popularity](https://img.shields.io/pub/popularity/btc_direct)](https://pub.dev/packages/btc_direct) [![likes](https://img.shields.io/pub/likes/btc_direct)](https://pub.dev/packages/btc_direct)
+[![pub](https://img.shields.io/pub/v/btc_direct.svg)](https://pub.dev/packages/btc_direct) [![points](https://img.shields.io/pub/points/btc_direct)](https://pub.dev/packages/btc_direct) [![popularity](https://img.shields.io/pub/popularity/btc_direct)](https://pub.dev/packages/btc_direct) [![likes](https://img.shields.io/pub/likes/btc_direct)](https://pub.dev/packages/btc_direct)
 
--   The BTC Direct SDK for Flutter allows you to integrate BTC Direct Onramp and let your users buy and sell their favorite crypto — without ever leaving your platform.
+-   Streamline token purchases with BTC Direct package: enter wallet details, select tokens, choose payment methods, and complete KYC verification effortlessly. Ideal for secure token transactions.
 
 ### Features
 
@@ -58,7 +57,19 @@ Add btc_direct as a dependency in your pubspec.yaml file.
 
 ## Usage
 
-TODO: Add usage example
+```dart
+BTCDirect(
+  myAddressesList: [
+    {
+      "address": "sender_wallet_address", "currency": "BTC",
+      "id": '1',
+      "name": "Sender's Wallet"
+    },
+  ],
+  xApiKey: "your_api_key_here",
+  isSandBox:true,
+);
+```
 
 ## Privacy
 
@@ -85,8 +96,4 @@ TODO: Add usage example
 
 ## Contributing
 
-We welcome contributions to the BTC Direct SDK for Flutter! Please submit a pull request with your proposed changes.
-
-## License
-
-The BTC Direct SDK for
+We welcome contributions to the BTC Direct SDK! Please submit a pull request with your proposed changes.

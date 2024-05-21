@@ -62,11 +62,8 @@ class CommonTextFormField extends StatelessWidget {
             textCapitalization: textCapitalization,
             maxLines: maxlines ?? 1,
             onEditingComplete: onEditingComplete,
-            //style: Get.textTheme.bodyLarge!.copyWith(color: Get.theme.iconTheme.color),
             validator: validator,
             decoration: InputDecoration(
-                //fillColor: Get.theme.scaffoldBackgroundColor,
-                //filled: true,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: CommonColors.blueColor)),
                 disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: CommonColors.greyColor)),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: CommonColors.greyColor)),
