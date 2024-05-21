@@ -1,13 +1,13 @@
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:btc_direct/src/core/model/order_model.dart';
-import 'package:btc_direct/src/features/buy/ui/completePayment.dart';
+import 'package:btc_direct/src/features/buy/ui/complete_payment.dart';
 import 'package:btc_direct/src/presentation/config_packages.dart';
 import 'package:flutter_webview_pro/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 
 
+// ignore: must_be_immutable
 class PaymentMethod extends StatefulWidget {
   String amount;
   String paymentMethodCode;
@@ -592,7 +592,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
   }
 
   paymentMethodInfoBottomSheet(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     showModalBottomSheet<void>(
       context: context,
@@ -663,7 +662,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
   }
 
   networkFeeInfoBottomSheet(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     showModalBottomSheet<void>(
       context: context,
@@ -824,7 +822,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
           return NavigationDecision.navigate;
         },
         onPageStarted: (String url) {
-          print('Page started loading: $url');
+          if (kDebugMode) {
+            print('Page started loading: $url');
+          }
         },
         onPageFinished: (String url) {
           // isLoading = true;

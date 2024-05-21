@@ -1,3 +1,4 @@
+// ignore: file_names
 class PaymentMethodModel {
   List<PaymentMethods>? paymentMethods;
   Countries? countries;

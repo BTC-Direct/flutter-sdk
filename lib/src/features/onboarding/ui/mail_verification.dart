@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:btc_direct/src/features/onboarding/ui/signin.dart';
 import 'package:btc_direct/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 
@@ -187,11 +186,13 @@ class _EmailVerificationState extends State<EmailVerification> {
         log("verifyEmail Response ::: ${tempData.toString()}");
         var user = UserModel.fromJson(tempData);
         log("verifyEmail Response ${user.toString()}");
+        if(context.mounted){
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => const VerifyIdentity(),
             ));
+        }
       } else if (response.statusCode >= 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
@@ -200,7 +201,9 @@ class _EmailVerificationState extends State<EmailVerification> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              if(context.mounted) {
               AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
           }
         }
@@ -222,7 +225,6 @@ class _EmailVerificationState extends State<EmailVerification> {
         widget.identifier ?? "",
       );
       if (response.statusCode == 202) {
-        var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         isLoading = false;
         reSendText = 'Email sent.';
         setState(() {});
@@ -238,7 +240,9 @@ class _EmailVerificationState extends State<EmailVerification> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              if(context.mounted) {
               AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
           }
         }
@@ -263,11 +267,13 @@ class _EmailVerificationState extends State<EmailVerification> {
         log("verifyEmail Response ::: ${tempData.toString()}");
         var user = UserModel.fromJson(tempData);
         log("verifyEmail Response ${user.toString()}");
+        if(context.mounted){
         Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const VerifyIdentity(),
             ));
+        }
       }
       else if (response.statusCode >= 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
@@ -277,7 +283,9 @@ class _EmailVerificationState extends State<EmailVerification> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              if(context.mounted) {
               AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
           }
         }
@@ -315,7 +323,9 @@ class _EmailVerificationState extends State<EmailVerification> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              if(context.mounted) {
               AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
           }
         }

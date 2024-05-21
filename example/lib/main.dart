@@ -1,4 +1,4 @@
-import 'package:btc_direct/btc_direct_package.dart';
+import 'package:btc_direct/btc_direct.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({
+
     super.key,
   });
 

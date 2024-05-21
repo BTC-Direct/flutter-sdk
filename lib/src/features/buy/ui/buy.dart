@@ -86,7 +86,7 @@ class _BTCDirectState extends State<BTCDirect> {
     }
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     log("xApiKey *** $xApiKey *** ::: addressesList *** ${addressesList.length} *** ::: isSendBox *** $isSendBox");
-    getCoinDataList();
+    getCoinDataList(context);
     walletAddress = TextEditingController(text: "My wallet");
     paymentMethod = TextEditingController(text: "Bancontact");
     isTimerShow = true;
@@ -1089,7 +1089,6 @@ class _BTCDirectState extends State<BTCDirect> {
                     child: ListView.builder(
                       itemCount: payMethodList.length,
                       itemBuilder: (context, index) {
-                        bool isBank = payMethodList[index].label == 'Bank Transfer';
                         return Container(
                           width: w,
                           height: h * 0.08,
@@ -1218,7 +1217,6 @@ class _BTCDirectState extends State<BTCDirect> {
   }
 
   paymentMethodInfoBottomSheet(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     showModalBottomSheet<void>(
       context: context,
@@ -1290,7 +1288,6 @@ class _BTCDirectState extends State<BTCDirect> {
   }
 
   networkFeeInfoBottomSheet(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     showModalBottomSheet<void>(
       context: context,
@@ -1505,7 +1502,9 @@ class _BTCDirectState extends State<BTCDirect> {
   bool updateButtonState() {
     DateTime currentCETTime = AppCommonFunction().getCETDateTime();
     var formattedDate = DateFormat('yyyy MM dd hh:mm:ss a').format(currentCETTime);
-    print("formattedDate ::: $formattedDate");
+    if (kDebugMode) {
+      print("formattedDate ::: $formattedDate");
+    }
     int currentHour = currentCETTime.hour;
     int minute = currentCETTime.minute;
     if (currentHour >= 9 && currentHour < 18) {
@@ -1542,7 +1541,7 @@ class _BTCDirectState extends State<BTCDirect> {
     );
   }
 
-  getCoinDataList() async {
+  getCoinDataList(BuildContext context) async {
     try {
       isLoading = true;
       List<GetPairsModel> currencyPairs = [];
@@ -1560,7 +1559,9 @@ class _BTCDirectState extends State<BTCDirect> {
             }
           }
         }
-        getPaymentMethod();
+        if(context.mounted){
+        getPaymentMethod(context);
+        }
       } else if (response.statusCode >= 400) {
         setState(() {
           isLoading = false;
@@ -1570,7 +1571,9 @@ class _BTCDirectState extends State<BTCDirect> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if(context.mounted){
+                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
               log(errorCodeList[i].message);
             }
           }
@@ -1584,7 +1587,7 @@ class _BTCDirectState extends State<BTCDirect> {
     }
   }
 
-  getPaymentMethod() async {
+  getPaymentMethod(BuildContext context) async {
     try {
       isLoading = true;
       PaymentMethodModel payMethodPairs;
@@ -1616,7 +1619,9 @@ class _BTCDirectState extends State<BTCDirect> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              if(context.mounted) {
               AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
               log(errorCodeList[i].message);
             }
           }

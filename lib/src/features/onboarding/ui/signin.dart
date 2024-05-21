@@ -240,7 +240,9 @@ class _SignInState extends State<SignIn> {
         await StorageHelper.setValue(StorageKeys.userId, tempData['uuid']);
         await StorageHelper.setValue(
             StorageKeys.refreshToken, tempData['refreshToken']);
-        getUserInfo(tempData['token']);
+        if(context.mounted) {
+        getUserInfo(tempData['token'],context);
+        }
       } else {
         isLoading = false;
         setState(() {});
@@ -252,7 +254,7 @@ class _SignInState extends State<SignIn> {
     }
   }
 
-  getUserInfo(String token) async {
+  getUserInfo(String token,BuildContext context) async {
     try {
       var response = await Repository().getUserInfoApiCall(token,context);
       UserInfoModel userInfoModel = UserInfoModel.fromJson(response);
@@ -272,12 +274,13 @@ class _SignInState extends State<SignIn> {
       } else if (userInfoModel.status?.details?.identityVerificationStatus == "open")  {
         if (context.mounted) {
           Navigator.push(
-          context,
+            context,
           MaterialPageRoute(
             builder: (context) => const VerifyIdentity(),
           ),
         );
         }
+        isLoading = false;
         emailController.clear();
         passwordController.clear();
       } else {

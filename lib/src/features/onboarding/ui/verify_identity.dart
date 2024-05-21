@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:btc_direct/src/features/onboarding/ui/signin.dart';
 import 'package:btc_direct/src/presentation/config_packages.dart';
 import 'package:flutter_idensic_mobile_sdk_plugin/flutter_idensic_mobile_sdk_plugin.dart';
@@ -22,7 +21,7 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
   @override
   void initState() {
     super.initState();
-    getKYCAccessToken();
+    getKYCAccessToken(context);
   }
 
   @override
@@ -99,7 +98,7 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
               bgColor: CommonColors.blueColor,
               onPressed: () {
                 setState(() {
-                  launchSDK();
+                  launchSDK(context);
                 });
               },
             ),
@@ -112,7 +111,7 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
     );
   }
 
-  getKYCAccessToken() async {
+  getKYCAccessToken(BuildContext context) async {
     try {
       http.Response response = await Repository().getVerificationStatusApiCall(context);
       var tempData = jsonDecode(response.body) ;
@@ -130,7 +129,9 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+             if(context.mounted) {
+                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
               log(errorCodeList[i].message);
             }
           }
@@ -142,10 +143,10 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
 
   }
 
-  void launchSDK() async {
+  void launchSDK(BuildContext context) async {
     String accessToken = kycAccessToken;
     onTokenExpiration() async {
-      return Future<String>.delayed(const Duration(seconds: 2), () => getKYCAccessToken());
+      return Future<String>.delayed(const Duration(seconds: 2), () => getKYCAccessToken(context));
     }
 
     final builder = SNSMobileSDK.init(accessToken, onTokenExpiration);
@@ -154,7 +155,7 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
 
     final result = await snsMobileSDK!.launch();
     if(result.success == true) {
-      var token = StorageHelper.getValue(StorageKeys.token);
+      var token = await StorageHelper.getValue(StorageKeys.token);
       if(token.isNotEmpty){
         if(context.mounted){
           Navigator.pop(context);

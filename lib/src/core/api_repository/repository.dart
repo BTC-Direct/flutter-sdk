@@ -56,12 +56,16 @@ class Repository {
         log("Response ${tempData.toString()}");
         for (int j = 0; j < tempData['errors'].length; j++) {
           if (tempData['errors'].keys.toList()[j] == "ER701") {
+            if(context.mounted) {
             getNewTokenApiCall(context);
+            }
           } else {
             var errorCodeList = await AppCommonFunction().getJsonData();
             for (int i = 0; i < errorCodeList.length; i++) {
               if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+                if(context.mounted){
+                  AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+                }
                 log("${errorCodeList[i].message}");
               }
             }
@@ -150,7 +154,7 @@ class Repository {
   getVerificationStatusApiCall(BuildContext context) async {
     var token = await StorageHelper.getValue(StorageKeys.token);
     var identifier = await StorageHelper.getValue(StorageKeys.identifier);
-    var response;
+    http.Response response;
     if (identifier != null && (token == null ||token == "" || token.isEmpty)) {
       response = await http.get(Uri.parse("${baseUrl}v2/user/verification-status"), headers: {"X-Api-Key": xApiKey, "User-Identifier": identifier});
     } else {
@@ -163,14 +167,18 @@ class Repository {
       log("Response ${tempData.toString()}");
       for (int j = 0; j < tempData['errors'].length; j++) {
         if (tempData['errors'].keys.toList()[j] == "ER701") {
-          getNewTokenApiCall(context).then((value) {
+          if(context.mounted) {
+            getNewTokenApiCall(context).then((value) {
             getVerificationStatusApiCall(context);
           });
+          }
         } else {
           var errorCodeList = await AppCommonFunction().getJsonData();
           for (int i = 0; i < errorCodeList.length; i++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if(context.mounted) {
+                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
           }
         }
@@ -194,7 +202,9 @@ class Repository {
         var errorCodeList = await AppCommonFunction().getJsonData();
         for (int i = 0; i < errorCodeList.length; i++) {
           if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-            AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            if(context.mounted) {
+              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+            }
           }
         }
       }
@@ -211,14 +221,18 @@ class Repository {
       log("Response ${tempData.toString()}");
       for (int j = 0; j < tempData['errors'].length; j++) {
         if (tempData['errors'].keys.toList()[j] == "ER701") {
-          getNewTokenApiCall(context).then((value) {
+          if(context.mounted) {
+            getNewTokenApiCall(context).then((value) {
             getQuoteApiCall(body, context);
           });
+          }
         } else {
           var errorCodeList = await AppCommonFunction().getJsonData();
           for (int i = 0; i < errorCodeList.length; i++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if(context.mounted) {
+                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
           }
         }
@@ -235,14 +249,18 @@ class Repository {
       log("Response ${tempData.toString()}");
       for (int j = 0; j < tempData['errors'].length; j++) {
         if (tempData['errors'].keys.toList()[j] == "ER701") {
-          getNewTokenApiCall(context).then((value) {
+          if(context.mounted) {
+            getNewTokenApiCall(context).then((value) {
             getPaymentConfirmApiCall(body, token, context);
           });
+          }
         } else {
           var errorCodeList = await AppCommonFunction().getJsonData();
           for (int i = 0; i < errorCodeList.length; i++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if(context.mounted) {
+                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
           }
         }
@@ -263,14 +281,18 @@ class Repository {
       log("Response ${tempData.toString()}");
       for (int j = 0; j < tempData['errors'].length; j++) {
         if (tempData['errors'].keys.toList()[j] == "ER701") {
-          getNewTokenApiCall(context).then((value) {
+          if(context.mounted) {
+            getNewTokenApiCall(context).then((value) {
             getOrderDataApiCall(orderId, context);
           });
+          }
         } else {
           var errorCodeList = await AppCommonFunction().getJsonData();
           for (int i = 0; i < errorCodeList.length; i++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if(context.mounted) {
+                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
           }
         }

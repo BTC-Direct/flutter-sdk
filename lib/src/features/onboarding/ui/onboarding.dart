@@ -34,7 +34,7 @@ class _OnBoardingState extends State<OnBoarding> {
   @override
   void initState() {
     super.initState();
-    getCountries();
+    getCountries(context);
   }
 
   @override
@@ -752,7 +752,7 @@ class _OnBoardingState extends State<OnBoarding> {
     );
   }
 
-  getCountries() async {
+  getCountries(BuildContext context) async {
     List<Nationality> countryList = [];
     try {
       isLoading = true;
@@ -772,7 +772,9 @@ class _OnBoardingState extends State<OnBoarding> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if(context.mounted) {
+                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              }
             }
           }
         }
@@ -798,7 +800,7 @@ class _OnBoardingState extends State<OnBoarding> {
       searchList.removeAt(j);
       searchList.insert(j,tempB);
     } else {
-      getCountries();
+      getCountries(context);
       setState(() {});
     }
 
@@ -885,7 +887,6 @@ class _OnBoardingState extends State<OnBoarding> {
                             List<Nationality> tempSearchList = searchList.where((nationalityName) => nationalityName.name!.toLowerCase().contains(value.toLowerCase())).toList();
                             setState(() {
                               searchList = tempSearchList;
-                              print('combinedItemsList length: ${searchList.length}');
                             });
                           } else {
                             setState(() {
@@ -1221,7 +1222,7 @@ class _OnBoardingState extends State<OnBoarding> {
                       ),
                     ),
                     SizedBox(height: h * 0.02),
-                    Center(child: SvgPicture.asset(Images.otherNationality, color: CommonColors.greenColor, height: 50)),
+                    Center(child: SvgPicture.asset(Images.otherNationality,colorFilter: const ColorFilter.mode(CommonColors.greenColor, BlendMode.srcIn), height: 50)),
                     const Text(
                       "Unfortunately we do not offer our service in your region.",
                       style: TextStyle(
@@ -1293,11 +1294,13 @@ class _OnBoardingState extends State<OnBoarding> {
         await StorageHelper.setValue(StorageKeys.token,'');
         log("Response::: ${user.toString()}");
         await StorageHelper.setValue(StorageKeys.identifier, identifier);
-        Navigator.push(
+        if(context.mounted) {
+          Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => EmailVerification(email: user.email.toString(), identifier: identifier),
             ));
+        }
       } else if (response.statusCode >= 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
@@ -1310,7 +1313,9 @@ class _OnBoardingState extends State<OnBoarding> {
               });
             } else {
               if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+                if(context.mounted) {
+                  AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+                }
               }
             }
           }

@@ -1,8 +1,6 @@
 # BTC Direct
 
 ## IMPORTANT
-
-## IMPORTANT
 myAddressesList: A list containing information about the sender's wallet
 address.
 * `address`: The sender's wallet address.
