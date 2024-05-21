@@ -1,0 +1,574 @@
+{
+  "errorCodeList": [
+    {
+      "code": "ER001",
+      "message": "Email address is invalid.",
+      "solution": "Provide a valid email address."
+    },
+    {
+      "code": "ER002",
+      "message": "Email address already registered.",
+      "solution": "Tell the user to log in to their existing account, or provide a link to the 'forgot password' procedure."
+    },
+    {
+      "code": "ER003",
+      "message": "No email address provided.",
+      "solution": "Provide a valid email address."
+    },
+    {
+      "code": "ER004",
+      "message": "No password provided.",
+      "solution": "Provide the password of the user."
+    },
+    {
+      "code": "ER005",
+      "message": "Invalid login details provided.",
+      "solution": "Tell the user to provide valid authentication details, or inform them about the \u0027forgot password\u0027 functionality."
+    },
+    {
+      "code": "ER006",
+      "message": "The provided quote has expired.",
+      "solution": "Request a new quote."
+    },
+    {
+      "code": "ER007",
+      "message": "The provided quote contains invalid data. It is possible it has been tampered with.",
+      "solution": "Provide a valid quote."
+    },
+    {
+      "code": "ER008",
+      "message": "The selected currency is down for maintenance.",
+      "solution": "Check /api/v1/system/currency-pairs to see whether the selected currency is enabled, and try again."
+    },
+    {
+      "code": "ER009",
+      "message": "The provided quote is not a buy quote.",
+      "solution": "Request a new buy quote."
+    },
+    {
+      "code": "ER010",
+      "message": "Unknown currency pair.",
+      "solution": "Provide a supported currency pair."
+    },
+    {
+      "code": "ER011",
+      "message": "The provided fiatAmount is invalid.",
+      "solution": "Provide a valid fiatAmount."
+    },
+    {
+      "code": "ER012",
+      "message": "The provided cryptoAmount is invalid.",
+      "solution": "Provide a valid cryptoAmount with max 8 decimals."
+    },
+    {
+      "code": "ER013",
+      "message": "Unknown payment method.",
+      "solution": "Provide a valid payment method."
+    },
+    {
+      "code": "ER014",
+      "message": "Invalid wallet address.",
+      "solution": "Provide a valid wallet address for the selected currency pair."
+    },
+    {
+      "code": "ER015",
+      "message": "Invalid destination tag.",
+      "solution": "Provide a valid destination tag."
+    },
+    {
+      "code": "ER016",
+      "message": "Selling is down for maintenance.",
+      "solution": "Check /api/v1/system/currency-pairs to see whether buying has been enabled, and try again."
+    },
+    {
+      "code": "ER017",
+      "message": "The provided quote is not a sell quote.",
+      "solution": "Request a new sell quote."
+    },
+    {
+      "code": "ER023",
+      "message": "No first name provided.",
+      "solution": "Provide a first name."
+    },
+    {
+      "code": "ER024",
+      "message": "No last name provided.",
+      "solution": "Provide a last name."
+    },
+    {
+      "code": "ER033",
+      "message": "Missing order id parameter.",
+      "solution": "Supply an order id parameter."
+    },
+    {
+      "code": "ER034",
+      "message": "Invalid order id parameter.",
+      "solution": "Order id parameter can only be a number."
+    },
+    {
+      "code": "ER035",
+      "message": "An order with the supplied id was not found.",
+      "solution": "Supply a valid order id."
+    },
+    {
+      "code": "ER036",
+      "message": "Refresh token has expired.",
+      "solution": "Request a new (regular) token."
+    },
+    {
+      "code": "ER037",
+      "message": "Refresh token is invalid.",
+      "solution": "Provide a valid refresh token."
+    },
+    {
+      "code": "ER038",
+      "message": "Bad credentials.",
+      "solution": "Provide valid credentials."
+    },
+    {
+      "code": "ER042",
+      "message": "Neither fiatAmount nor cryptoAmount is provided.",
+      "solution": "Provide a fiat amount or a crypto amount."
+    },
+    {
+      "code": "ER043",
+      "message": "Both fiatAmount and cryptoAmount are provided.",
+      "solution": "Provide a fiat amount or a crypto amount, not both."
+    },
+    {
+      "code": "ER044",
+      "message": "Destination tag not supported for this currency pair.",
+      "solution": "Leave the destination tag empty."
+    },
+    {
+      "code": "ER045",
+      "message": "Missing quote.",
+      "solution": "Provide a valid quote."
+    },
+    {
+      "code": "ER046",
+      "message": "Invalid callback URL.",
+      "solution": "Provide a valid callback URL."
+    },
+    {
+      "code": "ER047",
+      "message": "Invalid return URL.",
+      "solution": "Provide a valid return URL."
+    },
+    {
+      "code": "ER048",
+      "message": "Invalid JSON data provided.",
+      "solution": "Provide valid JSON data."
+    },
+    {
+      "code": "ER050",
+      "message": "Invalid fee provided.",
+      "solution": "Provide a number between 0 and 5.0 inclusive."
+    },
+    {
+      "code": "ER053",
+      "message": "Missing identifier.",
+      "solution": "Provide a valid identifier."
+    },
+    {
+      "code": "ER055",
+      "message": "Payment method not available at this time.",
+      "solution": "Provide another payment method."
+    },
+    {
+      "code": "ER058",
+      "message": "No phone number provided.",
+      "solution": "Provide a valid phone number."
+    },
+    {
+      "code": "ER059",
+      "message": "Invalid phone number provided.",
+      "solution": "Provide a valid phone number."
+    },
+    {
+      "code": "ER060",
+      "message": "No ISO 3166-1 alpha-2 country code provided.",
+      "solution": "Provide a valid ISO 3166-1 alpha-2 country code."
+    },
+    {
+      "code": "ER061",
+      "message": "Invalid ISO 3166-1 alpha-2 country code provided.",
+      "solution": "Provide a valid ISO 3166-1 alpha-2 country code."
+    },
+    {
+      "code": "ER062",
+      "message": "No country code provided.",
+      "solution": "Provide a valid country code."
+    },
+    {
+      "code": "ER067",
+      "message": "No identity document type provided.",
+      "solution": "Provide a valid identity document type."
+    },
+    {
+      "code": "ER068",
+      "message": "No identity document number provided.",
+      "solution": "Provide a valid identity document number."
+    },
+    {
+      "code": "ER069",
+      "message": "No identity document country provided.",
+      "solution": "Provide a valid identity document country."
+    },
+    {
+      "code": "ER070",
+      "message": "No identity document first names provided.",
+      "solution": "Provide the first names as they appear on the identity document."
+    },
+    {
+      "code": "ER071",
+      "message": "No identity document last name provided.",
+      "solution": "Provide the last name as it appears on the identity document."
+    },
+    {
+      "code": "ER072",
+      "message": "No date of birth provided.",
+      "solution": "Provide a valid date of birth."
+    },
+    {
+      "code": "ER073",
+      "message": "Invalid date of birth provided.",
+      "solution": "Provide a valid date of birth."
+    },
+    {
+      "code": "ER074",
+      "message": "Invalid identity document type provided.",
+      "solution": "Provide a valid identity document type."
+    },
+    {
+      "code": "ER075",
+      "message": "Missing document side.",
+      "solution": "Provide a document side."
+    },
+    {
+      "code": "ER076",
+      "message": "Invalid document side provided.",
+      "solution": "Provide a valid document side."
+    },
+    {
+      "code": "ER077",
+      "message": "Missing image data.",
+      "solution": "Provide base64 encoded binary image data."
+    },
+    {
+      "code": "ER078",
+      "message": "Invalid image data provided.",
+      "solution": "Provide valid base64 encoded binary image data."
+    },
+    {
+      "code": "ER080",
+      "message": "No website language provided.",
+      "solution": "Provide a valid website language."
+    },
+    {
+      "code": "ER081",
+      "message": "Invalid website language provided.",
+      "solution": "Provide a valid website language."
+    },
+    {
+      "code": "ER082",
+      "message": "No website country provided.",
+      "solution": "Provide a valid website country."
+    },
+    {
+      "code": "ER083",
+      "message": "Invalid website country provided.",
+      "solution": "Provide a valid website country."
+    },
+    {
+      "code": "ER084",
+      "message": "Invalid website language/country combination provided.",
+      "solution": "Provide a valid website language/country combination."
+    },
+    {
+      "code": "ER089",
+      "message": "No email verification code provided.",
+      "solution": "Provide a valid email verification code."
+    },
+    {
+      "code": "ER090",
+      "message": "Invalid email verification code.",
+      "solution": "Provide a valid email verification code."
+    },
+    {
+      "code": "ER091",
+      "message": "User email address is already verified.",
+      "solution": "Do not perform email verification for a user whose email address is already verified."
+    },
+    {
+      "code": "ER094",
+      "message": "No transaction info found for this order.",
+      "solution": "Provide transaction info for this order first, or try a different order."
+    },
+    {
+      "code": "ER095",
+      "message": "No transaction id provided.",
+      "solution": "Provide a valid transaction id for the currency of the order."
+    },
+    {
+      "code": "ER096",
+      "message": "Invalid transaction id provided.",
+      "solution": "Provide a valid transaction id for the currency of the order."
+    },
+    {
+      "code": "ER097",
+      "message": "An error occurred while saving the transaction info.",
+      "solution": "Please contact support for assistance."
+    },
+    {
+      "code": "ER098",
+      "message": "Transaction info already present for this order.",
+      "solution": "In order to update the transaction info, send a PATCH request."
+    },
+    {
+      "code": "ER099",
+      "message": "Invalid locale provided.",
+      "solution": "Provide a valid locale."
+    },
+    {
+      "code": "ER100",
+      "message": "Missing or malformed AMLD5 answers.",
+      "solution": "Provide well-formed AMLD5 answers with correct keys."
+    },
+    {
+      "code": "ER101",
+      "message": "Invalid AMLD5 answer provided.",
+      "solution": "Provide valid, supported answers for all questions."
+    },
+    {
+      "code": "ER109",
+      "message": "No currency provided.",
+      "solution": "Provide a supported currency."
+    },
+    {
+      "code": "ER117",
+      "message": "Destination tag not supported for this currency.",
+      "solution": "Leave the destination tag empty."
+    },
+    {
+      "code": "ER118",
+      "message": "Did not receive all required fields.",
+      "solution": "Please provide a valid currency, wallet address and optionally a destination tag."
+    },
+    {
+      "code": "ER122",
+      "message": "Invalid password length",
+      "solution": "Your password should be at least 8 characters in length."
+    },
+    {
+      "code": "ER124",
+      "message": "User is disabled.",
+      "solution": "Please contact support for assistance."
+    },
+    {
+      "code": "ER126",
+      "message": "Invalid first name.",
+      "solution": "Remove any emoji, < or > characters from the first name."
+    },
+    {
+      "code": "ER127",
+      "message": "Invalid last name.",
+      "solution": "Remove any emoji, < or > characters from the last name."
+    },
+    {
+      "code": "ER128",
+      "message": "Invalid identity document number provided.",
+      "solution": "Provide a valid identity document number."
+    },
+    {
+      "code": "ER700",
+      "message": "User authorization token not found.",
+      "solution": "Provide a user authorization token."
+    },
+    {
+      "code": "ER701",
+      "message": "User authorization token has expired.",
+      "solution": "Request a new authorization token, or refresh the token."
+    },
+    {
+      "code": "ER702",
+      "message": "User authorization token is invalid.",
+      "solution": "Provide a valid user authorization token."
+    },
+    {
+      "code": "ER703",
+      "message": "User identifier does not belong to the user in the user authorization token.",
+      "solution": "Provide a valid user identifier, or remove the user identifier header."
+    },
+    {
+      "code": "ER704",
+      "message": "No user identifier found in headers.",
+      "solution": "Provide a valid user identifier, or use the user/password authentication mechanism to request a user token and send that."
+    },
+    {
+      "code": "ER705",
+      "message": "User identifier is not linked to a user.",
+      "solution": "Provide a valid user identifier, link this user identifier to a user account, or use the user/password authentication mechanism."
+    },
+    {
+      "code": "ER706",
+      "message": "User identifier is invalid.",
+      "solution": "Provide a valid user identifier, a unique identifier string for the user account that is not already in use."
+    },
+    {
+      "code": "ER707",
+      "message": "User identifier is invalid.",
+      "solution": "Please provide an identifier, consisting of 36 - 255 characters, numeric or alphanumeric only."
+    },
+    {
+      "code": "ER708",
+      "message": "There is a pending document for this side.",
+      "solution": "Wait for the pending document to be reviewed."
+    },
+    {
+      "code": "ER709",
+      "message": "User not found, or user has been deleted.",
+      "solution": "Provide a valid user identifier."
+    },
+    {
+      "code": "ER800",
+      "message": "Authorization token is invalid.",
+      "solution": "Provide a valid authorization token."
+    },
+    {
+      "code": "ER801",
+      "message": "Authorization token has expired.",
+      "solution": "Request a new authorization token."
+    },
+    {
+      "code": "ER802",
+      "message": "Authorization token not found.",
+      "solution": "Provide an authorization token."
+    },
+    {
+      "code": "ER803",
+      "message": "Multiple authorization methods used.",
+      "solution": "Use exactly one authorization method."
+    },
+    {
+      "code": "ER805",
+      "message": "API key is invalid.",
+      "solution": "Provide a valid API key."
+    },
+    {
+      "code": "ER806",
+      "message": "API key not found.",
+      "solution": "Provide an API key."
+    },
+    {
+      "code": "ER900",
+      "message": "The file could not be uploaded.",
+      "solution": "Contact our support team."
+    },
+    {
+      "code": "ER901",
+      "message": "The file is not readable.",
+      "solution": "Contact our support team."
+    },
+    {
+      "code": "ER902",
+      "message": "The file is too large.",
+      "solution": "Upload a smaller file."
+    },
+    {
+      "code": "ER903",
+      "message": "The file mime type is not allowed.",
+      "solution": "Upload a file with an allowed mime type."
+    },
+    {
+      "code": "ER904",
+      "message": "An empty file is not allowed.",
+      "solution": "Upload a file which is not empty."
+    },
+    {
+      "code": "ER905",
+      "message": "The file was only partially uploaded.",
+      "solution": "Upload the file entirely."
+    },
+    {
+      "code": "ER906",
+      "message": "No file was uploaded.",
+      "solution": "Upload a file."
+    },
+    {
+      "code": "ER907",
+      "message": "The file is not a valid image.",
+      "solution": "Upload a valid image file."
+    },
+    {
+      "code": "ER908",
+      "message": "The image is too wide.",
+      "solution": "Upload an image of a valid width."
+    },
+    {
+      "code": "ER909",
+      "message": "The image is not wide enough.",
+      "solution": "Upload an image of a valid width."
+    },
+    {
+      "code": "ER910",
+      "message": "The image is too high.",
+      "solution": "Upload an image of a valid height."
+    },
+    {
+      "code": "ER911",
+      "message": "The image is not high enough.",
+      "solution": "Upload an image of a valid height."
+    },
+    {
+      "code": "ER912",
+      "message": "The image has too few pixels.",
+      "solution": "Upload an image which has a valid amount of pixels."
+    },
+    {
+      "code": "ER913",
+      "message": "The image has too many pixels.",
+      "solution": "Upload an image which has a valid amount of pixels."
+    },
+    {
+      "code": "ER914",
+      "message": "The image ratio is too high.",
+      "solution": "Upload an image which has a valid ratio."
+    },
+    {
+      "code": "ER915",
+      "message": "The image ratio is too low.",
+      "solution": "Upload an image which has a valid ratio."
+    },
+    {
+      "code": "ER916",
+      "message": "The image cannot be landscape oriented.",
+      "solution": "Upload an image which is portrait oriented."
+    },
+    {
+      "code": "ER917",
+      "message": "The image cannot be portrait oriented.",
+      "solution": "Upload an image which is landscape oriented."
+    },
+    {
+      "code": "ER918",
+      "message": "The image is corrupted.",
+      "solution": "Upload an image which is is not corrupted."
+    },
+    {
+      "code": "ER919",
+      "message": "Cannot write temporary file to disk.",
+      "solution": "Try again. Contact our support team if the problem persists."
+    },
+    {
+      "code": "ER998",
+      "message": "No route found for this request.",
+      "solution": "Make sure you use an existing endpoint. Take a look at the documentation for an overview of all existing endpoints."
+    },
+    {
+      "code": "ER999",
+      "message": "A general error has occurred. Please contact our support team.",
+      "solution": "Contact our support team."
+    }
+  ]
+}
