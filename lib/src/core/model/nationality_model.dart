@@ -11,6 +11,14 @@ class Nationality {
     idSelfieRequired = json['idSelfieRequired'];
   }
 
+  /// Converts the object to a JSON [Map].
+  ///
+  /// Returns a [Map] with the following keys:
+  /// - 'name': A [String] representing the name of the object.
+  /// - 'code': A [String] representing the code of the object.
+  /// - 'idSelfieRequired': A [bool] indicating whether selfie verification is required for the object.
+  ///
+  /// Returns the JSON [Map] representation of the object.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['name'] = name;

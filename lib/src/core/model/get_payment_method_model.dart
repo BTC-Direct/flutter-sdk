@@ -12,9 +12,28 @@ class PaymentMethodModel {
         paymentMethods!.add(PaymentMethods.fromJson(v));
       });
     }
-    countries = json['countries'] != null ? Countries.fromJson(json['countries']) : null;
+    countries = json['countries'] != null
+        ? Countries.fromJson(json['countries'])
+        : null;
   }
 
+  /// Converts this object to a [Map] representation in JSON format.
+  ///
+  /// Returns a [Map] containing the JSON representation of this object. The keys
+  /// of the map are the names of the properties of this object, and the values
+  /// are the corresponding values of the properties.
+  ///
+  /// The [paymentMethods] property is converted to a list of JSON representations
+  /// by calling the `toJson()` method on each element of the list. If
+  /// [paymentMethods] is `null`, the corresponding key-value pair is not added
+  /// to the map.
+  ///
+  /// The [countries] property is converted to a JSON representation by calling
+  /// the `toJson()` method on it. If [countries] is `null`, the corresponding
+  /// key-value pair is not added to the map.
+  ///
+  /// Returns:
+  ///   A [Map] containing the JSON representation of this object.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (paymentMethods != null) {
@@ -170,6 +189,19 @@ class Countries {
     sl = json['sl'].cast<String>();
   }
 
+  /// Converts this object to a [Map] representation in JSON format.
+  ///
+  /// Returns a [Map] containing the JSON representation of this object. The keys
+  /// of the map are the names of the properties of this object, and the values
+  /// are the corresponding values of the properties.
+  ///
+  /// The [at], [be], [bg], [ch], [cy], [cz], [de], [dk], [ee], [es], [fi],
+  /// [fr], [gb], [gr], [hr], [hu], [ie], [it], [lt], [lu], [lv], [mt], [nl],
+  /// [no], [pl], [pt], [ro], [se], [sk], and [sl] properties are converted to a
+  /// JSON representation by assigning their respective values to the map.
+  ///
+  /// Returns:
+  ///   A [Map] containing the JSON representation of this object.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['at'] = at;

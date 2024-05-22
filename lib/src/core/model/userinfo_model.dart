@@ -41,6 +41,11 @@ class UserInfoModel {
     status = json['status'] != null ? Status.fromJson(json['status']) : null;
   }
 
+  /// Converts this object to a [Map] representation in JSON format.
+  ///
+  /// Returns a [Map] containing the JSON representation of this object. The keys
+  /// of the map are the names of the properties of this object, and the values
+  /// are the corresponding values of the properties.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['emailAddress'] = emailAddress;
@@ -95,7 +100,8 @@ class Buy {
 
   Buy.fromJson(Map<String, dynamic> json) {
     limit = json['limit'] != null ? Limit.fromJson(json['limit']) : null;
-    remaining = json['remaining'] != null ? Limit.fromJson(json['remaining']) : null;
+    remaining =
+        json['remaining'] != null ? Limit.fromJson(json['remaining']) : null;
     interval = json['interval'];
   }
 
@@ -141,7 +147,8 @@ class Status {
   Status.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     description = json['description'];
-    details = json['details'] != null ? Details.fromJson(json['details']) : null;
+    details =
+        json['details'] != null ? Details.fromJson(json['details']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -173,8 +180,10 @@ class Details {
     amld5VerificationStatus = json['amld5VerificationStatus'];
     emailAddressVerificationStatus = json['emailAddressVerificationStatus'];
     identityVerificationStatus = json['identityVerificationStatus'];
-    privacyAgreementVerificationStatus = json['privacyAgreementVerificationStatus'];
-    identityDocumentVerificationStatus = json['identityDocumentVerificationStatus'].cast<String>();
+    privacyAgreementVerificationStatus =
+        json['privacyAgreementVerificationStatus'];
+    identityDocumentVerificationStatus =
+        json['identityDocumentVerificationStatus'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
@@ -182,8 +191,10 @@ class Details {
     data['amld5VerificationStatus'] = amld5VerificationStatus;
     data['emailAddressVerificationStatus'] = emailAddressVerificationStatus;
     data['identityVerificationStatus'] = identityVerificationStatus;
-    data['privacyAgreementVerificationStatus'] = privacyAgreementVerificationStatus;
-    data['identityDocumentVerificationStatus'] = identityDocumentVerificationStatus;
+    data['privacyAgreementVerificationStatus'] =
+        privacyAgreementVerificationStatus;
+    data['identityDocumentVerificationStatus'] =
+        identityDocumentVerificationStatus;
     return data;
   }
 }

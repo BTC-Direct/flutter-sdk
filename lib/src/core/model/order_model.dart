@@ -18,21 +18,21 @@ class OrderModel {
 
   OrderModel(
       {this.id,
-        this.date,
-        this.currencyPair,
-        this.status,
-        this.feeAmount,
-        this.feePercentage,
-        this.partnerOrderIdentifier,
-        this.orderNotCompletedReasons,
-        this.price,
-        this.value,
-        this.paymentMethod,
-        this.walletAddress,
-        this.destinationTag,
-        this.blockchainInfo,
-        this.isDcaOrder,
-        this.isEstimatedQuote});
+      this.date,
+      this.currencyPair,
+      this.status,
+      this.feeAmount,
+      this.feePercentage,
+      this.partnerOrderIdentifier,
+      this.orderNotCompletedReasons,
+      this.price,
+      this.value,
+      this.paymentMethod,
+      this.walletAddress,
+      this.destinationTag,
+      this.blockchainInfo,
+      this.isDcaOrder,
+      this.isEstimatedQuote});
 
   OrderModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -50,8 +50,7 @@ class OrderModel {
         orderNotCompletedReasons!.add(OrderNotCompletedReasons.fromJson(v));
       });
     }
-    price =
-    json['price'] != null ? FeeAmount.fromJson(json['price']) : null;
+    price = json['price'] != null ? FeeAmount.fromJson(json['price']) : null;
     value = json['value'] != null ? Value.fromJson(json['value']) : null;
     paymentMethod = json['paymentMethod'];
     walletAddress = json['walletAddress'];
@@ -63,6 +62,26 @@ class OrderModel {
     isEstimatedQuote = json['isEstimatedQuote'];
   }
 
+  /// Converts this object to a [Map] representation in JSON format.
+  ///
+  /// Returns a [Map] containing the JSON representation of this object. The keys
+  /// of the map are the names of the properties of this object, and the values
+  /// are the corresponding values of the properties.
+  ///
+  /// The [feeAmount] property is converted to a JSON representation by calling
+  /// the `toJson()` method on it. If [feeAmount] is `null`, the corresponding
+  /// key-value pair is not added to the map.
+  ///
+  /// The [orderNotCompletedReasons] property is converted to a list of JSON
+  /// representations by calling the `toJson()` method on each element of the
+  /// list. If [orderNotCompletedReasons] is `null`, the corresponding key-value
+  /// pair is not added to the map.
+  ///
+  /// The [price] property is converted to a JSON representation by calling the
+  /// `toJson()` method on it. If [price] is `null`, the corresponding key-value
+  /// pair is not added to the map.
+  ///
+  /// The [value] property is converted to a JSON representation by calling the
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
@@ -107,6 +126,16 @@ class FeeAmount {
     currencyCode = json['currencyCode'];
   }
 
+  /// Converts this object to a [Map] representation in JSON format.
+  ///
+  /// Returns a [Map] containing the JSON representation of this object. The keys
+  /// of the map are the names of the properties of this object, and the values
+  /// are the corresponding values of the properties.
+  ///
+  /// The [amount] property is converted to a JSON representation by calling
+  /// the `toJson()` method on it. If [amount] is `null`, the corresponding
+  /// key-value pair is not added to the map.
+  ///
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['amount'] = amount;
@@ -125,11 +154,11 @@ class OrderNotCompletedReasons {
 
   OrderNotCompletedReasons(
       {this.code,
-        this.description,
-        this.solution,
-        this.userActionRequired,
-        this.supportActionRequired,
-        this.url});
+      this.description,
+      this.solution,
+      this.userActionRequired,
+      this.supportActionRequired,
+      this.url});
 
   OrderNotCompletedReasons.fromJson(Map<String, dynamic> json) {
     code = json['code'];
@@ -163,6 +192,16 @@ class Value {
     currencyCode = json['currencyCode'];
   }
 
+  /// Converts this object to a [Map] representation in JSON format.
+  ///
+  /// Returns a [Map] containing the JSON representation of this object. The keys
+  /// of the map are the names of the properties of this object, and the values
+  /// are the corresponding values of the properties.
+  ///
+  /// The [amount] property is converted to a JSON representation by calling
+  /// the `toJson()` method on it. If [amount] is `null`, the corresponding
+  /// key-value pair is not added to the map.
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['amount'] = amount;
@@ -179,9 +218,9 @@ class BlockchainInfo {
 
   BlockchainInfo(
       {this.walletAddress,
-        this.walletExplorer,
-        this.transactionId,
-        this.transactionExplorer});
+      this.walletExplorer,
+      this.transactionId,
+      this.transactionExplorer});
 
   BlockchainInfo.fromJson(Map<String, dynamic> json) {
     walletAddress = json['walletAddress'];
@@ -190,6 +229,15 @@ class BlockchainInfo {
     transactionExplorer = json['transactionExplorer'];
   }
 
+  /// Converts this object to a [Map] representation in JSON format.
+  ///
+  /// Returns a [Map] containing the JSON representation of this object. The keys
+  /// of the map are the names of the properties of this object, and the values
+  /// are the corresponding values of the properties.
+  ///
+  /// The [walletAddress] property is converted to a JSON representation by
+  /// calling the `toJson()` method on it. If [walletAddress] is `null`,
+  /// the corresponding key-value pair is not added to the map.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['walletAddress'] = walletAddress;

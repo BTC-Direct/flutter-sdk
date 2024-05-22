@@ -5,12 +5,21 @@ class GetPairsModel {
   Buy? buy;
   Sell? sell;
 
-  GetPairsModel({this.currencyPair, this.baseCurrency, this.quoteCurrency, this.buy, this.sell});
+  GetPairsModel(
+      {this.currencyPair,
+      this.baseCurrency,
+      this.quoteCurrency,
+      this.buy,
+      this.sell});
 
   GetPairsModel.fromJson(Map<String, dynamic> json) {
     currencyPair = json['currencyPair'];
-    baseCurrency = json['baseCurrency'] != null ? BaseCurrency.fromJson(json['baseCurrency']) : null;
-    quoteCurrency = json['quoteCurrency'] != null ? BaseCurrency.fromJson(json['quoteCurrency']) : null;
+    baseCurrency = json['baseCurrency'] != null
+        ? BaseCurrency.fromJson(json['baseCurrency'])
+        : null;
+    quoteCurrency = json['quoteCurrency'] != null
+        ? BaseCurrency.fromJson(json['quoteCurrency'])
+        : null;
     buy = json['buy'] != null ? Buy.fromJson(json['buy']) : null;
     sell = json['sell'] != null ? Sell.fromJson(json['sell']) : null;
   }
@@ -113,7 +122,8 @@ class Sell {
     status = json['status'];
     min = json['min'] != null ? SellMin.fromJson(json['min']) : null;
     max = json['max'] != null ? SellMin.fromJson(json['max']) : null;
-    address = json['address'] != null ? Address.fromJson(json['address']) : null;
+    address =
+        json['address'] != null ? Address.fromJson(json['address']) : null;
   }
 
   Map<String, dynamic> toJson() {

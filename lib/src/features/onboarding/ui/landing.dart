@@ -33,7 +33,12 @@ class _LandingState extends State<Landing> {
               child: Text(
                 "Welcome to europe's\nfavorite crypto platform.",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: CommonColors.black, fontSize: 24, fontFamily: 'TextaAlt',package: "btc_direct", fontWeight: FontWeight.w700),
+                style: TextStyle(
+                    color: CommonColors.black,
+                    fontSize: 24,
+                    fontFamily: 'TextaAlt',
+                    package: "btc_direct",
+                    fontWeight: FontWeight.w700),
               ),
             ),
             const Spacer(),
@@ -44,7 +49,8 @@ class _LandingState extends State<Landing> {
                 fontSize: 24,
                 color: CommonColors.white,
                 fontWeight: FontWeight.w600,
-                fontFamily: 'TextaAlt',package: "btc_direct",
+                fontFamily: 'TextaAlt',
+                package: "btc_direct",
               ),
               bgColor: CommonColors.blueColor,
               onPressed: () {
@@ -63,7 +69,8 @@ class _LandingState extends State<Landing> {
                 fontSize: 24,
                 color: CommonColors.blueColor,
                 fontWeight: FontWeight.w600,
-                fontFamily: 'TextaAlt',package: "btc_direct",
+                fontFamily: 'TextaAlt',
+                package: "btc_direct",
               ),
               bgColor: CommonColors.blueColor,
               onPressed: () {

@@ -1,6 +1,6 @@
 name: btc_direct
-description: Streamline token purchases with BTC Direct package enter wallet details, select tokens, choose payment methods, and complete KYC verification effortlessly. Ideal for secure token transactions.
-version: 0.0.2
+description: Streamline token purchases with BTC Direct enter wallet details, select tokens, choose payment methods, and complete KYC verification effortlessly. Ideal for secure transactions.
+version: 0.0.3
 homepage: https://github.com/BTC-Direct/flutter-sdk.git
 
 environment:

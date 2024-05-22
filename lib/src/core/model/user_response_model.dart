@@ -8,7 +8,15 @@ class UserModel {
   String? registrationDate;
   String? activationDate;
 
-  UserModel({this.email, this.firstName, this.lastName, this.phoneNumber, this.country, this.isBusiness, this.registrationDate, this.activationDate});
+  UserModel(
+      {this.email,
+      this.firstName,
+      this.lastName,
+      this.phoneNumber,
+      this.country,
+      this.isBusiness,
+      this.registrationDate,
+      this.activationDate});
 
   UserModel.fromJson(Map<String, dynamic> json) {
     email = json['email'];
@@ -21,6 +29,11 @@ class UserModel {
     activationDate = json['activationDate'];
   }
 
+  /// Converts this object to a [Map] representation in JSON format.
+  ///
+  /// Returns a [Map] containing the JSON representation of this object. The keys
+  /// of the map are the names of the properties of this object, and the values
+  /// are the corresponding values of the properties.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['email'] = email;

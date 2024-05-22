@@ -19,6 +19,13 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
   //late final WebViewController controller;
 
   @override
+
+  /// Initializes the state of the widget.
+  ///
+  /// This function calls the parent `initState()` method and then calls the
+  /// `getKYCAccessToken()` function with the current `BuildContext` to retrieve
+  /// the KYC access token.
+  @override
   void initState() {
     super.initState();
     getKYCAccessToken(context);
@@ -31,7 +38,9 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
     return FooterContainer(
       appBarTitle: isWebViewReady ? "Verify identity" : "",
       child: Padding(
-        padding: isWebViewReady ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: w * 0.06),
+        padding: isWebViewReady
+            ? EdgeInsets.zero
+            : EdgeInsets.symmetric(horizontal: w * 0.06),
         child: Column(
           children: [
             SizedBox(
@@ -39,10 +48,10 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
             ),
             Center(
                 child: Image.asset(
-                  Images.verifyDocumentIcon,
-                  height: h * 0.25,
-                  width: w * 0.5,
-                )),
+              Images.verifyDocumentIcon,
+              height: h * 0.25,
+              width: w * 0.5,
+            )),
             SizedBox(
               height: h * 0.02,
             ),
@@ -111,10 +120,12 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
     );
   }
 
+  /// Retrieves the KYC access token from the server.
   getKYCAccessToken(BuildContext context) async {
     try {
-      http.Response response = await Repository().getVerificationStatusApiCall(context);
-      var tempData = jsonDecode(response.body) ;
+      http.Response response =
+          await Repository().getVerificationStatusApiCall(context);
+      var tempData = jsonDecode(response.body);
       if (response.statusCode == 200) {
         for (int i = 0; i < tempData.length; i++) {
           if (tempData[i]['name'] == "kyc") {
@@ -129,8 +140,9 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-             if(context.mounted) {
-                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
               }
               log(errorCodeList[i].message);
             }
@@ -140,35 +152,62 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
     } catch (e) {
       log(e.toString());
     }
-
   }
 
+  /// Launches the SDK with the given [context].
+  ///
+  /// This function initializes the SDK with the provided [accessToken] and
+  /// [onTokenExpiration] callback. It then builds the SDK with the specified
+  /// locale and debug mode. The SDK is launched and the result is checked.
+  /// If the launch is successful and the token is not empty, the current
+  /// screen is popped. If the token is empty, the user is navigated to the
+  /// sign-in screen.
+  ///
+  /// Parameters:
+  ///   - [context]: The build context used for navigation.
+  ///
+  /// Returns:
+  ///   - None.
   void launchSDK(BuildContext context) async {
     String accessToken = kycAccessToken;
+
+    /// Retrieves a new KYC access token after a delay of 2 seconds.
+    ///
+    /// This function returns a `Future<String>` that resolves to a new KYC access token.
+    /// It does this by delaying the execution of the `getKYCAccessToken` function with a
+    /// duration of 2 seconds. The `getKYCAccessToken` function is called with the current
+    /// `BuildContext` as an argument.
+    ///
+    /// Returns:
+    ///   - A `Future<String>` that resolves to a new KYC access token.
     onTokenExpiration() async {
-      return Future<String>.delayed(const Duration(seconds: 2), () => getKYCAccessToken(context));
+      return Future<String>.delayed(
+          const Duration(seconds: 2), () => getKYCAccessToken(context));
     }
 
     final builder = SNSMobileSDK.init(accessToken, onTokenExpiration);
 
-    snsMobileSDK = builder.withLocale(const Locale("en")).withDebug(true).build();
+    snsMobileSDK =
+        builder.withLocale(const Locale("en")).withDebug(true).build();
 
     final result = await snsMobileSDK!.launch();
-    if(result.success == true) {
+    if (result.success == true) {
       var token = await StorageHelper.getValue(StorageKeys.token);
-      if(token.isNotEmpty){
-        if(context.mounted){
+      if (token.isNotEmpty) {
+        if (context.mounted) {
           Navigator.pop(context);
         }
-      }else{
-        if(context.mounted){
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const SignIn()));
+      } else {
+        if (context.mounted) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => const SignIn()));
         }
       }
     }
     log("Completed with result: $result");
   }
 
+  /// Displays a bottom sheet with a message indicating that no ID is available.
   bottomSheet(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
@@ -217,7 +256,8 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(right: w * 0.08, left: w * 0.08, top: 10),
+                  padding:
+                      EdgeInsets.only(right: w * 0.08, left: w * 0.08, top: 10),
                   child: const Center(
                     child: Text(
                       "No worries. You can verify your ID later. You will receive a reminder via email if you didn't verify within a day.",

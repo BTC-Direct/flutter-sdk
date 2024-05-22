@@ -24,7 +24,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({
-
     super.key,
   });
 
@@ -43,7 +42,8 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true,
         title: const Text(
           "BTC Direct",
-          style: TextStyle(fontSize: 22, color: Colors.black, fontWeight: FontWeight.w500),
+          style: TextStyle(
+              fontSize: 22, color: Colors.black, fontWeight: FontWeight.w500),
         ),
       ),
       body: Padding(
@@ -55,29 +55,49 @@ class _MyHomePageState extends State<MyHomePage> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
+                  /// Navigate to the Buy widget. This widget allows the user to select
+                  /// a wallet and complete a buy transaction.
+                  ///
+                  /// The parameters passed to this widget are:
+                  /// - myAddressesList: A list of addresses that the user can select
+                  ///   from to complete the transaction.
+                  /// - xApiKey: The API key for the BTCDirect API.
+                  /// - isSandBox: A boolean that determines whether the transaction is
+                  ///   in sandbox mode or production mode.
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => BTCDirect(
-                                myAddressesList: const [
-                                  {"address": "sender_wallet_address",
-                                    "currency": "BTC",
-                                    "id": '1234567',
-                                    "name": "Sender's Wallet"},
-                                ],
-                                xApiKey: "your_api_key_here",
-                                isSandBox: true,
-                              )));
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BTCDirect(
+                        myAddressesList: const [
+                          {
+                            "address": "sender_wallet_address",
+                            "currency": "BTC",
+                            "id": '1234567',
+                            "name": "Sender's Wallet"
+                          },
+                        ],
+                        xApiKey: "your_api_key_here",
+                        isSandBox: true,
+                      ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
                   elevation: 2.0,
-                  textStyle: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                  textStyle: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
                 ),
                 child: const Text(
                   'Buy now',
-                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ),

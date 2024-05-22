@@ -1,4 +1,3 @@
-
 class CoinModel {
   String? coinName;
   String? coinTicker;
@@ -10,6 +9,3 @@ class CoinModel {
     this.coinIcon,
   });
 }
-
-
-

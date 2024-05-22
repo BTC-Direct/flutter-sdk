@@ -12,6 +12,19 @@ class ErrorCodeModel {
     }
   }
 
+  /// Converts this object to a [Map] representation in JSON format.
+  ///
+  /// Returns a [Map] containing the JSON representation of this object. The keys
+  /// of the map are the names of the properties of this object, and the values
+  /// are the corresponding values of the properties.
+  ///
+  /// The [errorCodeList] property is converted to a list of JSON representations
+  /// by calling the `toJson()` method on each element of the list. If
+  /// [errorCodeList] is `null`, the corresponding key-value pair is not added
+  /// to the map.
+  ///
+  /// Returns:
+  ///   A [Map] containing the JSON representation of this object.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (errorCodeList != null) {

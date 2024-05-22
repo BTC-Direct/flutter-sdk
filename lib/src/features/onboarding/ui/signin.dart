@@ -169,7 +169,8 @@ class _SignInState extends State<SignIn> {
                               await Repository().getClientInfoApiCall();
                           if (response.statusCode == 200) {
                             var tempData = jsonDecode(response.body)['slug'];
-                            final Uri url = Uri.parse("https://my-sandbox.btcdirect.eu/en-gb/forgot-password?client=$tempData");
+                            final Uri url = Uri.parse(
+                                "https://my-sandbox.btcdirect.eu/en-gb/forgot-password?client=$tempData");
                             if (!await launchUrl(url)) {
                               throw Exception('Could not launch $url');
                             }
@@ -224,7 +225,20 @@ class _SignInState extends State<SignIn> {
     );
   }
 
-  signInAccountApiCall({
+  /// Calls the API to sign in the user.
+  ///
+  /// This function calls the `signInAccountApiCall` function from the Repository class
+  /// and passes the email address and the password to the API.
+  ///
+  /// If the response is 200, it stores the token, user id, and refresh token in the
+  /// shared preferences and calls the `getUserInfo` function to fetch the user's information.
+  ///
+  /// If the response is not 200, it sets the `isLoading` value to false.
+  ///
+  /// [context]: The context of the widget.
+  /// [email]: The email address of the user.
+  /// [password]: The password of the user.
+  Future<void> signInAccountApiCall({
     required BuildContext context,
     String email = '',
     String password = '',
@@ -240,8 +254,8 @@ class _SignInState extends State<SignIn> {
         await StorageHelper.setValue(StorageKeys.userId, tempData['uuid']);
         await StorageHelper.setValue(
             StorageKeys.refreshToken, tempData['refreshToken']);
-        if(context.mounted) {
-        getUserInfo(tempData['token'],context);
+        if (context.mounted) {
+          getUserInfo(tempData['token'], context);
         }
       } else {
         isLoading = false;
@@ -254,31 +268,54 @@ class _SignInState extends State<SignIn> {
     }
   }
 
-  getUserInfo(String token,BuildContext context) async {
+  /// This function is called after the user successfully signs in.
+  /// It is used to fetch the user's information from the API.
+  ///
+  /// The function takes one parameter: `token`, which is the token obtained from the
+  /// sign in API.
+  ///
+  /// The function first calls the `getUserInfoApiCall` function from the Repository
+  /// class to fetch the user's information. The response from the API is then
+  /// parsed and the state is updated accordingly.
+  ///
+  /// If the user's email address verification status is "pending", the user is
+  /// navigated to the `EmailVerification` widget with the email address.
+  ///
+  /// If the user's identity verification status is "open", the user is navigated to
+  /// the `VerifyIdentity` widget.
+  ///
+  /// If neither of the above conditions are met, the user is navigated back to
+  /// the previous two screens.
+  ///
+  /// [token]: The token obtained from the sign in API.
+  /// [context]: The context of the widget.
+  Future<void> getUserInfo(String token, BuildContext context) async {
     try {
-      var response = await Repository().getUserInfoApiCall(token,context);
+      var response = await Repository().getUserInfoApiCall(token, context);
       UserInfoModel userInfoModel = UserInfoModel.fromJson(response);
-      if (userInfoModel.status?.details?.emailAddressVerificationStatus == "pending") {
-        if (context.mounted) {
-          Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EmailVerification(
-              email: '${userInfoModel.emailAddress}',
-            ),
-          ),
-        );
-        }
-        emailController.clear();
-        passwordController.clear();
-      } else if (userInfoModel.status?.details?.identityVerificationStatus == "open")  {
+      if (userInfoModel.status?.details?.emailAddressVerificationStatus ==
+          "pending") {
         if (context.mounted) {
           Navigator.push(
             context,
-          MaterialPageRoute(
-            builder: (context) => const VerifyIdentity(),
-          ),
-        );
+            MaterialPageRoute(
+              builder: (context) => EmailVerification(
+                email: '${userInfoModel.emailAddress}',
+              ),
+            ),
+          );
+        }
+        emailController.clear();
+        passwordController.clear();
+      } else if (userInfoModel.status?.details?.identityVerificationStatus ==
+          "open") {
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const VerifyIdentity(),
+            ),
+          );
         }
         isLoading = false;
         emailController.clear();
@@ -289,8 +326,6 @@ class _SignInState extends State<SignIn> {
           Navigator.pop(context);
           Navigator.pop(context);
         }
-        //Navigator.popUntil(context, (route) => route.isFirst);
-        //Navigator.popUntil(context, ModalRoute.withName(Navigator.defaultRouteName));
       }
       setState(() {});
     } catch (e) {

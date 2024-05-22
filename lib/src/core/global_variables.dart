@@ -1,7 +1,4 @@
-
-
 import 'package:btc_direct/src/presentation/config_packages.dart';
-
 
 ///A boolean flag designating whether the procedure ought to execute in a Sandbox setting.
 /// For testing purposes, set to true; in production environments, set to false.
@@ -16,4 +13,3 @@ String xApiKey = "";
 ///  "id": An identifier for the wallet address.
 ///  "name": A name for the sender's wallet.
 List<WalletAddressModel> addressesList = [];
-

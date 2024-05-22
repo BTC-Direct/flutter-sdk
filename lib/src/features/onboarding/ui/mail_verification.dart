@@ -61,7 +61,8 @@ class _EmailVerificationState extends State<EmailVerification> {
                     fontSize: 24,
                     fontWeight: FontWeight.w600,
                     color: CommonColors.black,
-                    fontFamily: 'TextaAlt',package: "btc_direct",
+                    fontFamily: 'TextaAlt',
+                    package: "btc_direct",
                   ),
                 ),
                 SizedBox(
@@ -74,7 +75,8 @@ class _EmailVerificationState extends State<EmailVerification> {
                     fontSize: 18,
                     fontWeight: FontWeight.w400,
                     color: CommonColors.greyColor,
-                    fontFamily: 'TextaAlt',package: "btc_direct",
+                    fontFamily: 'TextaAlt',
+                    package: "btc_direct",
                   ),
                 ),
                 SizedBox(
@@ -105,41 +107,44 @@ class _EmailVerificationState extends State<EmailVerification> {
                 ),
                 reSendText.isEmpty
                     ? RichText(
-                  text: TextSpan(
-                      children: [
-                        const TextSpan(text: "Didn't receive a code?  "),
-                        TextSpan(
-                          text: "Resend",
-                          style: const TextStyle(
-                            color: CommonColors.blueColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'TextaAlt',
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              if (widget.identifier != null) {
-                                identifierReSendEmailApiCall(context, widget.email);
-                              }else{
-                                tokenReSendEmailApiCall(context, widget.email);
-                              }
-                            },
-                        ),
-                        const TextSpan(text: "."),
-                      ],
-                      style: const TextStyle(
-                        color: CommonColors.greyColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'TextaAlt',
-                      )),
-                )
-                    : Text(reSendText,style: const TextStyle(
-                  color: CommonColors.greyColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'TextaAlt',
-                )),
+                        text: TextSpan(
+                            children: [
+                              const TextSpan(text: "Didn't receive a code?  "),
+                              TextSpan(
+                                text: "Resend",
+                                style: const TextStyle(
+                                  color: CommonColors.blueColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'TextaAlt',
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    if (widget.identifier != null) {
+                                      identifierReSendEmailApiCall(
+                                          context, widget.email);
+                                    } else {
+                                      tokenReSendEmailApiCall(
+                                          context, widget.email);
+                                    }
+                                  },
+                              ),
+                              const TextSpan(text: "."),
+                            ],
+                            style: const TextStyle(
+                              color: CommonColors.greyColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: 'TextaAlt',
+                            )),
+                      )
+                    : Text(reSendText,
+                        style: const TextStyle(
+                          color: CommonColors.greyColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'TextaAlt',
+                        )),
                 SizedBox(
                   height: h * 0.16,
                 ),
@@ -150,14 +155,16 @@ class _EmailVerificationState extends State<EmailVerification> {
                     fontSize: 24,
                     color: CommonColors.white,
                     fontWeight: FontWeight.w600,
-                    fontFamily: 'TextaAlt',package: "btc_direct",
+                    fontFamily: 'TextaAlt',
+                    package: "btc_direct",
                   ),
                   bgColor: CommonColors.blueColor,
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
                       if (widget.identifier != null) {
-                        identifierVerifyEmailApiCall(context, pinputController.text);
-                      }else{
+                        identifierVerifyEmailApiCall(
+                            context, pinputController.text);
+                      } else {
                         tokenVerifyEmailApiCall(context, pinputController.text);
                       }
                     }
@@ -174,10 +181,21 @@ class _EmailVerificationState extends State<EmailVerification> {
     );
   }
 
-  identifierVerifyEmailApiCall(BuildContext context, String emailCode) async {
+  /// This function verifies the email code sent to the user's email.
+  /// It calls the `identifierGetVerificationCodeApiCall` function from the Repository class
+  /// and decodes the response body into a `UserModel`.
+  /// If the response is 202, it navigates to the Verify Identity screen.
+  /// If the response is not 202, it checks the error codes and shows the appropriate error message using the `failureSnackBar` function from the AppCommonFunction class.
+  /// Finally, it sets the `isLoading` value to false.
+  ///
+  /// [context]: The context of the widget.
+  /// [emailCode]: The email verification code entered by the user.
+  void identifierVerifyEmailApiCall(
+      BuildContext context, String emailCode) async {
     try {
       isLoading = true;
-      http.Response response = await Repository().identifierGetVerificationCodeApiCall(
+      http.Response response =
+          await Repository().identifierGetVerificationCodeApiCall(
         emailCode,
         widget.identifier ?? '',
       );
@@ -186,23 +204,23 @@ class _EmailVerificationState extends State<EmailVerification> {
         log("verifyEmail Response ::: ${tempData.toString()}");
         var user = UserModel.fromJson(tempData);
         log("verifyEmail Response ${user.toString()}");
-        if(context.mounted){
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const VerifyIdentity(),
-            ));
+        if (context.mounted) {
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const VerifyIdentity(),
+              ));
         }
       } else if (response.statusCode >= 400) {
+        var errorCodeList = await AppCommonFunction().getJsonData();
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
-        var errorCodeList = await AppCommonFunction().getJsonData();
-        //print("errorCodeList: $errorCodeList");
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              if(context.mounted) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
               }
             }
           }
@@ -217,10 +235,26 @@ class _EmailVerificationState extends State<EmailVerification> {
     }
   }
 
-  identifierReSendEmailApiCall(BuildContext context, String email) async {
+  /// This function re-sends the email verification code to the user.
+  ///
+  /// It calls the `identifierDetReSendEmailApiCall` function from the Repository class
+  /// and passes the email address and the identifier to the API.
+  ///
+  /// If the response is 202, it sets the `reSendText` state to 'Email sent.'
+  /// and displays the message for 2 seconds before setting it back to an empty string.
+  ///
+  /// If the response is not 202, it checks the error codes and shows the appropriate
+  /// error message using the `failureSnackBar` function from the AppCommonFunction class.
+  ///
+  /// The function is called when the user clicks the "Resend email" button.
+  ///
+  /// [context]: The context of the widget.
+  /// [email]: The email address of the user.
+  void identifierReSendEmailApiCall(BuildContext context, String email) async {
     try {
       isLoading = true;
-      http.Response response = await Repository().identifierDetReSendEmailApiCall(
+      http.Response response =
+          await Repository().identifierDetReSendEmailApiCall(
         email,
         widget.identifier ?? "",
       );
@@ -240,8 +274,9 @@ class _EmailVerificationState extends State<EmailVerification> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              if(context.mounted) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
               }
             }
           }
@@ -256,26 +291,35 @@ class _EmailVerificationState extends State<EmailVerification> {
     }
   }
 
+  /// Verifies the email code sent to the user's email.
+  ///
+  /// This function calls the `tokenGetVerificationCodeApiCall` function from the Repository class
+  /// and decodes the response body into a `UserModel`.
+  /// If the response is 202, it navigates to the Verify Identity screen.
+  /// If the response is not 202, it checks the error codes and shows the appropriate error message using the `failureSnackBar` function from the AppCommonFunction class.
+  ///
+  /// Parameters:
+  /// - `context`: The context of the widget.
+  /// - `emailCode`: The email verification code entered by the user.
+
   tokenVerifyEmailApiCall(BuildContext context, String emailCode) async {
     try {
       isLoading = true;
-      http.Response response = await Repository().tokenGetVerificationCodeApiCall(
-          emailCode
-      );
+      http.Response response =
+          await Repository().tokenGetVerificationCodeApiCall(emailCode);
       if (response.statusCode == 202) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("verifyEmail Response ::: ${tempData.toString()}");
         var user = UserModel.fromJson(tempData);
         log("verifyEmail Response ${user.toString()}");
-        if(context.mounted){
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const VerifyIdentity(),
-            ));
+        if (context.mounted) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const VerifyIdentity(),
+              ));
         }
-      }
-      else if (response.statusCode >= 400) {
+      } else if (response.statusCode >= 400) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         log("Response ${tempData.toString()}");
         var errorCodeList = await AppCommonFunction().getJsonData();
@@ -283,8 +327,9 @@ class _EmailVerificationState extends State<EmailVerification> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              if(context.mounted) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
               }
             }
           }
@@ -299,12 +344,26 @@ class _EmailVerificationState extends State<EmailVerification> {
     }
   }
 
+  /// This function re-sends the email verification code to the user.
+  ///
+  /// It calls the `tokenDetReSendEmailApiCall` function from the Repository class
+  /// and passes the email address to the API.
+  ///
+  /// If the response is 202, it sets the `reSendText` state to 'Email sent.'
+  /// and displays the message for 2 seconds before setting it back to an empty string.
+  ///
+  /// If the response is not 202, it checks the error codes and shows the appropriate
+  /// error message using the `failureSnackBar` function from the AppCommonFunction class.
+  ///
+  /// The function is called when the user clicks the "Resend email" button.
+  ///
+  /// [context]: The context of the widget.
+  /// [email]: The email address of the user.
   tokenReSendEmailApiCall(BuildContext context, String email) async {
     try {
       isLoading = true;
-      http.Response response = await Repository().tokenDetReSendEmailApiCall(
-          email
-      );
+      http.Response response =
+          await Repository().tokenDetReSendEmailApiCall(email);
       if (response.statusCode == 202) {
         // var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         isLoading = false;
@@ -323,8 +382,9 @@ class _EmailVerificationState extends State<EmailVerification> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              if(context.mounted) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
               }
             }
           }
@@ -338,5 +398,4 @@ class _EmailVerificationState extends State<EmailVerification> {
       setState(() {});
     }
   }
-
 }

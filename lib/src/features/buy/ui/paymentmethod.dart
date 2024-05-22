@@ -6,7 +6,19 @@ import 'package:btc_direct/src/presentation/config_packages.dart';
 import 'package:flutter_webview_pro/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 
-
+/// The stateless widget for displaying the payment method screen of the Btc Direct.
+/// This widget takes the following parameters:
+/// - `amount`: The amount of fiat or cryptocurrency currency
+/// - `paymentMethodCode`: The code of the payment method
+/// - `walletAddress`: The wallet address of the user
+/// - `walletName`: The name of the wallet
+/// - `paymentMethodName`: The name of the payment method
+/// - `coinTicker`: The ticker of the cryptocurrency coin
+/// - `paymentFees`: The fees of the payment method
+/// - `networkFees`: The network fees
+/// The widget displays the payment method information, including the amount, payment method name, wallet address, and fees.
+/// It also displays a web view of the payment method's payment page.
+/// The widget does not return any widget.
 // ignore: must_be_immutable
 class PaymentMethod extends StatefulWidget {
   String amount;
@@ -18,22 +30,38 @@ class PaymentMethod extends StatefulWidget {
   String paymentFees;
   String networkFees;
 
-  PaymentMethod(
-      {super.key,
-        required this.amount,
-        required this.paymentMethodCode,
-        required this.walletAddress,
-        required this.walletName,
-        required this.paymentMethodName,
-        required this.coinTicker,
-        required this.paymentFees,
-        required this.networkFees});
+  PaymentMethod({
+    Key? key,
+    required this.amount,
+    required this.paymentMethodCode,
+    required this.walletAddress,
+    required this.walletName,
+    required this.paymentMethodName,
+    required this.coinTicker,
+    required this.paymentFees,
+    required this.networkFees,
+  }) : super(key: key);
 
   @override
   State<PaymentMethod> createState() => _PaymentMethodState();
 }
 
 class _PaymentMethodState extends State<PaymentMethod> {
+  /// State variables for PaymentMethod widget
+  /// - isTimerShow: indicates whether the timer is showing or not
+  /// - showAllFees: indicates whether to show all fees or not
+  /// - isChecked: indicates whether the checkbox is checked or not
+  /// - showError: indicates whether to show error or not
+  /// - isLoading: indicates whether the API call is in progress or not
+  /// - isOrderPending: indicates whether the order is pending or not
+  /// - isOrderCancelled: indicates whether the order is cancelled or not
+  /// - isWebViewReady: indicates whether the webview is ready or not
+  /// - isWebControllerCall: indicates whether the web controller is called or not
+  /// - start: timer start value
+  /// - paymentMethodTimerStart: timer start value for payment method
+  /// - price: price value
+  /// - totalFees: total fees value
+  /// - webViewUrl: webview url
   bool isTimerShow = false;
   bool showAllFees = false;
   bool isChecked = false;
@@ -50,14 +78,26 @@ class _PaymentMethodState extends State<PaymentMethod> {
   String price = "0.0";
   num totalFees = 0.0;
   String webViewUrl = "";
-  final Completer<WebViewController> _controller = Completer<WebViewController>();
+  final Completer<WebViewController> _controller =
+      Completer<WebViewController>();
 
   @override
+
+  /// Initializes the state of the widget.
+  ///
+  /// This function is called when the widget is inserted into the tree. It performs the following actions:
+  /// - Calls the `onAmountChanged` function with the `value` parameter set to `widget.amount`.
+  /// - Starts the timer using the `startTimer` function.
+  /// - Sets the `isTimerShow` variable to `true`.
+  /// - Calculates the `totalFees` by parsing the `widget.paymentFees` and `widget.networkFees` strings as doubles and adding them together.
+  /// - If the platform is Android, sets the `WebView.platform` to `SurfaceAndroidWebView`.
+  /// - Calls the `super.initState()` function to perform any additional initialization.
   void initState() {
     onAmountChanged(value: widget.amount);
     startTimer();
     isTimerShow = true;
-    totalFees = double.parse(widget.paymentFees) + double.parse(widget.networkFees);
+    totalFees =
+        double.parse(widget.paymentFees) + double.parse(widget.networkFees);
     if (Platform.isAndroid) {
       WebView.platform = SurfaceAndroidWebView();
     }
@@ -77,30 +117,33 @@ class _PaymentMethodState extends State<PaymentMethod> {
     return isWebViewReady
         ? webViewShow()
         : FooterContainer(
-      appBarTitle: "Checkout",
-      isAppBarLeadShow: true,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: w * 0.06),
-          child: Column(
-            children: [
-              SizedBox(
-                height: h * 0.01,
+            appBarTitle: "Checkout",
+            isAppBarLeadShow: true,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: w * 0.06),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: h * 0.01,
+                    ),
+                    topContainerView(),
+                    SizedBox(
+                      height: h * 0.04,
+                    ),
+                    isLoading
+                        ? SizedBox(
+                            height: h / 1.5,
+                            child: const Center(
+                                child: CircularProgressIndicator()))
+                        : isOrderPending
+                            ? pendingStatusView()
+                            : paymentView(),
+                  ],
+                ),
               ),
-              topContainerView(),
-              SizedBox(
-                height: h * 0.04,
-              ),
-              isLoading
-                  ? SizedBox(height: h / 1.5, child: const Center(child: CircularProgressIndicator()))
-                  : isOrderPending
-                  ? pendingStatusView()
-                  : paymentView(),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          );
   }
 
   topContainerView() {
@@ -186,7 +229,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
   }
 
   /// Payment View Widget
-
   paymentView() {
     double h = MediaQuery.of(context).size.height;
     double w = MediaQuery.of(context).size.width;
@@ -476,7 +518,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
               ),
               const Spacer(),
               Text(
-                widget.amount.isEmpty ? "€0.00" : "€${double.parse(widget.amount).toStringAsFixed(2)}",
+                widget.amount.isEmpty
+                    ? "€0.00"
+                    : "€${double.parse(widget.amount).toStringAsFixed(2)}",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -518,10 +562,12 @@ class _PaymentMethodState extends State<PaymentMethod> {
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () async {
-                            http.Response response = await Repository().getClientInfoApiCall();
+                            http.Response response =
+                                await Repository().getClientInfoApiCall();
                             if (response.statusCode == 200) {
                               var tempData = jsonDecode(response.body)['slug'];
-                              final Uri url = Uri.parse("https://btcdirect.eu/en-eu/terms-of-service?client=$tempData");
+                              final Uri url = Uri.parse(
+                                  "https://btcdirect.eu/en-eu/terms-of-service?client=$tempData");
                               if (!await launchUrl(url)) {
                                 throw Exception('Could not launch $url');
                               }
@@ -585,6 +631,21 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 
+  /// Displays a bottom sheet with payment method information.
+  ///
+  /// This function displays a bottom sheet with the title "Payment method"
+  /// and a message explaining how the fees for payment methods work.
+  ///
+  /// The message is centered and has a font size of 17. The text is
+  /// black and has a font weight of 400.
+  ///
+  /// The bottom sheet is scrollable and has a height of 30% of the
+  /// screen height.
+  ///
+  /// The bottom sheet has a close icon in the top right corner which
+  /// can be tapped to dismiss the bottom sheet.
+  ///
+  /// [context]: The context of the widget.
   paymentMethodInfoBottomSheet(BuildContext context) {
     double h = MediaQuery.of(context).size.height;
     showModalBottomSheet<void>(
@@ -655,6 +716,13 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 
+  /// Displays a bottom sheet with information about network fees.
+  /// Shows a bottom sheet with title "Network fee" and text explaining the purpose
+  /// of network fees in Bitcoin transactions. The bottom sheet can be closed by
+  /// tapping the close button in the top right corner.
+  /// This will display a bottom sheet with the title "Network fee" and the
+  /// explanation text about network fees. The bottom sheet can be closed by tapping
+  /// the close button in the top right corner.
   networkFeeInfoBottomSheet(BuildContext context) {
     double h = MediaQuery.of(context).size.height;
     showModalBottomSheet<void>(
@@ -727,7 +795,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
   }
 
   /// Pending Status View Widget
-
   pendingStatusView() {
     double h = MediaQuery.of(context).size.height;
     double w = MediaQuery.of(context).size.width;
@@ -745,7 +812,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
           height: h * 0.02,
         ),
         Text(
-          isOrderCancelled ? "Oops! Your order\nhas been cancelled" : "Oops! Something went\nwrong",
+          isOrderCancelled
+              ? "Oops! Your order\nhas been cancelled"
+              : "Oops! Something went\nwrong",
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 26,
@@ -760,15 +829,15 @@ class _PaymentMethodState extends State<PaymentMethod> {
         isOrderCancelled
             ? Container()
             : const Text(
-          "Please reload this page or contact our\nsupport team.",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: CommonColors.black,
-            fontFamily: 'TextaAlt',
-          ),
-        ),
+                "Please reload this page or contact our\nsupport team.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: CommonColors.black,
+                  fontFamily: 'TextaAlt',
+                ),
+              ),
         SizedBox(
           height: h * 0.2,
         ),
@@ -830,11 +899,19 @@ class _PaymentMethodState extends State<PaymentMethod> {
   }
 
   /// Api Call
+  /// Starts a timer that periodically calls the `onAmountChanged` function.
+  ///
+  /// The timer is set to run every second. When the timer ticks, it checks if the `start` variable is 0.
+  /// If it is, it calls the `onAmountChanged` function with the `widget.amount` as the value,
+  /// sets the `start` variable to 10, and updates the state.
+  /// If the `start` variable is not 0, it decrements the `start` variable and updates the state.
+  ///
+  /// This function does not take any parameters and does not return anything.
   void startTimer() {
     const oneSec = Duration(seconds: 1);
     timer = Timer.periodic(
       oneSec,
-          (Timer timer) {
+      (Timer timer) {
         if (start == 0) {
           onAmountChanged(value: widget.amount.toString());
           start = 10;
@@ -854,11 +931,14 @@ class _PaymentMethodState extends State<PaymentMethod> {
       "paymentMethod": widget.paymentMethodCode,
     };
     if (value.isNotEmpty || value != "" || value != "0.0") {
-      http.Response response = await Repository().getOnAmountChangedApiCall(body);
+      http.Response response =
+          await Repository().getOnAmountChangedApiCall(body);
       var tempData = jsonDecode(response.body) as Map<String, dynamic>;
       if (response.statusCode == 200) {
         setState(() {
-          price = tempData["cryptoAmount"].toString() != "null" ? tempData["cryptoAmount"].toString() : "0.00";
+          price = tempData["cryptoAmount"].toString() != "null"
+              ? tempData["cryptoAmount"].toString()
+              : "0.00";
         });
       }
     }
@@ -866,7 +946,12 @@ class _PaymentMethodState extends State<PaymentMethod> {
 
   getQuoteChanged() async {
     isLoading = true;
-    Map<String, String> body = {"currencyPair": "${widget.coinTicker}-EUR", "fiatAmount": widget.amount.toString(), "cryptoAmount": "", "paymentMethod": widget.paymentMethodCode};
+    Map<String, String> body = {
+      "currencyPair": "${widget.coinTicker}-EUR",
+      "fiatAmount": widget.amount.toString(),
+      "cryptoAmount": "",
+      "paymentMethod": widget.paymentMethodCode
+    };
     http.Response response = await Repository().getQuoteApiCall(body, context);
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 200) {
@@ -875,10 +960,26 @@ class _PaymentMethodState extends State<PaymentMethod> {
     }
   }
 
+  /// Calls the payment confirm API with the given quote and updates the state
+  /// accordingly.
+  /// The API is called with the quote, wallet address, destination tag, and return
+  /// URL.
+  /// The response is then parsed and the payment URL and order ID are stored in
+  /// the state.
+  /// If the API call is successful, the state is updated and the widget is rebuilt.
+  /// The function takes one parameter: `quote` which is the quote to be used in
+  /// the API call.
+  /// [quote]: The quote to be used in the API call.
   paymentConfirm(String quote) async {
-    Map<String, String> body = {"quote": quote, "walletAddress": widget.walletAddress, "destinationTag": "", "returnUrl": "https://www.btcdirectapp.com"};
+    Map<String, String> body = {
+      "quote": quote,
+      "walletAddress": widget.walletAddress,
+      "destinationTag": "",
+      "returnUrl": "https://www.btcdirectapp.com"
+    };
     var token = StorageHelper.getValue(StorageKeys.token);
-    http.Response response = await Repository().getPaymentConfirmApiCall(body, token, context);
+    http.Response response =
+        await Repository().getPaymentConfirmApiCall(body, token, context);
     var tempData = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 201) {
       var paymentUrl = tempData["paymentUrl"].toString();
@@ -891,12 +992,11 @@ class _PaymentMethodState extends State<PaymentMethod> {
   }
 
   /// Payment Method Complete Are Not Check Api Call
-
   void paymentMethodCompleteCheckTimer() {
     const oneSec = Duration(seconds: 1);
     paymentMethodTimer = Timer.periodic(
       oneSec,
-          (Timer timer) {
+      (Timer timer) {
         if (paymentMethodTimerStart == 0) {
           // timer.cancel();
           getOrderDetailsData();
@@ -910,11 +1010,27 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 
+  /// Retrieves order details data from the API and updates the state accordingly.
+  /// This function calls the `getOrderDataApiCall` function from the Repository class
+  /// and decodes the response body into an `OrderModel`.
+  /// It then checks the order status and updates the state accordingly.
+  /// If the order status is "completed", it navigates to the CompletePayment screen.
+  /// If the order status is "cancelled", it sets the `isOrderPending` and `isOrderCancelled`
+  /// variables to `true`. If the order status is "pending", it sets the `isOrderPending`
+  /// variable to `true`.
+  /// Finally, it calls `setState` to update the UI.
+  /// This function takes no parameters and does not return anything.
+  ///
+  /// Throws a [StateError] if the widget is not mounted when the function is called.
+  ///
+  /// Throws a [FormatException] if the order data is invalid.
+  ///
   getOrderDetailsData() async {
     isLoading = true;
     var orderId = StorageHelper.getValue(StorageKeys.orderId);
     try {
-      http.Response response = await Repository().getOrderDataApiCall(orderId, context);
+      http.Response response =
+          await Repository().getOrderDataApiCall(orderId, context);
       var tempData = jsonDecode(response.body) as Map<String, dynamic>;
       if (response.statusCode == 200) {
         OrderModel orderData = OrderModel.fromJson(tempData);
@@ -923,7 +1039,10 @@ class _PaymentMethodState extends State<PaymentMethod> {
           isOrderCancelled = false;
           paymentMethodTimer.cancel();
           if (mounted) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const CompletePayment()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const CompletePayment()));
           }
         } else if (orderData.status == "cancelled") {
           paymentMethodTimer.cancel();

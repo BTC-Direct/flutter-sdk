@@ -5,13 +5,27 @@ import 'package:btc_direct/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
+/// A widget for the buying screen of the Btc Direct.
+/// It takes three parameters in its constructor:
+/// - `myAddressesList`: A list of maps representing the user's wallet
+///     addresses. Each map should contain the keys "address", "currency", "id",
+///     and "name".
+/// - `xApiKey`: The API key for making requests to the Btc Direct API.
+/// - `isSandBox`: A boolean indicating whether the API is in sandbox mode
+///     or not.
+/// The [BTCDirect] widget is used to display the buying screen of the Btc Direct.
 //ignore: must_be_immutable
 class BTCDirect extends StatefulWidget {
   String xApiKey;
   List<Map<String, dynamic>> myAddressesList;
   bool isSandBox;
 
-  BTCDirect({super.key, required this.myAddressesList, required this.xApiKey, required this.isSandBox});
+  BTCDirect({
+    super.key,
+    required this.myAddressesList,
+    required this.xApiKey,
+    required this.isSandBox,
+  });
 
   @override
   State<BTCDirect> createState() => _BTCDirectState();
@@ -24,24 +38,95 @@ class _BTCDirectState extends State<BTCDirect> {
   TextEditingController coinAmount = TextEditingController();
   TextEditingController walletAddress = TextEditingController();
   TextEditingController paymentMethod = TextEditingController();
+
+  /// Index of the selected cryptocurrency currency in the dropdown list.
+  /// This value is used to get the selected cryptocurrency currency from the
+  /// `coinList` list.
   int coinSelectIndex = 0;
+
+  /// Index of the selected payment method in the dropdown list.
+  /// This value is used to get the selected payment method from the
+  /// `payMethodList` list.
   int paymentSelectIndex = 0;
+
+  /// A timer that is used to fetch the prices of the selected cryptocurrency
+  /// currency every second.
+  /// The timer is started when the widget is initialized and stopped
+  /// when the widget is disposed.
   late Timer timer;
+
+  /// The number of seconds left in the timer.
+  ///
+  /// This value is used to show the time left in the timer in the widget.
   int start = 10;
+
+  /// The current price of the selected cryptocurrency currency.
+  /// This value is used to update the text of the text field that shows the
+  /// amount of cryptocurrency currency.
   double price = 0.0;
+
+  /// A boolean that indicates if the loading state is active.
+  /// This value is used to show a loading indicator in the widget.
   bool isLoading = false;
+
+  /// A boolean that indicates if the timer is shown in the widget.
+  ///
+  /// This value is used to show or hide the timer in the widget.
   bool isTimerShow = false;
+
+  /// A boolean that indicates if all the fees are shown in the widget.
+  /// This value is used to show or hide the fees in the widget.
   bool showAllFees = false;
+
+  /// A boolean that indicates if the amount is valid.
+  /// This value is used to enable or disable the submit button based on the
+  /// validity of the amount.
   bool isAmountValid = false;
+
+  /// A boolean that indicates if the amount is maximum.
+  /// This value is used to show a text in the widget if the amount is maximum.
   bool isAmountMaximumValid = false;
+
+  /// A boolean that indicates if the user is verified.
+  /// This value is used to enable or disable the submit button based on the
+  /// verification status of the user.
   bool isUserVerified = false;
+
+  /// A boolean that indicates if the bank transfer button is enabled.
+  /// This value is used to enable or disable the bank transfer button
+  /// based on the payment method selected by the user.
   bool isBankTransferButtonEnabled = false;
+
+  /// A list of `CoinModel` objects that contain the cryptocurrency currencies.
+  /// This list is used to populate the dropdown list of cryptocurrencies in the widget.
   List<CoinModel> coinList = [];
+
+  /// A list of `PaymentMethods` objects that contain the payment methods.
+  /// This list is used to populate the dropdown list of payment methods in the widget.
   List<PaymentMethods> payMethodList = [];
+
+  /// A `UserInfoModel` object that contains the user's information.
+  /// This object is used to store the user's information and update the state
+  /// accordingly.
   UserInfoModel userInfoModel = UserInfoModel();
+
+  /// The fees of the selected payment method.
+  /// This value is used to update the text of the text field that shows the
+  /// fees of the payment method.
   String paymentFees = "0.00";
+
+  /// The network fees of the selected cryptocurrency currency.
+  /// This value is used to update the text of the text field that shows the
+  /// network fees of the selected cryptocurrency currency.
   String networkFees = "0.00";
+
+  /// The total fees of the transaction.
+  /// This value is used to update the text of the text field that shows the
+  /// total fees of the transaction.
   num totalFees = 0.00;
+
+  /// The code of the selected payment method.
+  /// This value is used to make the API call to get the payment method's details.
   String? paymentMethodCode;
 
   @override
@@ -72,7 +157,6 @@ class _BTCDirectState extends State<BTCDirect> {
     await StorageHelper.initialize();
     addressesList.clear();
   }
-
 
   /// Gets all the required data and initializes the state.
   /// Sets the xApiKey and isSandBox values from the widget.
@@ -125,7 +209,12 @@ class _BTCDirectState extends State<BTCDirect> {
                   SizedBox(
                     height: h * 0.04,
                   ),
-                  isLoading ? SizedBox(height: h / 1.6, child: const Center(child: CircularProgressIndicator())) : orderView(),
+                  isLoading
+                      ? SizedBox(
+                          height: h / 1.6,
+                          child:
+                              const Center(child: CircularProgressIndicator()))
+                      : orderView(),
                 ],
               ),
             ),
@@ -149,7 +238,9 @@ class _BTCDirectState extends State<BTCDirect> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
-                color: indexValue == 0 ? CommonColors.blueColor : CommonColors.greyColor.withOpacity(0.6),
+                color: indexValue == 0
+                    ? CommonColors.blueColor
+                    : CommonColors.greyColor.withOpacity(0.6),
                 fontFamily: 'TextaAlt',
               ),
             ),
@@ -174,7 +265,9 @@ class _BTCDirectState extends State<BTCDirect> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
-                color: indexValue == 1 ? CommonColors.blueColor : CommonColors.greyColor.withOpacity(0.6),
+                color: indexValue == 1
+                    ? CommonColors.blueColor
+                    : CommonColors.greyColor.withOpacity(0.6),
                 fontFamily: 'TextaAlt',
               ),
             ),
@@ -185,7 +278,9 @@ class _BTCDirectState extends State<BTCDirect> {
               width: w / 3.5,
               height: h * 0.007,
               decoration: BoxDecoration(
-                color: indexValue == 1 ? CommonColors.blueColor : CommonColors.greyColor.withOpacity(0.6),
+                color: indexValue == 1
+                    ? CommonColors.blueColor
+                    : CommonColors.greyColor.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -198,7 +293,9 @@ class _BTCDirectState extends State<BTCDirect> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
-                color: indexValue == 2 ? CommonColors.blueColor : CommonColors.greyColor.withOpacity(0.6),
+                color: indexValue == 2
+                    ? CommonColors.blueColor
+                    : CommonColors.greyColor.withOpacity(0.6),
                 fontFamily: 'TextaAlt',
               ),
             ),
@@ -209,7 +306,9 @@ class _BTCDirectState extends State<BTCDirect> {
               width: w / 3.5,
               height: h * 0.007,
               decoration: BoxDecoration(
-                color: indexValue == 2 ? CommonColors.blueColor : CommonColors.greyColor.withOpacity(0.6),
+                color: indexValue == 2
+                    ? CommonColors.blueColor
+                    : CommonColors.greyColor.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -234,12 +333,15 @@ class _BTCDirectState extends State<BTCDirect> {
               color: CommonColors.backgroundColor,
               borderRadius: BorderRadius.circular(10),
             ),
-            padding: EdgeInsets.symmetric(horizontal: w * 0.03, vertical: h * 0.015),
+            padding:
+                EdgeInsets.symmetric(horizontal: w * 0.03, vertical: h * 0.015),
             child: isAmountMaximumValid
                 ? RichText(
                     text: TextSpan(
                         children: [
-                          const TextSpan(text: "You can not currently order this amount using this currency."),
+                          const TextSpan(
+                              text:
+                                  "You can not currently order this amount using this currency."),
                           TextSpan(
                             text: "Click here ",
                             style: const TextStyle(
@@ -256,7 +358,9 @@ class _BTCDirectState extends State<BTCDirect> {
                                 isAmountValid = false;
                               },
                           ),
-                          const TextSpan(text: "to automatically fill in your maximum amount of €2500.00."),
+                          const TextSpan(
+                              text:
+                                  "to automatically fill in your maximum amount of €2500.00."),
                         ],
                         style: const TextStyle(
                           color: CommonColors.black,
@@ -269,7 +373,8 @@ class _BTCDirectState extends State<BTCDirect> {
                 : RichText(
                     text: TextSpan(
                         children: [
-                          const TextSpan(text: "Your order must be at least €30.00. "),
+                          const TextSpan(
+                              text: "Your order must be at least €30.00. "),
                           TextSpan(
                             text: "Click here ",
                             style: const TextStyle(
@@ -286,7 +391,9 @@ class _BTCDirectState extends State<BTCDirect> {
                                 isAmountValid = false;
                               },
                           ),
-                          const TextSpan(text: "to automatically fill in the minimum amount of €30.00."),
+                          const TextSpan(
+                              text:
+                                  "to automatically fill in the minimum amount of €30.00."),
                         ],
                         style: const TextStyle(
                           color: CommonColors.black,
@@ -349,7 +456,9 @@ class _BTCDirectState extends State<BTCDirect> {
                 Container(
                   height: 30,
                   width: 30,
-                  decoration: const BoxDecoration(color: CommonColors.darkBlueColor, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                      color: CommonColors.darkBlueColor,
+                      shape: BoxShape.circle),
                   child: const Text(
                     "€",
                     textAlign: TextAlign.center,
@@ -381,7 +490,8 @@ class _BTCDirectState extends State<BTCDirect> {
               return 'Amount is required';
             } else if (double.parse(value) < 30) {
               return "The minimum amount is €30.00";
-            } else if (double.parse(value) > 2500.00 && isAmountMaximumValid == true) {
+            } else if (double.parse(value) > 2500.00 &&
+                isAmountMaximumValid == true) {
               return "The maximum amount is €2500.00";
             } else {
               return null;
@@ -429,7 +539,9 @@ class _BTCDirectState extends State<BTCDirect> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SvgPicture.network(
-                          coinSelectIndex == 0 ? '${coinList.first.coinIcon}' : '${coinList[coinSelectIndex].coinIcon}',
+                          coinSelectIndex == 0
+                              ? '${coinList.first.coinIcon}'
+                              : '${coinList[coinSelectIndex].coinIcon}',
                           width: 28,
                           height: 28,
                         ),
@@ -437,7 +549,9 @@ class _BTCDirectState extends State<BTCDirect> {
                           width: 6,
                         ),
                         Text(
-                          coinSelectIndex == 0 ? "${coinList.first.coinTicker}" : "${coinList[coinSelectIndex].coinTicker}",
+                          coinSelectIndex == 0
+                              ? "${coinList.first.coinTicker}"
+                              : "${coinList[coinSelectIndex].coinTicker}",
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -475,7 +589,11 @@ class _BTCDirectState extends State<BTCDirect> {
                 size: h * 0.022,
               )
             else
-              SizedBox(height: h * 0.015, width: h * 0.015, child: const CircularProgressIndicator(strokeWidth: 1.5, color: CommonColors.greyColor)),
+              SizedBox(
+                  height: h * 0.015,
+                  width: h * 0.015,
+                  child: const CircularProgressIndicator(
+                      strokeWidth: 1.5, color: CommonColors.greyColor)),
             if (isTimerShow)
               Text(
                 " Refresh in ${start}s",
@@ -519,7 +637,8 @@ class _BTCDirectState extends State<BTCDirect> {
             width: 60,
             child: coinList.isNotEmpty
                 ? Padding(
-                    padding: EdgeInsets.symmetric(horizontal: w * 0.02, vertical: h * 0.01),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: w * 0.02, vertical: h * 0.01),
                     child: SvgPicture.network(
                       '${coinList[coinSelectIndex].coinIcon}',
                       width: 25,
@@ -528,7 +647,8 @@ class _BTCDirectState extends State<BTCDirect> {
                   )
                 : Container(),
           ),
-          suffix: const Icon(Icons.keyboard_arrow_down_outlined, color: CommonColors.greyColor),
+          suffix: const Icon(Icons.keyboard_arrow_down_outlined,
+              color: CommonColors.greyColor),
           onTap: () {
             myWalletAddressBottomSheet(context);
           },
@@ -557,7 +677,8 @@ class _BTCDirectState extends State<BTCDirect> {
           prefix: SizedBox(
             width: 60,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: w * 0.02, vertical: h * 0.01),
+              padding: EdgeInsets.symmetric(
+                  horizontal: w * 0.02, vertical: h * 0.01),
               child: payMethodList.isNotEmpty
                   ? SvgPicture.network(
                       "https://widgets-sandbox.btcdirect.eu/img/payment-methods/$paymentMethodCode.svg",
@@ -568,7 +689,8 @@ class _BTCDirectState extends State<BTCDirect> {
                   : const SizedBox(),
             ),
           ),
-          suffix: const Icon(Icons.keyboard_arrow_down_outlined, color: CommonColors.greyColor),
+          suffix: const Icon(Icons.keyboard_arrow_down_outlined,
+              color: CommonColors.greyColor),
           onTap: () {
             paymentMethodBottomSheet(context);
           },
@@ -594,7 +716,9 @@ class _BTCDirectState extends State<BTCDirect> {
               ),
               const Spacer(),
               Text(
-                amount.text.isEmpty ? "0.00" : "€${double.parse(amount.text).toStringAsFixed(2)}",
+                amount.text.isEmpty
+                    ? "0.00"
+                    : "€${double.parse(amount.text).toStringAsFixed(2)}",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -760,7 +884,8 @@ class _BTCDirectState extends State<BTCDirect> {
                 color: CommonColors.errorBackgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              padding: EdgeInsets.symmetric(horizontal: w * 0.02, vertical: h * 0.02),
+              padding: EdgeInsets.symmetric(
+                  horizontal: w * 0.02, vertical: h * 0.02),
               height: h * 0.18,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -777,7 +902,9 @@ class _BTCDirectState extends State<BTCDirect> {
                     child: RichText(
                       text: TextSpan(
                           children: [
-                            const TextSpan(text: "The order cannot be completed as your account registration hasn't been completed yet. "),
+                            const TextSpan(
+                                text:
+                                    "The order cannot be completed as your account registration hasn't been completed yet. "),
                             TextSpan(
                               text: "Click here to continue your registration",
                               style: const TextStyle(
@@ -788,17 +915,21 @@ class _BTCDirectState extends State<BTCDirect> {
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () async {
-                                  if (userInfoModel.status?.details?.emailAddressVerificationStatus == "pending") {
+                                  if (userInfoModel.status?.details
+                                          ?.emailAddressVerificationStatus ==
+                                      "pending") {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => EmailVerification(
-                                          email: '${userInfoModel.emailAddress}',
+                                          email:
+                                              '${userInfoModel.emailAddress}',
                                         ),
                                       ),
                                     ).then((value) {
                                       startTimer();
-                                      var token = StorageHelper.getValue(StorageKeys.token);
+                                      var token = StorageHelper.getValue(
+                                          StorageKeys.token);
                                       if (token != null && token.isNotEmpty) {
                                         getUserInfo(token);
                                       }
@@ -807,11 +938,13 @@ class _BTCDirectState extends State<BTCDirect> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const VerifyIdentity(),
+                                        builder: (context) =>
+                                            const VerifyIdentity(),
                                       ),
                                     ).then((value) {
                                       startTimer();
-                                      var token = StorageHelper.getValue(StorageKeys.token);
+                                      var token = StorageHelper.getValue(
+                                          StorageKeys.token);
                                       if (token != null && token.isNotEmpty) {
                                         getUserInfo(token);
                                       }
@@ -864,11 +997,21 @@ class _BTCDirectState extends State<BTCDirect> {
                     MaterialPageRoute(
                         builder: (context) => PaymentMethod(
                               amount: amount.text,
-                              paymentMethodCode: payMethodList[paymentSelectIndex].code.toString(),
-                              paymentMethodName: payMethodList[paymentSelectIndex].label.toString(),
+                              paymentMethodCode:
+                                  payMethodList[paymentSelectIndex]
+                                      .code
+                                      .toString(),
+                              paymentMethodName:
+                                  payMethodList[paymentSelectIndex]
+                                      .label
+                                      .toString(),
                               walletName: walletAddress.text,
-                              walletAddress: addressesList[coinSelectIndex].address.toString(),
-                              coinTicker: coinList[coinSelectIndex].coinTicker.toString(),
+                              walletAddress: addressesList[coinSelectIndex]
+                                  .address
+                                  .toString(),
+                              coinTicker: coinList[coinSelectIndex]
+                                  .coinTicker
+                                  .toString(),
                               paymentFees: paymentFees,
                               networkFees: networkFees,
                             ))).then((value) {
@@ -956,10 +1099,14 @@ class _BTCDirectState extends State<BTCDirect> {
                       return Container(
                         width: w,
                         height: h * 0.08,
-                        margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.008),
+                        margin: EdgeInsets.symmetric(
+                            horizontal: w * 0.08, vertical: h * 0.008),
                         decoration: BoxDecoration(
-                          color: coinSelectIndex == index ? CommonColors.backgroundColor : CommonColors.transparent,
-                          borderRadius: const BorderRadius.all(Radius.circular(10)),
+                          color: coinSelectIndex == index
+                              ? CommonColors.backgroundColor
+                              : CommonColors.transparent,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10)),
                         ),
                         child: InkWell(
                           onTap: () {
@@ -1017,7 +1164,9 @@ class _BTCDirectState extends State<BTCDirect> {
                               ),
                               const Spacer(),
                               Icon(
-                                coinSelectIndex == index ? Icons.check : Icons.arrow_forward_ios_sharp,
+                                coinSelectIndex == index
+                                    ? Icons.check
+                                    : Icons.arrow_forward_ios_sharp,
                                 color: CommonColors.black,
                                 size: 15,
                               ),
@@ -1102,18 +1251,26 @@ class _BTCDirectState extends State<BTCDirect> {
                         return Container(
                           width: w,
                           height: h * 0.08,
-                          margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.004),
+                          margin: EdgeInsets.symmetric(
+                              horizontal: w * 0.08, vertical: h * 0.004),
                           decoration: BoxDecoration(
-                            color: index == 0 ? CommonColors.backgroundColor : CommonColors.transparent,
-                            borderRadius: const BorderRadius.all(Radius.circular(10)),
+                            color: index == 0
+                                ? CommonColors.backgroundColor
+                                : CommonColors.transparent,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10)),
                           ),
                           child: InkWell(
-                            onTap: (isBankTransferButtonEnabled || !(payMethodList[index].label == 'Bank Transfer'))
+                            onTap: (isBankTransferButtonEnabled ||
+                                    !(payMethodList[index].label ==
+                                        'Bank Transfer'))
                                 ? () {
                                     setState(() {
                                       // paymentSelectIndex = index;
-                                      paymentMethod.text = '${payMethodList[index].label}';
-                                      paymentMethodCode = '${payMethodList[index].code}';
+                                      paymentMethod.text =
+                                          '${payMethodList[index].label}';
+                                      paymentMethodCode =
+                                          '${payMethodList[index].code}';
                                       selectedItem = payMethodList[index];
                                       payMethodList.remove(selectedItem);
                                       payMethodList.insert(0, selectedItem);
@@ -1151,17 +1308,20 @@ class _BTCDirectState extends State<BTCDirect> {
                                           ),
                                         ),
                                       )
-                                    : payMethodList[index].label == 'Bank Transfer'
+                                    : payMethodList[index].label ==
+                                            'Bank Transfer'
                                         ? Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Center(
                                                 child: Text(
                                                   '${payMethodList[index].label}',
                                                   style: const TextStyle(
-                                                    color: CommonColors.greyColor,
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        CommonColors.greyColor,
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w500,
                                                     fontFamily: 'TextaAlt',
                                                   ),
                                                 ),
@@ -1170,8 +1330,9 @@ class _BTCDirectState extends State<BTCDirect> {
                                                 child: Text(
                                                   'Mon-Fri 09:00AM - 6:00PM',
                                                   style: TextStyle(
-                                                    color: CommonColors.greyColor,
-                                                    fontSize: 14,
+                                                    color:
+                                                        CommonColors.greyColor,
+                                                    fontSize: 13,
                                                     fontWeight: FontWeight.w400,
                                                     fontFamily: 'TextaAlt',
                                                   ),
@@ -1181,8 +1342,9 @@ class _BTCDirectState extends State<BTCDirect> {
                                                 child: Text(
                                                   'Mon-Fri 09:00AM - 18:00PM',
                                                   style: TextStyle(
-                                                    color: CommonColors.greyColor,
-                                                    fontSize: 14,
+                                                    color:
+                                                        CommonColors.greyColor,
+                                                    fontSize: 13,
                                                     fontWeight: FontWeight.w400,
                                                     fontFamily: 'TextaAlt',
                                                   ),
@@ -1195,7 +1357,7 @@ class _BTCDirectState extends State<BTCDirect> {
                                               '${payMethodList[index].label}',
                                               style: const TextStyle(
                                                 color: CommonColors.black,
-                                                fontSize: 20,
+                                                fontSize: 18,
                                                 fontWeight: FontWeight.w600,
                                                 fontFamily: 'TextaAlt',
                                               ),
@@ -1426,10 +1588,14 @@ class _BTCDirectState extends State<BTCDirect> {
                       return Container(
                         width: w,
                         height: h * 0.08,
-                        margin: EdgeInsets.symmetric(horizontal: w * 0.08, vertical: h * 0.008),
+                        margin: EdgeInsets.symmetric(
+                            horizontal: w * 0.08, vertical: h * 0.008),
                         decoration: BoxDecoration(
-                          color: coinSelectIndex == index ? CommonColors.backgroundColor : CommonColors.transparent,
-                          borderRadius: const BorderRadius.all(Radius.circular(10)),
+                          color: coinSelectIndex == index
+                              ? CommonColors.backgroundColor
+                              : CommonColors.transparent,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10)),
                         ),
                         child: InkWell(
                           onTap: () {
@@ -1471,7 +1637,11 @@ class _BTCDirectState extends State<BTCDirect> {
                                   Expanded(
                                     child: Center(
                                       child: Text(
-                                        AppCommonFunction().truncateStringWithEllipsis(addressesList[index].address, 10, 5),
+                                        AppCommonFunction()
+                                            .truncateStringWithEllipsis(
+                                                addressesList[index].address,
+                                                10,
+                                                5),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -1487,7 +1657,9 @@ class _BTCDirectState extends State<BTCDirect> {
                               ),
                               const Spacer(),
                               Icon(
-                                coinSelectIndex == index ? Icons.check : Icons.arrow_forward_ios_sharp,
+                                coinSelectIndex == index
+                                    ? Icons.check
+                                    : Icons.arrow_forward_ios_sharp,
                                 color: CommonColors.black,
                                 size: 15,
                               ),
@@ -1509,21 +1681,22 @@ class _BTCDirectState extends State<BTCDirect> {
     );
   }
 
-    /// Updates the button state based on the current CET time.
-    ///
-    /// This function retrieves the current CET time using the `getCETDateTime` method from the `AppCommonFunction` class.
-    /// It then formats the current time using the `DateFormat` class and prints it if the app is in debug mode.
-    /// The function checks the current hour and minute of the CET time and returns a boolean value based on the following conditions:
-    /// - If the current hour is between 9 and 17 (inclusive), it returns `true` indicating that it is within working hours.
-    /// - If the current hour is 18 and the minute is 0, it returns `true` indicating that it includes 6:00 PM as working hours.
-    /// - If the current hour is between 0 and 5 (inclusive), it returns `false` indicating that it is before 6:00 AM.
-    /// - If the current hour is 6 and the minute is 0, it returns `false` indicating that it includes 6:00 AM as non-working hours.
-    /// - Otherwise, it returns `false` indicating that it is after 6:00 PM.
-    ///
-    /// Returns a boolean value indicating the state of the button.
+  /// Updates the button state based on the current CET time.
+  ///
+  /// This function retrieves the current CET time using the `getCETDateTime` method from the `AppCommonFunction` class.
+  /// It then formats the current time using the `DateFormat` class and prints it if the app is in debug mode.
+  /// The function checks the current hour and minute of the CET time and returns a boolean value based on the following conditions:
+  /// - If the current hour is between 9 and 17 (inclusive), it returns `true` indicating that it is within working hours.
+  /// - If the current hour is 18 and the minute is 0, it returns `true` indicating that it includes 6:00 PM as working hours.
+  /// - If the current hour is between 0 and 5 (inclusive), it returns `false` indicating that it is before 6:00 AM.
+  /// - If the current hour is 6 and the minute is 0, it returns `false` indicating that it includes 6:00 AM as non-working hours.
+  /// - Otherwise, it returns `false` indicating that it is after 6:00 PM.
+  ///
+  /// Returns a boolean value indicating the state of the button.
   bool updateButtonState() {
     DateTime currentCETTime = AppCommonFunction().getCETDateTime();
-    var formattedDate = DateFormat('yyyy MM dd hh:mm:ss a').format(currentCETTime);
+    var formattedDate =
+        DateFormat('yyyy MM dd hh:mm:ss a').format(currentCETTime);
     if (kDebugMode) {
       print("formattedDate ::: $formattedDate");
     }
@@ -1580,19 +1753,22 @@ class _BTCDirectState extends State<BTCDirect> {
       http.Response response = await Repository().getCoinDataListApiCall();
       var tempData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        currencyPairs = List<GetPairsModel>.from(tempData.map((x) => GetPairsModel.fromJson(x)));
+        currencyPairs = List<GetPairsModel>.from(
+            tempData.map((x) => GetPairsModel.fromJson(x)));
         for (int i = 0; i < currencyPairs.length; i++) {
           for (int j = 0; j < addressesList.length; j++) {
-            if (currencyPairs[i].currencyPair!.split("-")[0] == addressesList[j].currency) {
+            if (currencyPairs[i].currencyPair!.split("-")[0] ==
+                addressesList[j].currency) {
               coinList.add(CoinModel(
                   coinName: currencyPairs[i].currencyPair!.split("-")[0],
                   coinTicker: currencyPairs[i].currencyPair!.split("-")[0],
-                  coinIcon: "https://widgets-sandbox.btcdirect.eu/img/currencies/${currencyPairs[i].currencyPair!.split("-")[0]}.svg"));
+                  coinIcon:
+                      "https://widgets-sandbox.btcdirect.eu/img/currencies/${currencyPairs[i].currencyPair!.split("-")[0]}.svg"));
             }
           }
         }
-        if(context.mounted){
-        getPaymentMethod(context);
+        if (context.mounted) {
+          getPaymentMethod(context);
         }
       } else if (response.statusCode >= 400) {
         setState(() {
@@ -1603,8 +1779,9 @@ class _BTCDirectState extends State<BTCDirect> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              if(context.mounted){
-                AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
               }
               log(errorCodeList[i].message);
             }
@@ -1618,7 +1795,6 @@ class _BTCDirectState extends State<BTCDirect> {
       log(e.toString());
     }
   }
-
 
   /// Fetches the payment methods from the API and updates the state accordingly.
   /// This function calls the `getPaymentMethodApiCall` function from the Repository class
@@ -1661,8 +1837,9 @@ class _BTCDirectState extends State<BTCDirect> {
         for (int i = 0; i < errorCodeList.length; i++) {
           for (int j = 0; j < tempData['errors'].length; j++) {
             if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              if(context.mounted) {
-              AppCommonFunction().failureSnackBar(context: context, message: '${errorCodeList[i].message}');
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
               }
               log(errorCodeList[i].message);
             }
@@ -1687,7 +1864,9 @@ class _BTCDirectState extends State<BTCDirect> {
   void getCurrencyPrice() async {
     var response = await Repository().getPriceApiCall();
     setState(() {
-      price = double.parse(response["buy"]["${coinList[coinSelectIndex].coinTicker}-EUR"].toString());
+      price = double.parse(response["buy"]
+              ["${coinList[coinSelectIndex].coinTicker}-EUR"]
+          .toString());
     });
   }
 
@@ -1707,7 +1886,8 @@ class _BTCDirectState extends State<BTCDirect> {
   /// The function is synchronous.
   /// [value]: The amount of fiat or cryptocurrency currency.
   /// [isPay]: A boolean indicating whether it's a fiat or cryptocurrency currency.
-  Future<void> onAmountChanged({required String value, required bool isPay}) async {
+  Future<void> onAmountChanged(
+      {required String value, required bool isPay}) async {
     Map<String, String> body = isPay
         ? {
             "currencyPair": "${coinList[coinSelectIndex].coinTicker}-EUR",
@@ -1720,20 +1900,33 @@ class _BTCDirectState extends State<BTCDirect> {
             "paymentMethod": "${payMethodList[paymentSelectIndex].code}",
           };
     if (value.isNotEmpty || value != "" || value != "0.0") {
-      http.Response response = await Repository().getOnAmountChangedApiCall(body);
+      http.Response response =
+          await Repository().getOnAmountChangedApiCall(body);
       var tempData = jsonDecode(response.body) as Map<String, dynamic>;
       if (response.statusCode == 200) {
         if (!isPay) {
           setState(() {
-            amount.text = tempData["fiatAmount"].toString() != "null" ? tempData["fiatAmount"].toString() : "0.00";
-            paymentFees = tempData["paymentMethodCost"].toString() != "null" ? tempData["paymentMethodCost"].toString() : "0.00";
-            networkFees = tempData["networkFeeCost"].toString() != "null" ? tempData["networkFeeCost"].toString() : "0.00";
+            amount.text = tempData["fiatAmount"].toString() != "null"
+                ? tempData["fiatAmount"].toString()
+                : "0.00";
+            paymentFees = tempData["paymentMethodCost"].toString() != "null"
+                ? tempData["paymentMethodCost"].toString()
+                : "0.00";
+            networkFees = tempData["networkFeeCost"].toString() != "null"
+                ? tempData["networkFeeCost"].toString()
+                : "0.00";
           });
         } else {
           setState(() {
-            coinAmount.text = tempData["cryptoAmount"].toString() != "null" ? tempData["cryptoAmount"].toString() : "0.00";
-            paymentFees = tempData["paymentMethodCost"].toString() != "null" ? tempData["paymentMethodCost"].toString() : "0.00";
-            networkFees = tempData["networkFeeCost"].toString() != "null" ? tempData["networkFeeCost"].toString() : "0.00";
+            coinAmount.text = tempData["cryptoAmount"].toString() != "null"
+                ? tempData["cryptoAmount"].toString()
+                : "0.00";
+            paymentFees = tempData["paymentMethodCost"].toString() != "null"
+                ? tempData["paymentMethodCost"].toString()
+                : "0.00";
+            networkFees = tempData["networkFeeCost"].toString() != "null"
+                ? tempData["networkFeeCost"].toString()
+                : "0.00";
           });
         }
         totalFees = double.parse(paymentFees) + double.parse(networkFees);
