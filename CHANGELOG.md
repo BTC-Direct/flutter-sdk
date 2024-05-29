@@ -1,3 +1,8 @@
+
+## 0.0.5
+
+* Improve KYC process
+
 ## 0.0.4
 
 * Documentation added on function

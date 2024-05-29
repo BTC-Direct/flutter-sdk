@@ -1,3 +1,4 @@
+import 'package:btc_direct/src/features/buy/ui/buy.dart';
 import 'package:btc_direct/src/presentation/config_packages.dart';
 
 class CompletePayment extends StatefulWidget {
@@ -27,7 +28,7 @@ class _CompletePaymentState extends State<CompletePayment> {
               SizedBox(
                 height: h * 0.04,
               ),
-              completePaymentView(),
+              completePaymentView(context),
             ],
           ),
         ),
@@ -126,7 +127,7 @@ class _CompletePaymentState extends State<CompletePayment> {
     );
   }
 
-  completePaymentView() {
+  completePaymentView(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return Column(children: [
@@ -283,10 +284,30 @@ class _CompletePaymentState extends State<CompletePayment> {
           package: "btc_direct",
         ),
         bgColor: CommonColors.blueColor,
-        onPressed: () {
+        onPressed: () async {
+          var list = await StorageHelper.getValue(StorageKeys.myAddressesList);
+          final List<dynamic> jsonList = jsonDecode(list);
+          if (kDebugMode) {
+            print('jsonDecode :::: $jsonList');
+          }
+          final List<Map<String, dynamic>> data =
+              jsonList.map((item) => item as Map<String, dynamic>).toList();
+          var xApiKey = await StorageHelper.getValue(StorageKeys.xApiKey);
+          var isSandBox = await StorageHelper.getValue(StorageKeys.isSandBox);
+          if (context.mounted) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BTCDirect(
+                    myAddressesList: data,
+                    xApiKey: xApiKey,
+                    isSandBox: isSandBox,
+                  ),
+                ));
+          }
           //Navigator.popUntil(context, (route) => route.isFirst);
-          Navigator.pop(context);
-          Navigator.pop(context);
+          // Navigator.pop(context);
+          // Navigator.pop(context);
         },
       ),
     ]);

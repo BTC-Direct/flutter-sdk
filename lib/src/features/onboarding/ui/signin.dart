@@ -1,5 +1,7 @@
 import 'dart:developer';
 import 'package:btc_direct/src/core/model/userinfo_model.dart';
+import 'package:btc_direct/src/features/buy/ui/buy.dart';
+import 'package:btc_direct/src/features/onboarding/ui/questions_answer/origin_questions.dart';
 import 'package:btc_direct/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 
@@ -247,7 +249,6 @@ class _SignInState extends State<SignIn> {
       isLoading = true;
       http.Response response =
           await Repository().signInAccountApiCall(email, password, context);
-      // print('response StatusCode: ${response.statusCode}');
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
         await StorageHelper.setValue(StorageKeys.token, tempData['token']);
@@ -255,16 +256,21 @@ class _SignInState extends State<SignIn> {
         await StorageHelper.setValue(
             StorageKeys.refreshToken, tempData['refreshToken']);
         if (context.mounted) {
-          getUserInfo(tempData['token'], context);
+          await getUserInfo(tempData['token'], context);
         }
+        setState(() {
+          isLoading = false;
+        });
       } else {
-        isLoading = false;
-        setState(() {});
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       log(e.toString());
-      isLoading = false;
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -290,9 +296,14 @@ class _SignInState extends State<SignIn> {
   /// [token]: The token obtained from the sign in API.
   /// [context]: The context of the widget.
   Future<void> getUserInfo(String token, BuildContext context) async {
+    setState(() {
+      isLoading = true;
+    });
     try {
-      var response = await Repository().getUserInfoApiCall(token, context);
-      UserInfoModel userInfoModel = UserInfoModel.fromJson(response);
+      http.Response response =
+          await Repository().getUserInfoApiCall(token, context);
+      Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      UserInfoModel userInfoModel = UserInfoModel.fromJson(jsonResponse);
       if (userInfoModel.status?.details?.emailAddressVerificationStatus ==
           "pending") {
         if (context.mounted) {
@@ -305,6 +316,9 @@ class _SignInState extends State<SignIn> {
             ),
           );
         }
+        setState(() {
+          isLoading = false;
+        });
         emailController.clear();
         passwordController.clear();
       } else if (userInfoModel.status?.details?.identityVerificationStatus ==
@@ -317,17 +331,47 @@ class _SignInState extends State<SignIn> {
             ),
           );
         }
-        isLoading = false;
+        setState(() {
+          isLoading = false;
+        });
         emailController.clear();
         passwordController.clear();
-      } else {
-        isLoading = false;
+      } else if (userInfoModel.status?.details?.amld5VerificationStatus !=
+          "verified") {
         if (context.mounted) {
-          Navigator.pop(context);
-          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const OriginQuestions(),
+            ),
+          );
+          // Navigator.pop(context);
+        }
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        var list = await StorageHelper.getValue(StorageKeys.myAddressesList);
+        final List<dynamic> jsonList = jsonDecode(list);
+        final List<Map<String, dynamic>> data =
+            jsonList.map((item) => item as Map<String, dynamic>).toList();
+        var xApiKey = await StorageHelper.getValue(StorageKeys.xApiKey);
+        var isSandBox = await StorageHelper.getValue(StorageKeys.isSandBox);
+        if (context.mounted) {
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BTCDirect(
+                  myAddressesList: data,
+                  xApiKey: xApiKey,
+                  isSandBox: isSandBox,
+                ),
+              ));
         }
       }
-      setState(() {});
     } catch (e) {
       isLoading = false;
       setState(() {});

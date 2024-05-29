@@ -1,6 +1,6 @@
 name: btc_direct
 description: Streamline token purchases with BTC Direct enter wallet details, select tokens, choose payment methods, and complete KYC verification effortlessly. Ideal for secure transactions.
-version: 0.0.3
+version: 0.0.5
 homepage: https://github.com/BTC-Direct/flutter-sdk.git
 
 environment:
@@ -57,6 +57,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/fonts/
+    - assets/images/clock.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

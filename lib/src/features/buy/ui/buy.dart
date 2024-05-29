@@ -1,9 +1,12 @@
 import 'dart:developer';
+import 'package:btc_direct/src/core/model/currency_price_get_model.dart';
 import 'package:btc_direct/src/core/model/userinfo_model.dart';
 import 'package:btc_direct/src/features/buy/ui/paymentmethod.dart';
 import 'package:btc_direct/src/presentation/config_packages.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+
+import '../../onboarding/ui/questions_answer/origin_questions.dart';
 
 /// A widget for the buying screen of the Btc Direct.
 /// It takes three parameters in its constructor:
@@ -129,10 +132,13 @@ class _BTCDirectState extends State<BTCDirect> {
   /// This value is used to make the API call to get the payment method's details.
   String? paymentMethodCode;
 
+  num buyMaxPrice = 0;
+  num buyMinPrice = 0;
+
   @override
   void initState() {
     initData().then((value) {
-      getAllData();
+      getAllData(context);
     });
     super.initState();
   }
@@ -165,7 +171,7 @@ class _BTCDirectState extends State<BTCDirect> {
   /// Calls the getCoinDataList function to fetch the coin data.
   /// Initializes the wallet address and payment method text controllers.
   /// Starts the timer and enables or disables the bank transfer button based on the payment method.
-  void getAllData() {
+  void getAllData(BuildContext context) async {
     xApiKey = widget.xApiKey;
     isSandBox = widget.isSandBox;
     if (widget.myAddressesList.isNotEmpty) {
@@ -178,14 +184,26 @@ class _BTCDirectState extends State<BTCDirect> {
         ));
       }
     }
+    await saveDataInStorage(
+        widget.myAddressesList, widget.xApiKey, widget.isSandBox);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     log("xApiKey *** $xApiKey *** ::: addressesList *** ${addressesList.length} *** ::: isSendBox *** $isSandBox");
-    getCoinDataList(context);
+    if (context.mounted) {
+      await getCoinDataList(context);
+    }
     walletAddress = TextEditingController(text: "My wallet");
     paymentMethod = TextEditingController(text: "Bancontact");
     isTimerShow = true;
     startTimer();
     isBankTransferButtonEnabled = updateButtonState();
+  }
+
+  Future<void> saveDataInStorage(
+      List<Map<String, dynamic>> list, String xAPIkey, bool isSandBox) async {
+    final String jsonList = jsonEncode(list);
+    await StorageHelper.setValue(StorageKeys.myAddressesList, jsonList);
+    await StorageHelper.setValue(StorageKeys.xApiKey, xAPIkey);
+    await StorageHelper.setValue(StorageKeys.isSandBox, isSandBox);
   }
 
   @override
@@ -353,14 +371,15 @@ class _BTCDirectState extends State<BTCDirect> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                amount.text = "2500";
-                                onAmountChanged(value: "2500", isPay: true);
+                                amount.text = "$buyMaxPrice";
+                                onAmountChanged(
+                                    value: "$buyMaxPrice", isPay: true);
                                 isAmountValid = false;
                               },
                           ),
-                          const TextSpan(
+                          TextSpan(
                               text:
-                                  "to automatically fill in your maximum amount of €2500.00."),
+                                  "to automatically fill in your maximum amount of €$buyMaxPrice.00."),
                         ],
                         style: const TextStyle(
                           color: CommonColors.black,
@@ -386,14 +405,15 @@ class _BTCDirectState extends State<BTCDirect> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                amount.text = "30";
-                                onAmountChanged(value: "30", isPay: true);
+                                amount.text = "$buyMinPrice";
+                                onAmountChanged(
+                                    value: "$buyMinPrice", isPay: true);
                                 isAmountValid = false;
                               },
                           ),
-                          const TextSpan(
+                          TextSpan(
                               text:
-                                  "to automatically fill in the minimum amount of €30.00."),
+                                  "to automatically fill in the minimum amount of €$buyMinPrice.00."),
                         ],
                         style: const TextStyle(
                           color: CommonColors.black,
@@ -423,21 +443,24 @@ class _BTCDirectState extends State<BTCDirect> {
           hintText: "min. €30.00",
           onChanged: (p0) async {
             if (p0.isNotEmpty || p0 != "") {
-              final double enteredValue = double.parse(p0);
-              if (enteredValue >= 30 && enteredValue <= 2500.00) {
-                isAmountValid = false;
-                onAmountChanged(value: p0, isPay: true);
-                var token = await StorageHelper.getValue(StorageKeys.token);
-                if (token != null && token != "") {
-                  getUserInfo(token);
+              await getCurrencyBuySellPrice(context).then((value) async {
+                final double enteredValue = double.parse(p0);
+                if (enteredValue >= buyMinPrice &&
+                    enteredValue <= buyMaxPrice) {
+                  isAmountValid = false;
+                  onAmountChanged(value: p0, isPay: true);
+                  var token = await StorageHelper.getValue(StorageKeys.token);
+                  if (token != null && token != "") {
+                    await getUserInfo(token);
+                  }
+                } else {
+                  isAmountValid = true;
+                  isAmountMaximumValid = false;
+                  if (enteredValue >= buyMaxPrice) {
+                    isAmountMaximumValid = true;
+                  }
                 }
-              } else {
-                isAmountValid = true;
-                isAmountMaximumValid = false;
-                if (enteredValue >= 2500.00) {
-                  isAmountMaximumValid = true;
-                }
-              }
+              });
             }
           },
           suffix: Container(
@@ -926,12 +949,12 @@ class _BTCDirectState extends State<BTCDirect> {
                                               '${userInfoModel.emailAddress}',
                                         ),
                                       ),
-                                    ).then((value) {
+                                    ).then((value) async {
                                       startTimer();
                                       var token = StorageHelper.getValue(
                                           StorageKeys.token);
                                       if (token != null && token.isNotEmpty) {
-                                        getUserInfo(token);
+                                        await getUserInfo(token);
                                       }
                                     });
                                   } else {
@@ -941,12 +964,12 @@ class _BTCDirectState extends State<BTCDirect> {
                                         builder: (context) =>
                                             const VerifyIdentity(),
                                       ),
-                                    ).then((value) {
+                                    ).then((value) async {
                                       startTimer();
                                       var token = StorageHelper.getValue(
                                           StorageKeys.token);
                                       if (token != null && token.isNotEmpty) {
-                                        getUserInfo(token);
+                                        await getUserInfo(token);
                                       }
                                     });
                                   }
@@ -981,53 +1004,117 @@ class _BTCDirectState extends State<BTCDirect> {
           bgColor: CommonColors.blueColor,
           onPressed: () {
             if (formKey.currentState!.validate()) {
+              var token = StorageHelper.getValue(StorageKeys.token);
+              log('get token from storage $token');
               timer.cancel();
-              if (userInfoModel.status?.status == "pending") {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const VerifyIdentity(),
-                  ),
-                ).then((value) {
-                  startTimer();
-                });
-              } else if (userInfoModel.status?.status == "validated") {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => PaymentMethod(
-                              amount: amount.text,
-                              paymentMethodCode:
-                                  payMethodList[paymentSelectIndex]
-                                      .code
-                                      .toString(),
-                              paymentMethodName:
-                                  payMethodList[paymentSelectIndex]
-                                      .label
-                                      .toString(),
-                              walletName: walletAddress.text,
-                              walletAddress: addressesList[coinSelectIndex]
-                                  .address
-                                  .toString(),
-                              coinTicker: coinList[coinSelectIndex]
-                                  .coinTicker
-                                  .toString(),
-                              paymentFees: paymentFees,
-                              networkFees: networkFees,
-                            ))).then((value) {
-                  startTimer();
-                });
+              if (token != null && token.isNotEmpty) {
+                if (userInfoModel.status?.status == "validated") {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PaymentMethod(
+                                amount: amount.text,
+                                paymentMethodCode:
+                                    payMethodList[paymentSelectIndex]
+                                        .code
+                                        .toString(),
+                                paymentMethodName:
+                                    payMethodList[paymentSelectIndex]
+                                        .label
+                                        .toString(),
+                                walletName: walletAddress.text,
+                                walletAddress: addressesList[coinSelectIndex]
+                                    .address
+                                    .toString(),
+                                coinTicker: coinList[coinSelectIndex]
+                                    .coinTicker
+                                    .toString(),
+                                paymentFees: paymentFees,
+                                networkFees: networkFees,
+                              ))).then((value) {
+                    startTimer();
+                  });
+                } else {
+                  if (userInfoModel.status != null) {
+                    if (userInfoModel
+                            .status?.details?.emailAddressVerificationStatus !=
+                        "verified") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EmailVerification(
+                            email: '${userInfoModel.emailAddress}',
+                          ),
+                        ),
+                      ).then((value) async {
+                        startTimer();
+                        var token = StorageHelper.getValue(StorageKeys.token);
+                        if (token != null && token.isNotEmpty) {
+                          await getUserInfo(token);
+                        }
+                      });
+                    } else if (userInfoModel
+                            .status?.details?.identityVerificationStatus !=
+                        "verified") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const VerifyIdentity(),
+                        ),
+                      ).then((value) {
+                        startTimer();
+                      });
+                    } else if (userInfoModel
+                            .status?.details?.amld5VerificationStatus !=
+                        "verified") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const OriginQuestions(),
+                        ),
+                      ).then((value) {
+                        startTimer();
+                      });
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Landing(),
+                        ),
+                      ).then((value) async {
+                        startTimer();
+                        var token = StorageHelper.getValue(StorageKeys.token);
+                        if (token != null && token.isNotEmpty) {
+                          await getUserInfo(token);
+                        }
+                      });
+                    }
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Landing(),
+                      ),
+                    ).then((value) async {
+                      startTimer();
+                      var token = StorageHelper.getValue(StorageKeys.token);
+                      if (token != null && token.isNotEmpty) {
+                        await getUserInfo(token);
+                      }
+                    });
+                  }
+                }
               } else {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const Landing(),
                   ),
-                ).then((value) {
+                ).then((value) async {
                   startTimer();
                   var token = StorageHelper.getValue(StorageKeys.token);
                   if (token != null && token.isNotEmpty) {
-                    getUserInfo(token);
+                    await getUserInfo(token);
                   }
                 });
               }
@@ -1806,42 +1893,60 @@ class _BTCDirectState extends State<BTCDirect> {
   /// This function is called when the widget is mounted.
   /// [context]: The context of the widget.
   Future<void> getPaymentMethod(BuildContext context) async {
+    var token = await StorageHelper.getValue(StorageKeys.token);
     try {
       isLoading = true;
       PaymentMethodModel payMethodPairs;
-      http.Response response = await Repository().getPaymentMethodApiCall();
-      var tempData = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        payMethodPairs = PaymentMethodModel.fromJson(tempData);
-        for (var i = 0; i < payMethodPairs.paymentMethods!.length; i++) {
-          payMethodList.add(
-            PaymentMethods(
-              code: payMethodPairs.paymentMethods![i].code,
-              fee: payMethodPairs.paymentMethods![i].fee,
-              label: payMethodPairs.paymentMethods![i].label,
-              limit: payMethodPairs.paymentMethods![i].limit,
-            ),
-          );
-        }
-        paymentMethod.text = '${payMethodList.first.label}';
-        paymentMethodCode = payMethodList.first.code;
-        setState(() {
-          isLoading = false;
-        });
-      } else if (response.statusCode >= 400) {
-        setState(() {
-          isLoading = false;
-        });
-        log("Response ${tempData.toString()}");
-        var errorCodeList = await AppCommonFunction().getJsonData();
-        for (int i = 0; i < errorCodeList.length; i++) {
-          for (int j = 0; j < tempData['errors'].length; j++) {
-            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
-              if (context.mounted) {
-                AppCommonFunction().failureSnackBar(
-                    context: context, message: '${errorCodeList[i].message}');
+      if (context.mounted) {
+        http.Response response =
+            await Repository().getPaymentMethodApiCall(context);
+        var tempData = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          payMethodPairs = PaymentMethodModel.fromJson(tempData);
+          if (token == null || token.isEmpty) {
+            for (var i = 0; i < payMethodPairs.paymentMethods!.length; i++) {
+              payMethodList.add(
+                PaymentMethods(
+                  code: payMethodPairs.paymentMethods![i].code,
+                  fee: payMethodPairs.paymentMethods![i].fee,
+                  label: payMethodPairs.paymentMethods![i].label,
+                  limit: payMethodPairs.paymentMethods![i].limit,
+                ),
+              );
+            }
+          } else {
+            await getUserInfo(token).then((value) {
+              Map<String, dynamic> countriesData = tempData['countries'];
+              for (int i = 0; i < countriesData.length; i++) {
+                String countryCode = userInfoModel.region!.split("-")[1];
+                if (countriesData.containsKey(countryCode)) {
+                  paymentMethodsAddFromCountryCode(
+                      countriesData[countryCode], payMethodPairs);
+                }
               }
-              log(errorCodeList[i].message);
+            });
+          }
+          paymentMethod.text = '${payMethodList.first.label}';
+          paymentMethodCode = payMethodList.first.code;
+          setState(() {
+            isLoading = false;
+          });
+        } else if (response.statusCode >= 400) {
+          setState(() {
+            isLoading = false;
+          });
+          log("Response ${tempData.toString()}");
+          var errorCodeList = await AppCommonFunction().getJsonData();
+          for (int i = 0; i < errorCodeList.length; i++) {
+            for (int j = 0; j < tempData['errors'].length; j++) {
+              if (errorCodeList[i].code ==
+                  tempData['errors'].keys.toList()[j]) {
+                if (context.mounted) {
+                  AppCommonFunction().failureSnackBar(
+                      context: context, message: '${errorCodeList[i].message}');
+                }
+                log(errorCodeList[i].message);
+              }
             }
           }
         }
@@ -1851,6 +1956,33 @@ class _BTCDirectState extends State<BTCDirect> {
         isLoading = false;
       });
       log(e.toString());
+    }
+  }
+
+  Set<String> uniqueCodes = {};
+
+  /// Stores unique payment method codes
+
+  paymentMethodsAddFromCountryCode(
+      List<dynamic> countriesData, PaymentMethodModel payMethods) {
+    for (int k = 0; k < payMethods.paymentMethods!.length; k++) {
+      for (int j = 0; j < countriesData.length; j++) {
+        if (countriesData[j] == payMethods.paymentMethods![k].code &&
+            !uniqueCodes.contains(payMethods.paymentMethods![k].code)) {
+          if (kDebugMode) {
+            print('payMethodList Length ::: ***${payMethodList.length + 1}***');
+          }
+          payMethodList.add(
+            PaymentMethods(
+              code: payMethods.paymentMethods![k].code,
+              fee: payMethods.paymentMethods![k].fee,
+              label: payMethods.paymentMethods![k].label,
+              limit: payMethods.paymentMethods![k].limit,
+            ),
+          );
+          uniqueCodes.add(payMethods.paymentMethods![k].code.toString());
+        }
+      }
     }
   }
 
@@ -1868,6 +2000,44 @@ class _BTCDirectState extends State<BTCDirect> {
               ["${coinList[coinSelectIndex].coinTicker}-EUR"]
           .toString());
     });
+  }
+
+  getCurrencyBuySellPrice(BuildContext context) async {
+    try {
+      http.Response response =
+          await Repository().currencyPriceGetModelApiCall(context);
+      var tempData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        for (int i = 0; i < tempData.length; i++) {
+          if (tempData[i]['currencyPair']
+              .toString()
+              .contains(coinList[coinSelectIndex].coinTicker.toString())) {
+            CurrencyPriceGetModel currencyPriceGetModel =
+                CurrencyPriceGetModel.fromJson(tempData[i]);
+            buyMaxPrice = currencyPriceGetModel.buy!.max!.amount ?? 2500;
+            buyMinPrice = currencyPriceGetModel.buy!.min!.amount ?? 30;
+          }
+        }
+        log('buyPrice:::  $buyMaxPrice || $buyMinPrice');
+        setState(() {});
+      } else if (response.statusCode >= 400) {
+        log("Response ${tempData.toString()}");
+        var errorCodeList = await AppCommonFunction().getJsonData();
+        for (int i = 0; i < errorCodeList.length; i++) {
+          for (int j = 0; j < tempData['errors'].length; j++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
+              }
+              log(errorCodeList[i].message);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   /// This function is used to call the API for getting the amount related data such as
@@ -1956,11 +2126,22 @@ class _BTCDirectState extends State<BTCDirect> {
   Future<void> getUserInfo(String token) async {
     try {
       var response = await Repository().getUserInfoApiCall(token, context);
-      userInfoModel = UserInfoModel.fromJson(response);
+      Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      userInfoModel = UserInfoModel.fromJson(jsonResponse);
       if (userInfoModel.status?.status == "pending") {
         isUserVerified = true;
-      } else {
-        isUserVerified = false;
+      }
+      if (userInfoModel.enabledWalletAddresses!.isNotEmpty) {
+        for (int i = 0; i < userInfoModel.enabledWalletAddresses!.length; i++) {
+          addressesList.add(WalletAddressModel(
+              address: userInfoModel.enabledWalletAddresses![i].address ?? '',
+              currency:
+                  userInfoModel.enabledWalletAddresses![i].currency ?? 'BTC',
+              id: userInfoModel.enabledWalletAddresses![i].destinationTag ??
+                  '1234567',
+              name: userInfoModel.enabledWalletAddresses![i].name ??
+                  'My wallet'));
+        }
       }
       setState(() {});
     } catch (e) {

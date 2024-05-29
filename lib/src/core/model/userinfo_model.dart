@@ -8,8 +8,8 @@ class UserInfoModel {
   String? activationDate;
   bool? isBusiness;
   Limits? limits;
-  List<String>? enabledIbanAccounts;
-  List<String>? enabledWalletAddresses;
+  List<EnabledIbanAccounts>? enabledIbanAccounts;
+  List<EnabledWalletAddresses>? enabledWalletAddresses;
   Status? status;
 
   UserInfoModel(
@@ -36,8 +36,18 @@ class UserInfoModel {
     activationDate = json['activationDate'];
     isBusiness = json['isBusiness'];
     limits = json['limits'] != null ? Limits.fromJson(json['limits']) : null;
-    enabledIbanAccounts = json['enabledIbanAccounts'].cast<String>();
-    enabledWalletAddresses = json['enabledWalletAddresses'].cast<String>();
+    if (json['enabledIbanAccounts'] != null) {
+      enabledIbanAccounts = <EnabledIbanAccounts>[];
+      json['enabledIbanAccounts'].forEach((v) {
+        enabledIbanAccounts!.add(EnabledIbanAccounts.fromJson(v));
+      });
+    }
+    if (json['enabledWalletAddresses'] != null) {
+      enabledWalletAddresses = <EnabledWalletAddresses>[];
+      json['enabledWalletAddresses'].forEach((v) {
+        enabledWalletAddresses!.add(EnabledWalletAddresses.fromJson(v));
+      });
+    }
     status = json['status'] != null ? Status.fromJson(json['status']) : null;
   }
 
@@ -59,8 +69,14 @@ class UserInfoModel {
     if (limits != null) {
       data['limits'] = limits!.toJson();
     }
-    data['enabledIbanAccounts'] = enabledIbanAccounts;
-    data['enabledWalletAddresses'] = enabledWalletAddresses;
+    if (enabledIbanAccounts != null) {
+      data['enabledIbanAccounts'] =
+          enabledIbanAccounts!.map((v) => v.toJson()).toList();
+    }
+    if (enabledWalletAddresses != null) {
+      data['enabledWalletAddresses'] =
+          enabledWalletAddresses!.map((v) => v.toJson()).toList();
+    }
     if (status != null) {
       data['status'] = status!.toJson();
     }
@@ -133,6 +149,61 @@ class Limit {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['amount'] = amount;
     data['currencyCode'] = currencyCode;
+    return data;
+  }
+}
+
+class EnabledIbanAccounts {
+  String? number;
+  String? holder;
+  bool? verified;
+
+  EnabledIbanAccounts({this.number, this.holder, this.verified});
+
+  EnabledIbanAccounts.fromJson(Map<String, dynamic> json) {
+    number = json['number'];
+    holder = json['holder'];
+    verified = json['verified'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['number'] = number;
+    data['holder'] = holder;
+    data['verified'] = verified;
+    return data;
+  }
+}
+
+class EnabledWalletAddresses {
+  String? currency;
+  String? address;
+  String? name;
+  String? status;
+  String? destinationTag;
+
+  EnabledWalletAddresses(
+      {this.currency,
+      this.address,
+      this.name,
+      this.status,
+      this.destinationTag});
+
+  EnabledWalletAddresses.fromJson(Map<String, dynamic> json) {
+    currency = json['currency'];
+    address = json['address'];
+    name = json['name'];
+    status = json['status'];
+    destinationTag = json['destinationTag'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['currency'] = currency;
+    data['address'] = address;
+    data['name'] = name;
+    data['status'] = status;
+    data['destinationTag'] = destinationTag;
     return data;
   }
 }

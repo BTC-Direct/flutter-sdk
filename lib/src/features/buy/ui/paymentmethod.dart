@@ -31,7 +31,7 @@ class PaymentMethod extends StatefulWidget {
   String networkFees;
 
   PaymentMethod({
-    Key? key,
+    super.key,
     required this.amount,
     required this.paymentMethodCode,
     required this.walletAddress,
@@ -40,7 +40,7 @@ class PaymentMethod extends StatefulWidget {
     required this.coinTicker,
     required this.paymentFees,
     required this.networkFees,
-  }) : super(key: key);
+  });
 
   @override
   State<PaymentMethod> createState() => _PaymentMethodState();

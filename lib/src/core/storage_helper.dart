@@ -79,4 +79,7 @@ class StorageKeys {
   static const String refreshToken = 'refreshToken';
   static const String identifier = 'identifier';
   static const String orderId = 'orderId';
+  static const String xApiKey = 'xApiKey';
+  static const String myAddressesList = 'myAddressesList';
+  static const String isSandBox = 'isSandBox';
 }

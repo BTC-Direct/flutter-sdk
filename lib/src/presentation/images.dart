@@ -11,4 +11,6 @@ class Images {
       "packages/btc_direct/assets/images/email_in_use.png";
   static const String otherNationality =
       "packages/btc_direct/assets/images/other_nationality.svg";
+  static const String locker = "packages/btc_direct/assets/images/locker.png";
+  static const String clock = "packages/btc_direct/assets/images/clock.png";
 }

@@ -49,6 +49,7 @@ class FooterContainer extends StatelessWidget {
           backgroundColor: CommonColors.white,
           foregroundColor: CommonColors.white,
           elevation: 0,
+          scrolledUnderElevation: 0.0,
           leading: isAppBarLeadShow
               ? InkWell(
                   onTap: () {

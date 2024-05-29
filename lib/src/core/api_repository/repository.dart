@@ -46,25 +46,6 @@ class Repository {
     }
   }
 
-  /// Retrieves the payment methods from the API.
-  ///
-  /// This function sends a GET request to the API endpoint 'v1/buy/payment-methods'
-  /// with the X-Api-Key header. It returns a `http.Response` object that completes
-  /// when the payment methods retrieval is done.
-  ///
-  /// Returns:
-  ///   - A `http.Response` object that completes when the payment methods retrieval is done.
-  getPaymentMethodApiCall() async {
-    try {
-      http.Response response = await http.get(
-          Uri.parse("${baseUrl}v1/buy/payment-methods"),
-          headers: {"X-Api-Key": xApiKey});
-      return response;
-    } catch (e) {
-      log(e.toString());
-    }
-  }
-
   /// Retrieves the system info from the API.
   ///
   /// This function sends a GET request to the API endpoint 'v1/system/info'
@@ -102,16 +83,23 @@ class Repository {
   ///   - A map containing the user info if the response status code is 200.
   ///   - Otherwise, null.
   getUserInfoApiCall(String token, BuildContext context) async {
+    http.Response response;
     try {
-      http.Response response =
-          await http.get(Uri.parse("${baseUrl}v1/user/info"), headers: {
-        "User-Authorization": "Bearer $token",
-        "X-Api-Key": xApiKey,
-      });
-      var tempData = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        return tempData;
+      var identifier = await StorageHelper.getValue(StorageKeys.identifier);
+      if (identifier != null && (token == "" || token.isEmpty)) {
+        response = await http.get(Uri.parse("${baseUrl}v1/user/info"),
+            headers: {"X-Api-Key": xApiKey, "User-Identifier": identifier});
       } else {
+        response =
+            await http.get(Uri.parse("${baseUrl}v1/user/info"), headers: {
+          "User-Authorization": "Bearer $token",
+          "X-Api-Key": xApiKey,
+        });
+      }
+      if (response.statusCode == 200) {
+        return response;
+      } else {
+        var tempData = jsonDecode(response.body);
         log("Response ${tempData.toString()}");
         for (int j = 0; j < tempData['errors'].length; j++) {
           if (tempData['errors'].keys.toList()[j] == "ER701") {
@@ -163,23 +151,24 @@ class Repository {
     bool isBusiness,
     bool newsletterSubscription,
   ) async {
-    http.Response response =
-        await http.post(Uri.parse("${baseUrl}v2/user"), body: {
-      "isBusiness": isBusiness.toString(),
-      "identifier": identifier,
-      "firstName": firstName,
-      "lastName": lastName,
-      "email": email,
-      "country": nationalityCode,
-      "password": password,
-      "termsAndConditions": "true",
-      "privacyAgreement": "true",
-      "newsletterSubscription": newsletterSubscription.toString(),
-      "websiteLanguage": "en",
-      "websiteCountry": "gb"
-    }, headers: {
-      "X-Api-Key": xApiKey,
-    });
+    http.Response response = await http.post(Uri.parse("${baseUrl}v2/user"),
+        body: jsonEncode({
+          "isBusiness": isBusiness,
+          "identifier": identifier,
+          "firstName": firstName,
+          "lastName": lastName,
+          "email": email,
+          "country": nationalityCode,
+          "password": password,
+          "termsAndConditions": true,
+          "privacyAgreement": true,
+          "newsletterSubscription": newsletterSubscription,
+          "websiteLanguage": "en",
+          "websiteCountry": "gb"
+        }),
+        headers: {
+          "X-Api-Key": xApiKey,
+        });
     return response;
   }
 
@@ -191,13 +180,12 @@ class Repository {
   /// it returns the response object. If the response status code is not 200,
   identifierGetVerificationCodeApiCall(
       String emailCode, String identifier) async {
-    http.Response response =
-        await http.patch(Uri.parse("${baseUrl}v2/user"), body: {
-      "emailCode": emailCode
-    }, headers: {
-      "X-Api-Key": xApiKey,
-      "user-identifier": identifier,
-    });
+    http.Response response = await http.patch(Uri.parse("${baseUrl}v2/user"),
+        body: jsonEncode({"emailCode": emailCode}),
+        headers: {
+          "X-Api-Key": xApiKey,
+          "user-identifier": identifier,
+        });
     return response;
   }
 
@@ -216,13 +204,12 @@ class Repository {
   /// Returns:
   ///   - A `http.Response` object that completes when the email re-sending is done.
   identifierDetReSendEmailApiCall(String email, String identifier) async {
-    http.Response response =
-        await http.patch(Uri.parse("${baseUrl}v2/user"), body: {
-      "email": email
-    }, headers: {
-      "X-Api-Key": xApiKey,
-      "user-identifier": identifier,
-    });
+    http.Response response = await http.patch(Uri.parse("${baseUrl}v2/user"),
+        body: jsonEncode({"email": email}),
+        headers: {
+          "X-Api-Key": xApiKey,
+          "user-identifier": identifier,
+        });
     return response;
   }
 
@@ -242,7 +229,7 @@ class Repository {
   tokenGetVerificationCodeApiCall(String emailCode) async {
     var token = StorageHelper.getValue(StorageKeys.token);
     http.Response response = await http.patch(Uri.parse("${baseUrl}v2/user"),
-        body: {"emailCode": emailCode},
+        body: jsonEncode({"emailCode": emailCode}),
         headers: {"X-Api-Key": xApiKey, "User-Authorization": "Bearer $token"});
     return response;
   }
@@ -261,7 +248,7 @@ class Repository {
   tokenDetReSendEmailApiCall(String email) async {
     var token = StorageHelper.getValue(StorageKeys.token);
     http.Response response = await http.patch(Uri.parse("${baseUrl}v2/user"),
-        body: {"email": email},
+        body: jsonEncode({"email": email}),
         headers: {"X-Api-Key": xApiKey, "User-Authorization": "Bearer $token"});
     return response;
   }
@@ -282,7 +269,7 @@ class Repository {
     http.Response response = await http.post(
         Uri.parse("${baseUrl}v1/buy/quote"),
         headers: {"X-Api-Key": xApiKey},
-        body: body);
+        body: jsonEncode(body));
     return response;
   }
 
@@ -333,12 +320,14 @@ class Repository {
   signInAccountApiCall(
       String email, String password, BuildContext context) async {
     http.Response response =
-        await http.post(Uri.parse("${baseUrl}v1/user/login"), body: {
-      "emailAddress": email,
-      "password": password,
-    }, headers: {
-      "X-Api-Key": xApiKey,
-    });
+        await http.post(Uri.parse("${baseUrl}v1/user/login"),
+            body: jsonEncode({
+              "emailAddress": email,
+              "password": password,
+            }),
+            headers: {
+          "X-Api-Key": xApiKey,
+        });
     if (response.statusCode == 200) {
       return response;
     } else {
@@ -364,7 +353,7 @@ class Repository {
     http.Response response = await http.post(
         Uri.parse("${baseUrl}v1/buy/quote"),
         headers: {"X-Api-Key": xApiKey, "User-Authorization": "Bearer $token"},
-        body: body);
+        body: jsonEncode(body));
     if (response.statusCode == 200) {
       return response;
     } else {
@@ -412,7 +401,7 @@ class Repository {
     http.Response response = await http.post(
         Uri.parse("${baseUrl}v1/buy/confirm"),
         headers: {"X-Api-Key": xApiKey, "User-Authorization": "Bearer $token"},
-        body: body);
+        body: jsonEncode(body));
     if (response.statusCode == 201) {
       return response;
     } else {
@@ -506,7 +495,7 @@ class Repository {
   ///   - A `Future` that completes when the token retrieval is done.
   Future getNewTokenApiCall(BuildContext context) async {
     var refreshToken = StorageHelper.getValue(StorageKeys.refreshToken);
-    var body = {"refreshToken": refreshToken};
+    var body = jsonEncode({"refreshToken": refreshToken});
     http.Response response = await http.post(
       Uri.parse("${baseUrl}v1/refresh"),
       headers: {"X-Api-Key": xApiKey},
@@ -526,5 +515,124 @@ class Repository {
       //   ),
       // );
     }
+  }
+
+  Future currencyPriceGetModelApiCall(BuildContext context) async {
+    http.Response response;
+    response = await http
+        .get(Uri.parse("${baseUrl}v1/system/currency-pairs"), headers: {
+      "X-Api-Key": xApiKey,
+    });
+    if (response.statusCode == 200) {
+      return response;
+    } else {
+      var tempData = jsonDecode(response.body);
+      log("Response ${tempData.toString()}");
+      for (int j = 0; j < tempData['errors'].length; j++) {
+        if (tempData['errors'].keys.toList()[j] == "ER701") {
+          if (context.mounted) {
+            getNewTokenApiCall(context).then((value) {
+              getVerificationStatusApiCall(context);
+            });
+          }
+        } else {
+          var errorCodeList = await AppCommonFunction().getJsonData();
+          for (int i = 0; i < errorCodeList.length; i++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /// Retrieves the payment methods from the API.
+  ///
+  /// This function sends a GET request to the API endpoint 'v1/buy/payment-methods'
+  /// with the X-Api-Key header. It returns a `http.Response` object that completes
+  /// when the payment methods retrieval is done.
+  ///
+  /// Returns:
+  ///   - A `http.Response` object that completes when the payment methods retrieval is done.
+  Future getPaymentMethodApiCall(BuildContext context) async {
+    http.Response response;
+    response = await http.get(
+        Uri.parse("${baseUrl}v1/buy/payment-methods/$paymentMethods"),
+        headers: {
+          "X-Api-Key": xApiKey,
+        });
+    if (response.statusCode == 200) {
+      if (kDebugMode) {
+        print('getPaymentMethodsApiCall ::: ***${response.body}***');
+      }
+      return response;
+    } else {
+      var tempData = jsonDecode(response.body);
+      log("Response ${tempData.toString()}");
+      for (int j = 0; j < tempData['errors'].length; j++) {
+        if (tempData['errors'].keys.toList()[j] == "ER701") {
+          if (context.mounted) {
+            getNewTokenApiCall(context).then((value) {
+              getVerificationStatusApiCall(context);
+            });
+          }
+        } else {
+          var errorCodeList = await AppCommonFunction().getJsonData();
+          for (int i = 0; i < errorCodeList.length; i++) {
+            if (errorCodeList[i].code == tempData['errors'].keys.toList()[j]) {
+              if (context.mounted) {
+                AppCommonFunction().failureSnackBar(
+                    context: context, message: '${errorCodeList[i].message}');
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /// Calls the API to send the setQuestionAnswerApiCall verification code to the user.
+  ///
+  /// This function sends a PATCH request to the API endpoint 'v2/user'
+  /// with the email code as the request body. It expects a JSON response
+  /// containing the updated user information. If the response status code is 200,
+  /// it returns the response object. If the response status code is not 200,
+  setQuestionAnswerApiCall(
+      {required String origin,
+      required String employmentStatus,
+      required String income}) async {
+    var token = StorageHelper.getValue(StorageKeys.token);
+    var identifier = await StorageHelper.getValue(StorageKeys.identifier);
+    http.Response response;
+    if (identifier != null && (token == null || token == "" || token.isEmpty)) {
+      response = await http.patch(
+        Uri.parse("${baseUrl}v2/user"),
+        headers: {"X-Api-Key": xApiKey, "User-Identifier": identifier},
+        body: jsonEncode({
+          "amld5QuestionAnswers": {
+            "kyc-amld5-annual-net-income": income,
+            "kyc-amld5-employment-status": employmentStatus,
+            "kyc-amld5-main-source-income": origin
+          }
+        }),
+      );
+    } else {
+      response = await http.patch(
+        Uri.parse("${baseUrl}v2/user"),
+        headers: {"X-Api-Key": xApiKey, "User-Authorization": "Bearer $token"},
+        body: jsonEncode({
+          "amld5QuestionAnswers": {
+            "kyc-amld5-annual-net-income": income,
+            "kyc-amld5-employment-status": employmentStatus,
+            "kyc-amld5-main-source-income": origin
+          }
+        }),
+      );
+    }
+    return response;
   }
 }
