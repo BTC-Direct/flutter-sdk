@@ -255,12 +255,12 @@ class _SignInState extends State<SignIn> {
         await StorageHelper.setValue(StorageKeys.userId, tempData['uuid']);
         await StorageHelper.setValue(
             StorageKeys.refreshToken, tempData['refreshToken']);
-        if (context.mounted) {
-          await getUserInfo(tempData['token'], context);
-        }
         setState(() {
           isLoading = false;
         });
+        if (context.mounted) {
+          await getUserInfo(tempData['token'], context);
+        }
       } else {
         setState(() {
           isLoading = false;

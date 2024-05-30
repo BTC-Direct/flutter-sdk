@@ -9,6 +9,7 @@ class IncomeQuestions extends StatefulWidget {
   VerificationStatusModel incomeQueAndAns;
   String origin;
   String employment;
+
   IncomeQuestions(
       {required this.incomeQueAndAns,
       required this.origin,
@@ -21,7 +22,7 @@ class IncomeQuestions extends StatefulWidget {
 
 class _IncomeQuestionsState extends State<IncomeQuestions> {
   int? selectedIndex;
-  bool isLoading = false;
+  //bool isLoading = false;
   String question = '';
   List<String> incomeList = <String>[];
 
@@ -55,126 +56,122 @@ class _IncomeQuestionsState extends State<IncomeQuestions> {
       child: FooterContainer(
         isAppBarLeadShow: true,
         appBarTitle: "Questions",
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: w * 0.06),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Container(
-                      width: w / 3.5,
-                      height: h * 0.007,
-                      decoration: BoxDecoration(
-                        color: CommonColors.blueColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    Container(
-                      width: w / 3.5,
-                      height: h * 0.007,
-                      decoration: BoxDecoration(
-                        color: CommonColors.blueColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    Container(
-                      width: w / 3.5,
-                      height: h * 0.007,
-                      decoration: BoxDecoration(
-                        color: CommonColors.blueColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: w * 0.08, vertical: h * 0.02),
-                  child: Text(
-                    question,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: CommonColors.black,
-                      fontFamily: 'TextaAlt',
-                      package: 'btc_direct',
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: w * 0.06),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(
+                    width: w / 3.5,
+                    height: h * 0.007,
+                    decoration: BoxDecoration(
+                      color: CommonColors.blueColor,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                  Container(
+                    width: w / 3.5,
+                    height: h * 0.007,
+                    decoration: BoxDecoration(
+                      color: CommonColors.blueColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  Container(
+                    width: w / 3.5,
+                    height: h * 0.007,
+                    decoration: BoxDecoration(
+                      color: CommonColors.blueColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: w * 0.08, vertical: h * 0.02),
+                child: Text(
+                  question,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: CommonColors.black,
+                    fontFamily: 'TextaAlt',
+                    package: 'btc_direct',
+                  ),
                 ),
-                SizedBox(
-                  height: h * 0.01,
-                ),
-                ListView.builder(
-                    itemCount: incomeList.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: h * 0.01),
-                        child: Container(
-                          width: w / 1.5,
-                          height: h * 0.07,
-                          decoration: BoxDecoration(
-                            color: selectedIndex == index
-                                ? CommonColors.backgroundColor.withOpacity(0.4)
-                                : CommonColors.transparent,
-                            border: Border.all(
-                                color: CommonColors.greyColor, width: 1.2),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(10),
-                            ),
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              selectedIndex = index;
-
-                              setVerifyEmailApiCall(context, incomeList[index]);
-                              setState(() {});
-                            },
-                            child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: w * 0.02, vertical: h * 0.02),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      incomeList[index],
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w400,
-                                        color: CommonColors.black,
-                                        fontFamily: 'TextaAlt',
-                                        package: 'btc_direct',
-                                      ),
-                                    ),
-                                    Icon(
-                                      selectedIndex == index
-                                          ? Icons.check
-                                          : Icons.arrow_forward_ios_sharp,
-                                      color: CommonColors.black,
-                                      size: 15,
-                                    ),
-                                  ],
-                                )),
+              ),
+              SizedBox(
+                height: h * 0.01,
+              ),
+              ListView.builder(
+                  itemCount: incomeList.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: h * 0.01),
+                      child: Container(
+                        width: w / 1.5,
+                        height: h * 0.07,
+                        decoration: BoxDecoration(
+                          color: selectedIndex == index
+                              ? CommonColors.backgroundColor.withOpacity(0.4)
+                              : CommonColors.transparent,
+                          border: Border.all(
+                              color: CommonColors.greyColor, width: 1.2),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(10),
                           ),
                         ),
-                      );
-                    })
-              ],
-            ),
+                        child: InkWell(
+                          onTap: () {
+                            selectedIndex = index;
+                            setState(() {});
+                            setQueAnsApiCall(context, incomeList[index]);
+                          },
+                          child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: w * 0.02, vertical: h * 0.02),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    incomeList[index],
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      color: CommonColors.black,
+                                      fontFamily: 'TextaAlt',
+                                      package: 'btc_direct',
+                                    ),
+                                  ),
+                                  Icon(
+                                    selectedIndex == index
+                                        ? Icons.check
+                                        : Icons.arrow_forward_ios_sharp,
+                                    color: CommonColors.black,
+                                    size: 15,
+                                  ),
+                                ],
+                              )),
+                        ),
+                      ),
+                    );
+                  })
+            ],
           ),
         ),
       ),
     );
   }
 
-  void setVerifyEmailApiCall(
-      BuildContext context, String selectedIncome) async {
-    isLoading = true;
+  void setQueAnsApiCall(BuildContext context, String selectedIncome) async {
+    // setState(() {isLoading = true;});
     try {
       http.Response response = await Repository().setQuestionAnswerApiCall(
         origin: widget.origin,
@@ -189,6 +186,7 @@ class _IncomeQuestionsState extends State<IncomeQuestions> {
                 builder: (context) => const VerifyIdentity(),
               ));
         }
+        //setState(() {isLoading = false;});
       } else if (response.statusCode >= 400) {
         var errorCodeList = await AppCommonFunction().getJsonData();
         var tempData = jsonDecode(response.body) as Map<String, dynamic>;
@@ -204,12 +202,10 @@ class _IncomeQuestionsState extends State<IncomeQuestions> {
           }
         }
       }
-      isLoading = false;
-      setState(() {});
+      //setState(() {isLoading = false;});
     } catch (e) {
-      isLoading = false;
       log(e.toString());
-      setState(() {});
+      //setState(() {isLoading = false;});
     }
   }
 }

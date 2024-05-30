@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:btc_direct/src/core/model/currency_price_get_model.dart';
 import 'package:btc_direct/src/core/model/userinfo_model.dart';
 import 'package:btc_direct/src/features/buy/ui/paymentmethod.dart';
@@ -131,6 +132,9 @@ class _BTCDirectState extends State<BTCDirect> {
   /// The code of the selected payment method.
   /// This value is used to make the API call to get the payment method's details.
   String? paymentMethodCode;
+
+  bool isCoin = true;
+  bool isWallet = false;
 
   num buyMaxPrice = 0;
   num buyMinPrice = 0;
@@ -562,9 +566,14 @@ class _BTCDirectState extends State<BTCDirect> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SvgPicture.network(
-                          coinSelectIndex == 0
+                          /* isWallet
+                              ? '${coinList[coinSelectIndex].coinIcon}'
+                              : */
+                          coinSelectIndex == 0 && !isWallet
                               ? '${coinList.first.coinIcon}'
-                              : '${coinList[coinSelectIndex].coinIcon}',
+                              : isWallet
+                                  ? '${coinList.firstWhere((element) => element.coinTicker == addressesList[coinSelectIndex].currency).coinIcon}'
+                                  : '${coinList[coinSelectIndex].coinIcon}',
                           width: 28,
                           height: 28,
                         ),
@@ -572,9 +581,11 @@ class _BTCDirectState extends State<BTCDirect> {
                           width: 6,
                         ),
                         Text(
-                          coinSelectIndex == 0
+                          coinSelectIndex == 0 && !isWallet
                               ? "${coinList.first.coinTicker}"
-                              : "${coinList[coinSelectIndex].coinTicker}",
+                              : isWallet
+                                  ? '${coinList.firstWhere((element) => element.coinTicker == addressesList[coinSelectIndex].currency).coinTicker}'
+                                  : '${coinList[coinSelectIndex].coinTicker}',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -663,7 +674,9 @@ class _BTCDirectState extends State<BTCDirect> {
                     padding: EdgeInsets.symmetric(
                         horizontal: w * 0.02, vertical: h * 0.01),
                     child: SvgPicture.network(
-                      '${coinList[coinSelectIndex].coinIcon}',
+                      isCoin
+                          ? '${coinList[coinSelectIndex].coinIcon}'
+                          : '${coinList.firstWhere((element) => element.coinTicker == addressesList[coinSelectIndex].currency).coinIcon}',
                       width: 25,
                       height: 25,
                     ),
@@ -704,7 +717,9 @@ class _BTCDirectState extends State<BTCDirect> {
                   horizontal: w * 0.02, vertical: h * 0.01),
               child: payMethodList.isNotEmpty
                   ? SvgPicture.network(
-                      "https://widgets-sandbox.btcdirect.eu/img/payment-methods/$paymentMethodCode.svg",
+                      isSandBox
+                          ? 'https://widgets-sandbox.btcdirect.eu/img/payment-methods/$paymentMethodCode.svg'
+                          : "https://cdn.btcdirect.eu/img/payment-methods/$paymentMethodCode.svg",
                       width: 25,
                       height: 25,
                       fit: BoxFit.contain,
@@ -1154,7 +1169,7 @@ class _BTCDirectState extends State<BTCDirect> {
                       "Currency",
                       style: TextStyle(
                         color: CommonColors.black,
-                        fontSize: 24,
+                        fontSize: 20,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'TextaAlt',
                       ),
@@ -1183,13 +1198,23 @@ class _BTCDirectState extends State<BTCDirect> {
                   child: ListView.builder(
                     itemCount: coinList.length,
                     itemBuilder: (context, index) {
+                      int coinIndexSelect = coinSelectIndex;
+                      if (isWallet) {
+                        coinIndexSelect = coinList.indexWhere((element) =>
+                            element.coinTicker ==
+                            addressesList[coinSelectIndex].currency);
+                      }
+
                       return Container(
                         width: w,
                         height: h * 0.08,
                         margin: EdgeInsets.symmetric(
                             horizontal: w * 0.08, vertical: h * 0.008),
                         decoration: BoxDecoration(
-                          color: coinSelectIndex == index
+                          color: index ==
+                                  (!isWallet
+                                      ? coinSelectIndex
+                                      : coinIndexSelect)
                               ? CommonColors.backgroundColor
                               : CommonColors.transparent,
                           borderRadius:
@@ -1197,14 +1222,22 @@ class _BTCDirectState extends State<BTCDirect> {
                         ),
                         child: InkWell(
                           onTap: () {
+                            print(
+                                'coinSelect coinIndexSelect ***$coinIndexSelect  coinSelectIndex***$coinSelectIndex index***$index');
                             setState(() {
+                              isCoin = true;
                               coinSelectIndex = index;
+                              print(coinIndexSelect);
                               start = 10;
+                              walletAddress.text =
+                                  addressesList[coinIndexSelect].name;
+                              isWallet = false;
                             });
-                            walletAddress.text = addressesList[index].name;
                             onAmountChanged(value: amount.text, isPay: true);
                             getCurrencyPrice();
                             Navigator.pop(context);
+                            print(
+                                'coinSelect2 coinIndexSelect ***$coinIndexSelect  coinSelectIndex***$coinSelectIndex index***$index');
                           },
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1251,7 +1284,178 @@ class _BTCDirectState extends State<BTCDirect> {
                               ),
                               const Spacer(),
                               Icon(
-                                coinSelectIndex == index
+                                index ==
+                                        (!isWallet
+                                            ? coinSelectIndex
+                                            : coinIndexSelect)
+                                    ? Icons.check
+                                    : Icons.arrow_forward_ios_sharp,
+                                color: CommonColors.black,
+                                size: 15,
+                              ),
+                              SizedBox(
+                                width: w * 0.02,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  myWalletAddressBottomSheet(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: CommonColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(25.0),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return CommonFontDimen(
+          child: SizedBox(
+            height: h * 0.70,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    SizedBox(width: w / 2.5),
+                    const Text(
+                      "Your wallets",
+                      style: TextStyle(
+                        color: CommonColors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'TextaAlt',
+                      ),
+                    ),
+                    const Spacer(),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Icon(
+                            Icons.close,
+                            color: CommonColors.black,
+                            size: 26,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: h * 0.01),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: addressesList.length,
+                    itemBuilder: (context, index) {
+                      int indexSelect = coinSelectIndex;
+                      if (isCoin) {
+                        indexSelect = addressesList.indexWhere((element) =>
+                            element.currency ==
+                            coinList[coinSelectIndex].coinTicker);
+                      }
+                      return Container(
+                        width: w,
+                        height: h * 0.08,
+                        margin: EdgeInsets.symmetric(
+                            horizontal: w * 0.08, vertical: h * 0.008),
+                        decoration: BoxDecoration(
+                          color: //index == (isInit?coinSelectIndex:indexSelect)
+                              indexSelect == index
+                                  ? CommonColors.backgroundColor
+                                  : CommonColors.transparent,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10)),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            print(
+                                'myWallet indexSelect ***$indexSelect  coinSelectIndex***$coinSelectIndex index***$index');
+
+                            isWallet = true;
+                            coinSelectIndex = index;
+                            print('$coinSelectIndex');
+                            walletAddress.text = addressesList[index].name;
+                            isCoin = false;
+                            indexSelect = index;
+                            setState(() {});
+                            Navigator.pop(context);
+                            print(
+                                'myWallet2 indexSelect ***$indexSelect  coinSelectIndex***$coinSelectIndex index***$index');
+                          },
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(
+                                width: w * 0.05,
+                              ),
+                              SvgPicture.network(
+                                'https://widgets-sandbox.btcdirect.eu/img/currencies/${addressesList[index].currency}.svg',
+                                width: 50,
+                                height: 50,
+                              ),
+                              SizedBox(
+                                width: w * 0.02,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: h * 0.015),
+                                  Center(
+                                    child: Text(
+                                      addressesList[index].name,
+                                      style: const TextStyle(
+                                        color: CommonColors.black,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'TextaAlt',
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        AppCommonFunction()
+                                            .truncateStringWithEllipsis(
+                                                addressesList[index].address,
+                                                10,
+                                                5),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: CommonColors.black,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'TextaAlt',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              Icon(
+                                //index == (isInit?coinSelectIndex:indexSelect)
+                                indexSelect == index
                                     ? Icons.check
                                     : Icons.arrow_forward_ios_sharp,
                                 color: CommonColors.black,
@@ -1362,9 +1566,13 @@ class _BTCDirectState extends State<BTCDirect> {
                                       payMethodList.remove(selectedItem);
                                       payMethodList.insert(0, selectedItem);
                                       Navigator.pop(context);
-                                      log(
-                                        'images:- https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[paymentSelectIndex].code}.svg',
-                                      );
+                                      isSandBox
+                                          ? log(
+                                              'images:- https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[paymentSelectIndex].code}.svg',
+                                            )
+                                          : log(
+                                              'images:- https://cdn.btcdirect.eu/img/payment-methods/${payMethodList[paymentSelectIndex].code}.svg',
+                                            );
                                     });
                                   }
                                 : null,
@@ -1375,8 +1583,12 @@ class _BTCDirectState extends State<BTCDirect> {
                                 SizedBox(
                                   width: w * 0.04,
                                 ),
+                                // payMethodList[index].code == 'iDeal'
+                                //      SvgPicture.network('http://75.119.139.244/ideal-icon.svg', width: 30, height: 30,),
                                 SvgPicture.network(
-                                  'https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[index].code}.svg',
+                                  isSandBox
+                                      ? 'https://widgets-sandbox.btcdirect.eu/img/payment-methods/${payMethodList[index].code}.svg'
+                                      : 'https://cdn.btcdirect.eu/img/payment-methods/${payMethodList[index].code}.svg',
                                   width: 30,
                                   height: 30,
                                 ),
@@ -1617,157 +1829,6 @@ class _BTCDirectState extends State<BTCDirect> {
     );
   }
 
-  myWalletAddressBottomSheet(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
-    double h = MediaQuery.of(context).size.height;
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: CommonColors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(25.0),
-        ),
-      ),
-      builder: (BuildContext context) {
-        return CommonFontDimen(
-          child: SizedBox(
-            height: h * 0.70,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  children: [
-                    SizedBox(width: w / 2.5),
-                    const Text(
-                      "Your wallets",
-                      style: TextStyle(
-                        color: CommonColors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'TextaAlt',
-                      ),
-                    ),
-                    const Spacer(),
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Icon(
-                            Icons.close,
-                            color: CommonColors.black,
-                            size: 26,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: h * 0.01),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: addressesList.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        width: w,
-                        height: h * 0.08,
-                        margin: EdgeInsets.symmetric(
-                            horizontal: w * 0.08, vertical: h * 0.008),
-                        decoration: BoxDecoration(
-                          color: coinSelectIndex == index
-                              ? CommonColors.backgroundColor
-                              : CommonColors.transparent,
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            coinSelectIndex = index;
-                            walletAddress.text = addressesList[index].name;
-                            setState(() {});
-                            Navigator.pop(context);
-                          },
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              SizedBox(
-                                width: w * 0.05,
-                              ),
-                              SvgPicture.network(
-                                'https://widgets-sandbox.btcdirect.eu/img/currencies/${addressesList[index].currency}.svg',
-                                width: 50,
-                                height: 50,
-                              ),
-                              SizedBox(
-                                width: w * 0.02,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: h * 0.015),
-                                  Center(
-                                    child: Text(
-                                      addressesList[index].name,
-                                      style: const TextStyle(
-                                        color: CommonColors.black,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        fontFamily: 'TextaAlt',
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Center(
-                                      child: Text(
-                                        AppCommonFunction()
-                                            .truncateStringWithEllipsis(
-                                                addressesList[index].address,
-                                                10,
-                                                5),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: CommonColors.black,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          fontFamily: 'TextaAlt',
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              Icon(
-                                coinSelectIndex == index
-                                    ? Icons.check
-                                    : Icons.arrow_forward_ios_sharp,
-                                color: CommonColors.black,
-                                size: 15,
-                              ),
-                              SizedBox(
-                                width: w * 0.02,
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   /// Updates the button state based on the current CET time.
   ///
   /// This function retrieves the current CET time using the `getCETDateTime` method from the `AppCommonFunction` class.
@@ -1915,7 +1976,7 @@ class _BTCDirectState extends State<BTCDirect> {
               );
             }
           } else {
-            await getUserInfo(token).then((value) {
+            getUserInfo(token).then((value) {
               Map<String, dynamic> countriesData = tempData['countries'];
               for (int i = 0; i < countriesData.length; i++) {
                 String countryCode = userInfoModel.region!.split("-")[1];

@@ -614,9 +614,9 @@ class Repository {
         headers: {"X-Api-Key": xApiKey, "User-Identifier": identifier},
         body: jsonEncode({
           "amld5QuestionAnswers": {
-            "kyc-amld5-annual-net-income": income,
-            "kyc-amld5-employment-status": employmentStatus,
-            "kyc-amld5-main-source-income": origin
+            "kyc-amld5-annual-net-income": income.trim(),
+            "kyc-amld5-employment-status": employmentStatus.trim(),
+            "kyc-amld5-main-source-income": origin.trim()
           }
         }),
       );
@@ -626,9 +626,9 @@ class Repository {
         headers: {"X-Api-Key": xApiKey, "User-Authorization": "Bearer $token"},
         body: jsonEncode({
           "amld5QuestionAnswers": {
-            "kyc-amld5-annual-net-income": income,
-            "kyc-amld5-employment-status": employmentStatus,
-            "kyc-amld5-main-source-income": origin
+            "kyc-amld5-annual-net-income": income.trim(),
+            "kyc-amld5-employment-status": employmentStatus.trim(),
+            "kyc-amld5-main-source-income": origin.trim()
           }
         }),
       );

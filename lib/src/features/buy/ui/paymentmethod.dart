@@ -316,7 +316,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
         Row(
           children: [
             SvgPicture.network(
-              'https://widgets-sandbox.btcdirect.eu/img/payment-methods/${widget.paymentMethodCode}.svg',
+              isSandBox
+                  ? 'https://widgets-sandbox.btcdirect.eu/img/payment-methods/${widget.paymentMethodCode}.svg'
+                  : 'https://widgets-sandbox.btcdirect.eu/img/payment-methods/${widget.paymentMethodCode}.svg',
               width: 30,
               height: 30,
             ),

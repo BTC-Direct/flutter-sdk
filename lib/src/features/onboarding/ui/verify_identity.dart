@@ -230,8 +230,9 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
 
   /// Retrieves the KYC access token from the server.
   getKYCAccessToken(BuildContext context) async {
-    isLoading = true;
-    setState(() {});
+    setState(() {
+      isLoading = true;
+    });
     try {
       http.Response response =
           await Repository().getVerificationStatusApiCall(context);
@@ -290,32 +291,6 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
               }
             }
           }
-          /*for (int i = 0; i < tempData.length; i++) {
-            if (tempData[i]['name'] == "kyc") {
-              if(tempData[i]['status'] == 'open' || tempData[i]['status'] == 'missing'||tempData[i]['status'] == 'pending'){
-                isIdVerified = true;
-                startTimer();
-              }
-              kycAccessToken = tempData[i]['data']['accessToken'];
-              log('kycAccessToken $kycAccessToken');
-              break;
-            }
-            else if(tempData[i]['name'] == "amld5QuestionAnswers") {
-              if(tempData[i]['status'] == 'open' || tempData[i]['status'] == 'missing'||tempData[i]['status'] == 'pending'){
-                isLoading = false;
-                setState(() {});
-                if (context.mounted) {
-                  Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const OriginQuestions(),
-                  ),
-                );
-                }
-              }
-              break;
-            }
-          }*/
         }
         setState(() {
           isLoading = false;
@@ -339,6 +314,9 @@ class _VerifyIdentityState extends State<VerifyIdentity> {
         }
       }
     } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       log(e.toString());
     }
   }
